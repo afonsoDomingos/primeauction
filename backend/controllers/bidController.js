@@ -16,6 +16,21 @@ exports.getBids = async (req, res) => {
   }
 };
 
+// @desc    Get user's bids
+// @route   GET /api/bids/mybids
+// @access  Private/User
+exports.getMyBids = async (req, res) => {
+  try {
+    const bids = await Bid.find({ user: req.user.id })
+      .populate({ path: 'auction', select: 'title imageUrl currentPrice status endTime' })
+      .sort('-createdAt');
+
+    res.status(200).json({ success: true, count: bids.length, data: bids });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 // @desc    Place a bid
 // @route   POST /api/bids/:auctionId
 // @access  Private/User

@@ -8,8 +8,8 @@
       </div>
       
       <div class="hero-actions animate-fade-in" style="animation-delay: 0.3s;">
-        <router-link to="/auctions" class="btn btn-primary btn-pill">Ver Leilões</router-link>
-        <router-link to="/about" class="btn btn-secondary btn-pill">Saber Mais</router-link>
+        <router-link to="/auctions" class="btn btn-primary btn-pill">Ver Leilões Activos</router-link>
+        <router-link to="/register" class="btn btn-secondary btn-pill">Criar Conta</router-link>
       </div>
     </section>
 

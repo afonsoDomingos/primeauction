@@ -7,28 +7,33 @@
     </div>
     
     <nav class="nav-links">
-      <router-link to="/">Vehicles</router-link>
-      <router-link to="/">Energy</router-link>
-      <router-link to="/">Charging</router-link>
-      <router-link to="/">Discover</router-link>
-      <router-link to="/">Shop</router-link>
+      <router-link to="/">Início</router-link>
+      <router-link to="/auctions">Leilões Activos</router-link>
+      <router-link v-if="authStore.isAdmin" to="/admin">Painel Admin</router-link>
+      <router-link v-if="authStore.isAuthenticated" to="/profile">O Meu Perfil</router-link>
     </nav>
     
     <div class="nav-actions">
-      <router-link to="/login" class="nav-icon">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      </router-link>
+      <router-link v-if="!authStore.isAuthenticated" to="/login" class="nav-icon">Login</router-link>
+      <router-link v-if="!authStore.isAuthenticated" to="/register" class="nav-icon">Registar</router-link>
+      <a v-if="authStore.isAuthenticated" @click.prevent="logout" class="nav-icon" style="cursor:pointer">Sair</a>
     </div>
   </header>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useAuthStore } from '../stores/authStore';
+import { useRouter } from 'vue-router';
 
+const authStore = useAuthStore();
+const router = useRouter();
 const isScrolled = ref(false);
+
+const logout = () => {
+  authStore.logout();
+  router.push('/');
+};
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50;

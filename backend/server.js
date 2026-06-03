@@ -40,6 +40,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
 app.use('/api/auctions', require('./routes/auctions'));
 app.use('/api/bids', require('./routes/bids'));
 
