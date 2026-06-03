@@ -58,7 +58,8 @@ const form = ref({
 
 const handleCreate = async () => {
   try {
-    await axios.post('http://localhost:5000/api/auctions', form.value, {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    await axios.post(`${apiUrl}/api/auctions`, form.value, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
     alert('Auction created successfully!');

@@ -96,9 +96,10 @@ const formatCurrency = (value) => {
 
 const fetchAuctionData = async () => {
   try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const [auctionRes, bidsRes] = await Promise.all([
-      axios.get(`http://localhost:5000/api/auctions/${route.params.id}`),
-      axios.get(`http://localhost:5000/api/bids/${route.params.id}`)
+      axios.get(`${apiUrl}/api/auctions/${route.params.id}`),
+      axios.get(`${apiUrl}/api/bids/${route.params.id}`)
     ]);
     auction.value = auctionRes.data.data;
     bids.value = bidsRes.data.data;
@@ -111,7 +112,8 @@ const fetchAuctionData = async () => {
 const placeBid = async () => {
   errorMsg.value = '';
   try {
-    await axios.post(`http://localhost:5000/api/bids/${route.params.id}`, 
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    await axios.post(`${apiUrl}/api/bids/${route.params.id}`, 
       { amount: bidAmount.value },
       { headers: { Authorization: `Bearer ${authStore.token}` } }
     );
@@ -126,7 +128,8 @@ onMounted(() => {
   fetchAuctionData();
 
   // Socket setup
-  socket = io('http://localhost:5000');
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  socket = io(apiUrl);
   
   socket.emit('join_auction', route.params.id);
 
