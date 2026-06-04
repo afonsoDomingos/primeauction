@@ -65,6 +65,15 @@ const heroTitle = ref('Prime Auctions');
 const heroSubtitle = ref('Leilões Exclusivos. Preços Competitivos. Totalmente Online.');
 const heroImage = ref('https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 const heroImageUrls = ref([]);
+const heroMobileImageUrls = ref([]);
+
+// Reactive viewport width — updated on resize
+const isMobileViewport = ref(window.innerWidth <= 768);
+const onResize = () => {
+  isMobileViewport.value = window.innerWidth <= 768;
+  // Restart slideshow interval when switching between desktop/mobile lists
+  restartSlideshow();
+};
 
 const activeIndex = ref(0);
 let intervalId = null;
@@ -76,14 +85,34 @@ const scrollDown = () => {
   }
 };
 
+// Picks the right image list based on viewport and available settings:
+// 1. Mobile viewport + mobile slides configured  → use mobile slides
+// 2. Mobile viewport + no mobile slides          → fall back to desktop slides
+// 3. Desktop viewport                            → use desktop slides
+// 4. No slides at all                            → single fallback image
 const heroImagesList = computed(() => {
-  if (heroImageUrls.value && heroImageUrls.value.length > 0) {
+  if (isMobileViewport.value && heroMobileImageUrls.value.length > 0) {
+    return heroMobileImageUrls.value;
+  }
+  if (heroImageUrls.value.length > 0) {
     return heroImageUrls.value;
   }
   return [heroImage.value];
 });
 
+const restartSlideshow = () => {
+  if (intervalId) clearInterval(intervalId);
+  activeIndex.value = 0;
+  if (heroImagesList.value.length > 1) {
+    intervalId = setInterval(() => {
+      activeIndex.value = (activeIndex.value + 1) % heroImagesList.value.length;
+    }, 5000);
+  }
+};
+
 onMounted(async () => {
+  window.addEventListener('resize', onResize);
+
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const res = await axios.get(`${apiUrl}/api/settings/homepage`);
@@ -93,19 +122,18 @@ onMounted(async () => {
       if (data.heroSubtitle) heroSubtitle.value = data.heroSubtitle;
       if (data.heroImageUrl) heroImage.value = data.heroImageUrl;
       if (data.heroImageUrls) heroImageUrls.value = data.heroImageUrls;
+      if (data.heroMobileImageUrls) heroMobileImageUrls.value = data.heroMobileImageUrls;
     }
   } catch (err) {
     console.warn('Failed to load homepage custom settings, using default fallback.', err);
   }
 
-  if (heroImagesList.value.length > 1) {
-    intervalId = setInterval(() => {
-      activeIndex.value = (activeIndex.value + 1) % heroImagesList.value.length;
-    }, 5000);
-  }
+  // Start slideshow after settings are loaded
+  restartSlideshow();
 });
 
 onUnmounted(() => {
+  window.removeEventListener('resize', onResize);
   if (intervalId) clearInterval(intervalId);
 });
 </script>
