@@ -66,6 +66,9 @@ async function run() {
     heroImageUrls: [
       'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1200',
       'https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=1200'
+    ],
+    heroMobileImageUrls: [
+      'https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=600'
     ]
   };
 
@@ -103,9 +106,12 @@ async function run() {
       d.heroImageUrl === testPayload.heroImageUrl &&
       Array.isArray(d.heroImageUrls) &&
       d.heroImageUrls.length === 2 &&
-      d.heroImageUrls[1] === testPayload.heroImageUrls[1]
+      d.heroImageUrls[1] === testPayload.heroImageUrls[1] &&
+      Array.isArray(d.heroMobileImageUrls) &&
+      d.heroMobileImageUrls.length === 1 &&
+      d.heroMobileImageUrls[0] === testPayload.heroMobileImageUrls[0]
     ) {
-      pass('Persisted settings retrieved successfully and match (including multiple URLs)');
+      pass('Persisted settings retrieved successfully and match (including multiple desktop and mobile URLs)');
     } else {
       fail(`Retrieved settings mismatch: ${JSON.stringify(d)}`);
     }

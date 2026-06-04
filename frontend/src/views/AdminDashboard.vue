@@ -372,37 +372,67 @@
                 <textarea v-model="homepageForm.heroSubtitle" class="form-input" rows="3" placeholder="Ex: Leilões Exclusivos. Preços Competitivos."></textarea>
               </div>
               
-              <div class="form-group">
-                <label class="form-label">Adicionar Imagem de Fundo por URL</label>
-                <div style="display: flex; gap: 0.5rem;">
-                  <input type="url" v-model="manualHeroImageUrl" class="form-input" placeholder="https://... (URL da imagem)" style="margin-bottom: 0;" />
-                  <button type="button" class="btn btn-pill" @click="addManualHeroImageUrl" style="flex-shrink: 0; padding: 0 1.25rem; height: 42px; background-color: var(--text-primary); color: white; border: none; font-size: 0.8rem; font-weight: 600;">Adicionar</button>
+              <!-- Desktop Images Group -->
+              <div class="settings-group-card">
+                <span class="group-title-label">🖥️ Imagens para Desktop / Geral</span>
+                
+                <div class="form-group">
+                  <div style="display: flex; gap: 0.5rem;">
+                    <input type="url" v-model="manualHeroImageUrl" class="form-input" placeholder="https://... (URL da imagem)" style="margin-bottom: 0;" />
+                    <button type="button" class="btn btn-pill" @click="addManualHeroImageUrl" style="flex-shrink: 0; padding: 0 1rem; height: 42px; background-color: var(--text-primary); color: white; border: none; font-size: 0.75rem; font-weight: 600;">Adicionar</button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="upload-dropzone" @click="triggerHeroImageUpload" title="Clique para carregar imagens do hero">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-light); margin-bottom: 0.2rem;">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span style="font-size: 0.8rem;">{{ uploadingHeroImage ? 'A enviar...' : 'Carregar fotos para Desktop' }}</span>
+                    <input type="file" ref="heroImageInput" multiple accept="image/*" style="display: none" @change="handleHeroImageUpload" />
+                  </div>
+                </div>
+
+                <!-- Desktop slide list -->
+                <div v-if="homepageForm.heroImageUrls && homepageForm.heroImageUrls.length > 0" class="uploaded-thumbnails-grid" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                  <div v-for="(imgUrl, idx) in homepageForm.heroImageUrls" :key="idx" class="thumb-wrapper" style="aspect-ratio: 16/9; height: auto;">
+                    <img :src="imgUrl" class="thumb-img" style="height: 100%; width: 100%; object-fit: cover;" alt="Desktop Hero" />
+                    <button type="button" class="btn-remove-thumb" @click="removeHeroImage(idx)" title="Remover">×</button>
+                  </div>
                 </div>
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Carregar Novas Imagens de Fundo (Múltiplas)</label>
-                <div class="upload-dropzone" @click="triggerHeroImageUpload" title="Clique para carregar imagens do hero">
-                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-light); margin-bottom: 0.4rem;">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21 15 16 10 5 21"/>
-                  </svg>
-                  <span>{{ uploadingHeroImage ? 'A enviar...' : 'Clique para selecionar imagens' }}</span>
-                  <input type="file" ref="heroImageInput" multiple accept="image/*" style="display: none" @change="handleHeroImageUpload" />
+              <!-- Mobile Images Group -->
+              <div class="settings-group-card" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                <span class="group-title-label">📱 Imagens para Telemóvel / Mobile</span>
+                
+                <div class="form-group">
+                  <div style="display: flex; gap: 0.5rem;">
+                    <input type="url" v-model="manualHeroMobileImageUrl" class="form-input" placeholder="https://... (URL da imagem)" style="margin-bottom: 0;" />
+                    <button type="button" class="btn btn-pill" @click="addManualHeroMobileImageUrl" style="flex-shrink: 0; padding: 0 1rem; height: 42px; background-color: var(--text-primary); color: white; border: none; font-size: 0.75rem; font-weight: 600;">Adicionar</button>
+                  </div>
                 </div>
-              </div>
 
-              <!-- List of current hero slides -->
-              <div v-if="homepageForm.heroImageUrls && homepageForm.heroImageUrls.length > 0" class="uploaded-thumbnails-grid" style="margin-bottom: 1.5rem;">
-                <div 
-                  v-for="(imgUrl, idx) in homepageForm.heroImageUrls" 
-                  :key="idx" 
-                  class="thumb-wrapper"
-                  style="aspect-ratio: 16/9; height: auto;"
-                >
-                  <img :src="imgUrl" class="thumb-img" style="height: 100%; width: 100%; object-fit: cover;" alt="Capa da Home" />
-                  <button type="button" class="btn-remove-thumb" @click="removeHeroImage(idx)" title="Remover imagem">×</button>
+                <div class="form-group">
+                  <div class="upload-dropzone" @click="triggerHeroMobileImageUpload" title="Clique para carregar imagens mobile">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-light); margin-bottom: 0.2rem;">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span style="font-size: 0.8rem;">{{ uploadingHeroMobileImage ? 'A enviar...' : 'Carregar fotos para Telemóvel' }}</span>
+                    <input type="file" ref="heroMobileImageInput" multiple accept="image/*" style="display: none" @change="handleHeroMobileImageUpload" />
+                  </div>
+                </div>
+
+                <!-- Mobile slide list -->
+                <div v-if="homepageForm.heroMobileImageUrls && homepageForm.heroMobileImageUrls.length > 0" class="uploaded-thumbnails-grid" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                  <div v-for="(imgUrl, idx) in homepageForm.heroMobileImageUrls" :key="idx" class="thumb-wrapper" style="aspect-ratio: 9/16; height: auto; max-width: 60px;">
+                    <img :src="imgUrl" class="thumb-img" style="height: 100%; width: 100%; object-fit: cover;" alt="Mobile Hero" />
+                    <button type="button" class="btn-remove-thumb" @click="removeHeroMobileImage(idx)" title="Remover">×</button>
+                  </div>
                 </div>
               </div>
 
@@ -415,8 +445,26 @@
             <!-- Right: Live Preview -->
             <div class="home-settings-preview">
               <p class="preview-label">Pré-visualização (Carrossel Activo)</p>
+              
+              <!-- Preview Viewport Switcher -->
+              <div class="preview-mode-selector">
+                <button 
+                  type="button" 
+                  class="btn-mode" 
+                  :class="{ active: previewMode === 'desktop' }" 
+                  @click="previewMode = 'desktop'"
+                >🖥️ Desktop</button>
+                <button 
+                  type="button" 
+                  class="btn-mode" 
+                  :class="{ active: previewMode === 'mobile' }" 
+                  @click="previewMode = 'mobile'"
+                >📱 Telemóvel</button>
+              </div>
+
               <div
                 class="hero-preview"
+                :class="{ 'is-mobile-preview': previewMode === 'mobile' }"
                 :style="{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.6) 100%), url(${activePreviewImage})` }"
               >
                 <p class="preview-eyebrow">Plataforma de Leilões #1 em Moçambique</p>
@@ -466,18 +514,26 @@ const auctions = ref([]);
 
 // ── Homepage Settings ──
 const defaultHeroImage = 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
-const homepageForm = ref({ heroTitle: '', heroSubtitle: '', heroImageUrl: '', heroImageUrls: [] });
+const homepageForm = ref({ heroTitle: '', heroSubtitle: '', heroImageUrl: '', heroImageUrls: [], heroMobileImageUrls: [] });
 const manualHeroImageUrl = ref('');
+const manualHeroMobileImageUrl = ref('');
 const savingHomepage = ref(false);
 const uploadingHeroImage = ref(false);
+const uploadingHeroMobileImage = ref(false);
 const heroImageInput = ref(null);
+const heroMobileImageInput = ref(null);
 const previewActiveIndex = ref(0);
+const previewMode = ref('desktop');
 let previewIntervalId = null;
 
 const activePreviewImage = computed(() => {
-  const urls = homepageForm.value.heroImageUrls;
+  const isMob = previewMode.value === 'mobile';
+  const urls = isMob ? homepageForm.value.heroMobileImageUrls : homepageForm.value.heroImageUrls;
   if (urls && urls.length > 0) {
     return urls[previewActiveIndex.value % urls.length];
+  }
+  if (isMob && homepageForm.value.heroImageUrls && homepageForm.value.heroImageUrls.length > 0) {
+    return homepageForm.value.heroImageUrls[previewActiveIndex.value % homepageForm.value.heroImageUrls.length];
   }
   return homepageForm.value.heroImageUrl || defaultHeroImage;
 });
@@ -649,7 +705,8 @@ onMounted(async () => {
         heroTitle: d.heroTitle || '',
         heroSubtitle: d.heroSubtitle || '',
         heroImageUrl: d.heroImageUrl || '',
-        heroImageUrls: d.heroImageUrls || []
+        heroImageUrls: d.heroImageUrls || [],
+        heroMobileImageUrls: d.heroMobileImageUrls || []
       };
     }
   } catch (err) {
@@ -840,6 +897,54 @@ const removeHeroImage = (index) => {
   }
 };
 
+const triggerHeroMobileImageUpload = () => {
+  heroMobileImageInput.value.click();
+};
+
+const handleHeroMobileImageUpload = async (e) => {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+
+  const formData = new FormData();
+  files.forEach(file => {
+    formData.append('images', file);
+  });
+
+  uploadingHeroMobileImage.value = true;
+  try {
+    const res = await axios.post(`${apiUrl}/api/auctions/upload-images`, formData, {
+      headers: { Authorization: `Bearer ${authStore.token}`, 'Content-Type': 'multipart/form-data' }
+    });
+    if (res.data.success) {
+      const urls = res.data.imageUrls;
+      if (!homepageForm.value.heroMobileImageUrls) {
+        homepageForm.value.heroMobileImageUrls = [];
+      }
+      homepageForm.value.heroMobileImageUrls = [...homepageForm.value.heroMobileImageUrls, ...urls];
+      showAlert('Imagens para Telemóvel carregadas! ✓');
+    }
+  } catch (err) {
+    showAlert('Erro ao carregar imagens: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    uploadingHeroMobileImage.value = false;
+    if (heroMobileImageInput.value) heroMobileImageInput.value.value = '';
+  }
+};
+
+const addManualHeroMobileImageUrl = () => {
+  if (!manualHeroMobileImageUrl.value.trim()) return;
+  if (!homepageForm.value.heroMobileImageUrls) {
+    homepageForm.value.heroMobileImageUrls = [];
+  }
+  homepageForm.value.heroMobileImageUrls.push(manualHeroMobileImageUrl.value.trim());
+  manualHeroMobileImageUrl.value = '';
+  showAlert('URL da imagem mobile adicionada! ✓');
+};
+
+const removeHeroMobileImage = (index) => {
+  homepageForm.value.heroMobileImageUrls.splice(index, 1);
+};
+
 const saveHomepageSettings = async () => {
   savingHomepage.value = true;
   try {
@@ -847,7 +952,8 @@ const saveHomepageSettings = async () => {
       heroTitle: homepageForm.value.heroTitle,
       heroSubtitle: homepageForm.value.heroSubtitle,
       heroImageUrl: homepageForm.value.heroImageUrl,
-      heroImageUrls: homepageForm.value.heroImageUrls
+      heroImageUrls: homepageForm.value.heroImageUrls,
+      heroMobileImageUrls: homepageForm.value.heroMobileImageUrls
     }, { headers: { Authorization: `Bearer ${authStore.token}` } });
     showAlert('Configurações da página inicial guardadas com sucesso! ✓');
   } catch (err) {
@@ -1624,6 +1730,59 @@ const saveHomepageSettings = async () => {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.hero-preview.is-mobile-preview {
+  max-width: 260px;
+  min-height: 460px;
+  margin: 0 auto;
+  border: 8px solid #334155;
+  border-radius: 24px;
+}
+
+.preview-mode-selector {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  background: #e2e8f0;
+  padding: 3px;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.btn-mode {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: all 0.2s ease;
+}
+
+.btn-mode.active {
+  background: white;
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.settings-group-card {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.group-title-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 0.75rem;
+}
 
 @media (max-width: 900px) {
   .home-settings-layout {
