@@ -39,6 +39,11 @@ exports.placeBid = async (req, res) => {
     const { amount } = req.body;
     const auctionId = req.params.auctionId;
 
+    // Admins cannot place bids
+    if (req.user.role === 'admin') {
+      return res.status(403).json({ success: false, error: 'Administrators cannot place bids' });
+    }
+
     // Check if auction exists
     const auction = await Auction.findById(auctionId);
     if (!auction) {
