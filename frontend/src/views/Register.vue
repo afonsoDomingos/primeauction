@@ -78,11 +78,6 @@
               </div>
             </div>
 
-            <p v-if="errorMsg" class="error-msg">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              {{ errorMsg }}
-            </p>
-
             <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="loading">
               <span v-if="loading" class="btn-spinner"></span>
               {{ loading ? 'A registar...' : 'Criar Conta' }}
@@ -103,15 +98,16 @@ import { ref, computed } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useToastStore } from '../stores/toastStore';
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const showPass = ref(false);
 const loading = ref(false);
-const errorMsg = ref('');
 const authStore = useAuthStore();
 const router = useRouter();
+const toastStore = useToastStore();
 
 const passwordStrength = computed(() => {
   const len = password.value.length;
@@ -123,7 +119,6 @@ const passwordStrength = computed(() => {
 
 const handleRegister = async () => {
   loading.value = true;
-  errorMsg.value = '';
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const res = await axios.post(`${apiUrl}/api/auth/register`, {
@@ -134,9 +129,10 @@ const handleRegister = async () => {
     authStore.token = res.data.token;
     authStore.user = res.data.user;
     localStorage.setItem('token', res.data.token);
+    toastStore.success('Conta criada com sucesso! ✓');
     router.push('/');
   } catch (err) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao criar conta. Tente novamente.';
+    toastStore.error(err.response?.data?.error || 'Erro ao criar conta. Tente novamente.');
   } finally {
     loading.value = false;
   }

@@ -52,6 +52,27 @@
       <div class="nav-actions">
         <router-link v-if="!authStore.isAuthenticated" to="/login" class="nav-btn nav-btn-ghost" @click="closeMobileMenu">Login</router-link>
         <router-link v-if="!authStore.isAuthenticated" to="/register" class="nav-btn nav-btn-solid" @click="closeMobileMenu">Registar</router-link>
+
+        <!-- User chip (shows when logged in) -->
+        <router-link
+          v-if="authStore.isAuthenticated"
+          to="/profile"
+          class="nav-user-chip"
+          @click="closeMobileMenu"
+          :title="`Perfil de ${authStore.user?.name}`"
+        >
+          <img
+            v-if="authStore.user?.profilePhoto"
+            :src="authStore.user.profilePhoto"
+            :alt="authStore.user?.name"
+            class="nav-avatar-img"
+          />
+          <span v-else class="nav-avatar-initial">
+            {{ authStore.user?.name?.charAt(0)?.toUpperCase() }}
+          </span>
+          <span class="nav-user-name">{{ authStore.user?.name?.split(' ')[0] }}</span>
+        </router-link>
+
         <a v-if="authStore.isAuthenticated" @click.prevent="handleLogout" class="nav-btn nav-btn-ghost" style="cursor:pointer">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Sair
@@ -65,9 +86,11 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
+import { useToastStore } from '../stores/toastStore';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const toastStore = useToastStore();
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
 
@@ -83,6 +106,7 @@ const closeMobileMenu = () => {
 
 const handleLogout = () => {
   authStore.logout();
+  toastStore.success('Sessão terminada com sucesso! ✓');
   closeMobileMenu();
   router.push('/');
 };
@@ -249,6 +273,59 @@ onUnmounted(() => {
 
 .nav-btn-solid:hover {
   background-color: #3457b2;
+}
+
+/* ─── User Avatar Chip ─── */
+.nav-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(0,0,0,0.08);
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+}
+
+.nav-user-chip:hover {
+  border-color: var(--btn-primary-bg);
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+.nav-avatar-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.nav-avatar-initial {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--btn-primary-bg), #7c3aed);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-user-name {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ─── Tablet breakpoint ─── */

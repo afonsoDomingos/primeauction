@@ -19,7 +19,10 @@ const sendTokenResponse = (user, statusCode, res) => {
       status: user.status,
       profilePhoto: user.profilePhoto || null,
       phone: user.phone || null,
-      bio: user.bio || null
+      bio: user.bio || null,
+      province: user.province || null,
+      gender: user.gender || null,
+      age: user.age || null
     }
   });
 };
@@ -110,7 +113,7 @@ exports.getMe = async (req, res) => {
 // @access  Private
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, email, phone, bio, currentPassword, newPassword } = req.body;
+    const { name, email, phone, bio, currentPassword, newPassword, province, gender, age } = req.body;
 
     const user = await User.findById(req.user.id).select('+password');
 
@@ -128,6 +131,9 @@ exports.updateProfile = async (req, res) => {
     }
     if (phone !== undefined) user.phone = phone;
     if (bio !== undefined) user.bio = bio;
+    if (province !== undefined) user.province = province;
+    if (gender !== undefined) user.gender = gender;
+    if (age !== undefined) user.age = age;
 
     if (newPassword) {
       if (!currentPassword) {

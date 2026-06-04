@@ -73,8 +73,6 @@
                 />
                 <button type="submit" class="btn btn-primary btn-pill bid-submit">Lance!</button>
               </div>
-              <p v-if="bidSuccess" class="success-msg">✓ Lance registado com sucesso!</p>
-              <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
             </form>
           </div>
 
@@ -117,6 +115,67 @@
   <div v-else class="loading-full">
     <div class="spinner"></div>
   </div>
+
+  <!-- Profile Completion Modal -->
+  <Transition name="modal-fade">
+    <div v-if="showProfileModal" class="custom-modal-overlay" @click.self="closeProfileModal">
+      <div class="custom-modal-card animate-scale-in">
+        <div class="modal-header-row">
+          <span class="modal-title-icon">📋</span>
+          <h4>Completar Perfil</h4>
+        </div>
+        <p class="modal-subtitle">Preencha estes dados obrigatórios para poder licitar:</p>
+        
+        <form @submit.prevent="submitProfileDetails" class="modal-form">
+          <div class="form-group">
+            <label class="form-label" for="modal-name">Nome Completo</label>
+            <input type="text" id="modal-name" v-model="profileForm.name" class="form-input" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modal-phone">Contacto Telefónico</label>
+            <input type="text" id="modal-phone" v-model="profileForm.phone" class="form-input" placeholder="Ex: +258 84 123 4567" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modal-province">Província</label>
+            <select id="modal-province" v-model="profileForm.province" class="form-input" required>
+              <option value="" disabled>Seleccione a sua província</option>
+              <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sexo</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" v-model="profileForm.gender" value="Masculino" required /> Masculino
+              </label>
+              <label class="radio-label">
+                <input type="radio" v-model="profileForm.gender" value="Feminino" required /> Feminino
+              </label>
+              <label class="radio-label">
+                <input type="radio" v-model="profileForm.gender" value="Outro" required /> Outro
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modal-age">Idade</label>
+            <input type="number" id="modal-age" v-model="profileForm.age" class="form-input" min="1" max="120" required />
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" @click="closeProfileModal" class="btn btn-secondary btn-pill btn-sm">Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-pill btn-sm" :disabled="submittingProfile">
+              <span v-if="submittingProfile" class="btn-spinner"></span>
+              {{ submittingProfile ? 'A processar...' : 'Confirmar & Licitar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -125,16 +184,30 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
+import { useToastStore } from '../stores/toastStore';
 
 const route = useRoute();
 const authStore = useAuthStore();
+const toastStore = useToastStore();
 const auction = ref(null);
 const bids = ref([]);
 const bidAmount = ref(0);
-const errorMsg = ref('');
-const bidSuccess = ref(false);
 const activeImage = ref('');
 let socket = null;
+
+const showProfileModal = ref(false);
+const submittingProfile = ref(false);
+const provinces = [
+  'Maputo Cidade', 'Maputo Província', 'Gaza', 'Inhambane', 'Sofala',
+  'Manica', 'Tete', 'Zambézia', 'Nampula', 'Cabo Delgado', 'Niassa'
+];
+const profileForm = ref({
+  name: '',
+  phone: '',
+  province: '',
+  gender: '',
+  age: null
+});
 
 const isEnded = computed(() => {
   if (!auction.value) return true;
@@ -161,20 +234,64 @@ const fetchAuctionData = async () => {
   }
 };
 
+const closeProfileModal = () => {
+  showProfileModal.value = false;
+};
+
+const submitProfileDetails = async () => {
+  submittingProfile.value = true;
+  try {
+    const res = await authStore.updateProfile({
+      name: profileForm.value.name,
+      phone: profileForm.value.phone,
+      province: profileForm.value.province,
+      gender: profileForm.value.gender,
+      age: profileForm.value.age
+    });
+
+    if (res.success) {
+      toastStore.success('Perfil actualizado com sucesso! ✓');
+      showProfileModal.value = false;
+      await executePlaceBid();
+    } else {
+      toastStore.error(res.error || 'Erro ao actualizar o perfil.');
+    }
+  } catch (err) {
+    toastStore.error('Ocorreu um erro ao salvar o perfil.');
+  } finally {
+    submittingProfile.value = false;
+  }
+};
+
 const placeBid = async () => {
-  errorMsg.value = '';
-  bidSuccess.value = false;
+  const user = authStore.user;
+  if (!user.name || !user.phone || !user.province || !user.gender || !user.age) {
+    profileForm.value = {
+      name: user.name || '',
+      phone: user.phone || '',
+      province: user.province || '',
+      gender: user.gender || '',
+      age: user.age || null
+    };
+    showProfileModal.value = true;
+    return;
+  }
+
+  await executePlaceBid();
+};
+
+const executePlaceBid = async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const bidVal = bidAmount.value;
     await axios.post(
       `${apiUrl}/api/bids/${route.params.id}`,
-      { amount: bidAmount.value },
+      { amount: bidVal },
       { headers: { Authorization: `Bearer ${authStore.token}` } }
     );
-    bidSuccess.value = true;
-    setTimeout(() => { bidSuccess.value = false; }, 3000);
+    toastStore.success(`Lance de ${new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(bidVal)} registado! ✓`);
   } catch (err) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao registar lance';
+    toastStore.error(err.response?.data?.error || 'Erro ao registar lance');
   }
 };
 
@@ -703,5 +820,113 @@ onUnmounted(() => {
   .bid-submit {
     width: 100%;
   }
+}
+
+/* ─── Profile Modal Custom Styles ─── */
+.custom-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.custom-modal-card {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.modal-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.modal-title-icon {
+  font-size: 1.5rem;
+}
+
+.modal-header-row h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+/* Modal Animations */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
 }
 </style>

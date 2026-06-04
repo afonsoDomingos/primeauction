@@ -46,7 +46,10 @@ export const useAuthStore = defineStore('auth', {
           status: user.status,
           profilePhoto: user.profilePhoto || null,
           phone: user.phone || null,
-          bio: user.bio || null
+          bio: user.bio || null,
+          province: user.province || null,
+          gender: user.gender || null,
+          age: user.age || null
         };
       } catch (err) {
         console.error('Failed to fetch user:', err);

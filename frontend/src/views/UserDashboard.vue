@@ -25,13 +25,16 @@
           <p class="profile-email">{{ authStore.user?.email }}</p>
           <p v-if="authStore.user?.phone" class="profile-phone">📞 {{ authStore.user.phone }}</p>
           <p v-if="authStore.user?.bio" class="profile-bio">“{{ authStore.user.bio }}”</p>
-          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+          <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
             <span class="status-badge" :class="authStore.user?.status">
               {{ authStore.user?.status === 'active' ? 'Activo' : 'Bloqueado' }}
             </span>
             <span class="status-badge role-badge">
               {{ authStore.user?.role === 'admin' ? 'Administrador' : 'Cliente' }}
             </span>
+            <span v-if="authStore.user?.province" class="status-badge province-badge">📍 {{ authStore.user.province }}</span>
+            <span v-if="authStore.user?.gender" class="status-badge gender-badge">{{ authStore.user.gender === 'Masculino' ? '♂' : authStore.user.gender === 'Feminino' ? '♀' : '⚥' }} {{ authStore.user.gender }}</span>
+            <span v-if="authStore.user?.age" class="status-badge age-badge">🎂 {{ authStore.user.age }} anos</span>
           </div>
         </div>
         <button @click="logout" class="btn btn-logout">
@@ -135,9 +138,6 @@
           <h3 class="edit-title">📋 Informações Pessoais</h3>
           
           <form @submit.prevent="handleUpdateProfile" class="edit-form">
-            <div v-if="profileError" class="alert error-alert">{{ profileError }}</div>
-            <div v-if="profileSuccess" class="alert success-alert">{{ profileSuccess }}</div>
-            
             <div class="form-group">
               <label class="form-label" for="edit-name">Nome Completo</label>
               <input type="text" id="edit-name" v-model="profileForm.name" class="form-input" required />
@@ -148,6 +148,41 @@
               <input type="email" id="edit-email" v-model="profileForm.email" class="form-input" required />
             </div>
             
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="edit-province">Província</label>
+                <select id="edit-province" v-model="profileForm.province" class="form-input">
+                  <option value="">— Selecionar Província —</option>
+                  <option>Maputo Cidade</option>
+                  <option>Maputo Província</option>
+                  <option>Gaza</option>
+                  <option>Inhambane</option>
+                  <option>Sofala</option>
+                  <option>Manica</option>
+                  <option>Tete</option>
+                  <option>Zambézia</option>
+                  <option>Nampula</option>
+                  <option>Cabo Delgado</option>
+                  <option>Niassa</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="edit-gender">Sexo</label>
+                <select id="edit-gender" v-model="profileForm.gender" class="form-input">
+                  <option value="">— Selecionar Sexo —</option>
+                  <option>Masculino</option>
+                  <option>Feminino</option>
+                  <option>Outro</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="edit-age">Idade</label>
+                <input type="number" id="edit-age" v-model.number="profileForm.age" class="form-input" min="16" max="120" placeholder="Ex: 30" />
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="form-label" for="edit-phone">Contacto Telefónico</label>
               <input type="text" id="edit-phone" v-model="profileForm.phone" class="form-input" placeholder="Ex: +258 84 123 4567" />
@@ -170,9 +205,6 @@
           <h3 class="edit-title">🔒 Segurança & Palavra-passe</h3>
           
           <form @submit.prevent="handleUpdatePassword" class="edit-form">
-            <div v-if="securityError" class="alert error-alert">{{ securityError }}</div>
-            <div v-if="securitySuccess" class="alert success-alert">{{ securitySuccess }}</div>
-            
             <div class="form-group">
               <label class="form-label" for="edit-curr-pass">Palavra-passe Actual</label>
               <input type="password" id="edit-curr-pass" v-model="securityForm.currentPassword" class="form-input" required />
@@ -205,9 +237,11 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useToastStore } from '../stores/toastStore';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const toastStore = useToastStore();
 const bids = ref([]);
 const loading = ref(true);
 const activeTab = ref('activity');
@@ -217,7 +251,10 @@ const profileForm = ref({
   name: '',
   email: '',
   phone: '',
-  bio: ''
+  bio: '',
+  province: '',
+  gender: '',
+  age: null
 });
 
 const securityForm = ref({
@@ -226,10 +263,6 @@ const securityForm = ref({
   confirmPassword: ''
 });
 
-const profileError = ref('');
-const profileSuccess = ref('');
-const securityError = ref('');
-const securitySuccess = ref('');
 const updatingProfile = ref(false);
 const updatingSecurity = ref(false);
 const photoLoading = ref(false);
@@ -243,7 +276,10 @@ watch(() => authStore.user, (newVal) => {
       name: newVal.name || '',
       email: newVal.email || '',
       phone: newVal.phone || '',
-      bio: newVal.bio || ''
+      bio: newVal.bio || '',
+      province: newVal.province || '',
+      gender: newVal.gender || '',
+      age: newVal.age || null
     };
   }
 }, { immediate: true });
@@ -286,13 +322,12 @@ const formatCurrencyCompact = (value) => {
 
 const logout = () => {
   authStore.logout();
+  toastStore.success('Sessão terminada com sucesso! ✓');
   router.push('/');
 };
 
 // Update profile logic
 const handleUpdateProfile = async () => {
-  profileError.value = '';
-  profileSuccess.value = '';
   updatingProfile.value = true;
   
   try {
@@ -300,17 +335,19 @@ const handleUpdateProfile = async () => {
       name: profileForm.value.name,
       email: profileForm.value.email,
       phone: profileForm.value.phone,
-      bio: profileForm.value.bio
+      bio: profileForm.value.bio,
+      province: profileForm.value.province || null,
+      gender: profileForm.value.gender || null,
+      age: profileForm.value.age || null
     });
     
     if (res.success) {
-      profileSuccess.value = 'Perfil actualizado com sucesso! ✓';
-      setTimeout(() => { profileSuccess.value = ''; }, 4000);
+      toastStore.success('Perfil actualizado com sucesso! ✓');
     } else {
-      profileError.value = res.error || 'Erro ao actualizar o perfil.';
+      toastStore.error(res.error || 'Erro ao actualizar o perfil.');
     }
   } catch (err) {
-    profileError.value = 'Ocorreu um erro no servidor.';
+    toastStore.error('Ocorreu um erro no servidor.');
   } finally {
     updatingProfile.value = false;
   }
@@ -318,11 +355,8 @@ const handleUpdateProfile = async () => {
 
 // Update password logic
 const handleUpdatePassword = async () => {
-  securityError.value = '';
-  securitySuccess.value = '';
-  
   if (securityForm.value.newPassword !== securityForm.value.confirmPassword) {
-    securityError.value = 'As palavras-passe novas não coincidem.';
+    toastStore.error('As palavras-passe novas não coincidem.');
     return;
   }
   
@@ -335,14 +369,13 @@ const handleUpdatePassword = async () => {
     });
     
     if (res.success) {
-      securitySuccess.value = 'Palavra-passe alterada com sucesso! ✓';
+      toastStore.success('Palavra-passe alterada com sucesso! ✓');
       securityForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' };
-      setTimeout(() => { securitySuccess.value = ''; }, 4000);
     } else {
-      securityError.value = res.error || 'Erro ao alterar a palavra-passe.';
+      toastStore.error(res.error || 'Erro ao alterar a palavra-passe.');
     }
   } catch (err) {
-    securityError.value = 'Ocorreu um erro no servidor.';
+    toastStore.error('Ocorreu um erro no servidor.');
   } finally {
     updatingSecurity.value = false;
   }
@@ -357,27 +390,24 @@ const handlePhotoUpload = async (e) => {
   if (!file) return;
   
   if (!file.type.startsWith('image/')) {
-    profileError.value = 'Por favor seleccione um ficheiro de imagem válido.';
+    toastStore.error('Por favor seleccione um ficheiro de imagem válido.');
     return;
   }
   
   const formData = new FormData();
   formData.append('photo', file);
   
-  profileError.value = '';
-  profileSuccess.value = '';
   photoLoading.value = true;
   
   try {
     const res = await authStore.uploadProfilePhoto(formData);
     if (res.success) {
-      profileSuccess.value = 'Fotografia de perfil actualizada com sucesso! ✓';
-      setTimeout(() => { profileSuccess.value = ''; }, 4000);
+      toastStore.success('Fotografia de perfil actualizada com sucesso! ✓');
     } else {
-      profileError.value = res.error || 'Erro ao carregar a imagem.';
+      toastStore.error(res.error || 'Erro ao carregar a imagem.');
     }
   } catch (err) {
-    profileError.value = 'Erro ao carregar a imagem no servidor.';
+    toastStore.error('Erro ao carregar a imagem no servidor.');
   } finally {
     photoLoading.value = false;
   }
@@ -794,6 +824,35 @@ const handlePhotoUpload = async (e) => {
   display: flex;
   flex-direction: column;
 }
+
+/* 3-column row for province / gender / age */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+/* make select look like the other inputs */
+.form-input select,
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+/* Province / gender / age badge colours */
+.province-badge { background-color: #e8f4fd; color: #1565c0; }
+.gender-badge   { background-color: #f3e8fd; color: #6a1b9a; }
+.age-badge      { background-color: #fff8e1; color: #e65100; }
+
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr; }
+}
+
 
 .submit-btn {
   margin-top: 1rem;

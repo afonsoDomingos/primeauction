@@ -43,16 +43,27 @@ const userSchema = new mongoose.Schema({
     type: String,
     maxlength: [200, 'Bio cannot be more than 200 characters'],
     default: null
+  },
+  province: {
+    type: String,
+    default: null
+  },
+  gender: {
+    type: String,
+    enum: ['Masculino', 'Feminino', 'Outro'],
+    default: null
+  },
+  age: {
+    type: Number,
+    default: null
   }
 }, {
   timestamps: true
 });
 
-// Encrypt password using bcrypt
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
-  }
+// Encrypt password using bcrypt (Mongoose 9 async middleware — no next param)
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
