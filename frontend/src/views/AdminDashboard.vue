@@ -6,10 +6,29 @@
         <p class="page-subtitle">Gerencie leilões, utilizadores e toda a plataforma</p>
       </div>
 
-      <!-- Alert -->
-      <div v-if="alertMsg" class="alert-banner" :class="alertType">
-        {{ alertMsg }}
+    <!-- Toast Notifications -->
+    <Teleport to="body">
+      <div class="toast-container">
+        <TransitionGroup name="toast">
+          <div
+            v-for="toast in toasts"
+            :key="toast.id"
+            class="toast-item"
+            :class="toast.type"
+            @click="removeToast(toast.id)"
+          >
+            <span class="toast-icon">
+              <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              <svg v-else-if="toast.type === 'error'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </span>
+            <span class="toast-msg">{{ toast.message }}</span>
+            <button class="toast-close" @click.stop="removeToast(toast.id)">×</button>
+            <div class="toast-progress"><div class="toast-progress-bar" :style="{ animationDuration: toast.duration + 'ms' }"></div></div>
+          </div>
+        </TransitionGroup>
       </div>
+    </Teleport>
 
       <!-- KPI Stats Row -->
       <div class="kpi-row">
@@ -456,8 +475,19 @@ const formatCurrencyCompact = (value) => {
   return new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN', maximumFractionDigits: 0 }).format(value);
 };
 const creating = ref(false);
-const alertMsg = ref('');
-const alertType = ref('success');
+const toasts = ref([]);
+let toastCounter = 0;
+
+const showAlert = (message, type = 'success', duration = 4000) => {
+  const id = ++toastCounter;
+  toasts.value.push({ id, message, type, duration });
+  setTimeout(() => removeToast(id), duration);
+};
+
+const removeToast = (id) => {
+  const idx = toasts.value.findIndex(t => t.id === id);
+  if (idx !== -1) toasts.value.splice(idx, 1);
+};
 
 const form = ref({
   title: '',
@@ -523,11 +553,7 @@ const setCoverImage = (url) => {
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const showAlert = (msg, type = 'success') => {
-  alertMsg.value = msg;
-  alertType.value = type;
-  setTimeout(() => { alertMsg.value = ''; }, 4000);
-};
+// showAlert & removeToast defined above
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(value);
@@ -686,25 +712,129 @@ const deleteAuction = (auctionId) => {
   color: var(--text-light);
 }
 
-/* ── Alert Banner ── */
-.alert-banner {
-  padding: 0.875rem 1.25rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
+/* ── Toast Notification System ── */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08);
+  font-size: 0.875rem;
   font-weight: 500;
+  min-width: 280px;
+  max-width: 380px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  pointer-events: all;
+  border: 1px solid transparent;
 }
 
-.alert-banner.success {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #a5d6a7;
+.toast-item.success {
+  background-color: #1a1a2e;
+  color: #fff;
+  border-color: rgba(76,175,80,0.4);
 }
 
-.alert-banner.error {
-  background-color: #fdecea;
-  color: #c62828;
-  border: 1px solid #ef9a9a;
+.toast-item.success .toast-icon { color: #4caf50; }
+.toast-item.success .toast-progress-bar { background: #4caf50; }
+
+.toast-item.error {
+  background-color: #1a1a2e;
+  color: #fff;
+  border-color: rgba(239,83,80,0.4);
+}
+
+.toast-item.error .toast-icon { color: #ef5350; }
+.toast-item.error .toast-progress-bar { background: #ef5350; }
+
+.toast-item.warning {
+  background-color: #1a1a2e;
+  color: #fff;
+  border-color: rgba(255,152,0,0.4);
+}
+
+.toast-item.warning .toast-icon { color: #ff9800; }
+.toast-item.warning .toast-progress-bar { background: #ff9800; }
+
+.toast-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+
+.toast-msg {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0 0 0.25rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.toast-close:hover { color: white; }
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+}
+
+.toast-progress-bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  animation: shrinkBar linear forwards;
+  border-radius: 0 2px 2px 0;
+}
+
+@keyframes shrinkBar {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* Toast Transition Animations */
+.toast-enter-active {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.toast-leave-active {
+  transition: all 0.25s ease-in;
+}
+.toast-enter-from {
+  opacity: 0;
+  transform: translateX(60px) scale(0.95);
+}
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(60px) scale(0.9);
 }
 
 /* ── Grid ── */
