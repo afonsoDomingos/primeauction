@@ -17,7 +17,11 @@
       <!-- Right: Form -->
       <div class="auth-form-side">
         <div class="auth-form-wrap animate-fade-in">
-          <div class="auth-logo">PRIME AUCTION</div>
+          <div class="auth-logo">
+            <router-link to="/">
+              <img src="/PRIME LOGO.png" alt="PRIME AUCTION" class="auth-logo-img" />
+            </router-link>
+          </div>
 
           <h1 class="auth-title">Criar Conta</h1>
           <p class="auth-subtitle">Já tem conta? <router-link to="/login">Faça Login</router-link></p>
@@ -220,11 +224,14 @@ const handleRegister = async () => {
 }
 
 .auth-logo {
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 4px;
-  color: var(--text-light);
   margin-bottom: 2rem;
+  display: flex;
+}
+
+.auth-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
 }
 
 .auth-title {

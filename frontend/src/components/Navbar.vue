@@ -3,7 +3,7 @@
     <!-- Logo -->
     <div class="nav-brand">
       <router-link to="/" @click="closeMobileMenu">
-        <span class="logo-text">PRIME AUCTION</span>
+        <img src="/PRIME LOGO.png" alt="PRIME AUCTION" class="logo-img" />
       </router-link>
     </div>
     
@@ -27,7 +27,7 @@
     <div class="nav-content" :class="{ 'mobile-open': isMobileMenuOpen }">
       <!-- Mobile header inside drawer -->
       <div class="nav-drawer-header">
-        <span class="logo-text">PRIME AUCTION</span>
+        <img src="/PRIME LOGO.png" alt="PRIME AUCTION" class="logo-img logo-img-drawer" />
       </div>
 
       <nav class="nav-links">
@@ -153,13 +153,23 @@ onUnmounted(() => {
 /* ─── Logo ─── */
 .nav-brand a {
   text-decoration: none;
+  display: flex;
+  align-items: center;
 }
 
-.logo-text {
-  font-weight: 700;
-  letter-spacing: 5px;
-  font-size: 1rem;
-  color: var(--text-primary);
+.logo-img {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  transition: height 0.3s ease;
+}
+
+.tesla-nav.scrolled .logo-img {
+  height: 34px;
+}
+
+.logo-img-drawer {
+  height: 36px;
 }
 
 /* ─── Mobile Toggle Button ─── */
