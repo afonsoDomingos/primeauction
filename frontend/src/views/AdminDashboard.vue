@@ -272,7 +272,10 @@
                 <tr v-for="user in users" :key="user._id">
                   <td>
                     <div class="user-cell">
-                      <div class="user-avatar">{{ user.name?.charAt(0)?.toUpperCase() }}</div>
+                      <div class="user-avatar">
+                        <img v-if="user.profilePhoto" :src="user.profilePhoto" alt="Avatar" class="user-avatar-img" />
+                        <span v-else>{{ user.name?.charAt(0)?.toUpperCase() }}</span>
+                      </div>
                       <div>
                         <span class="user-name">{{ user.name }}</span>
                         <span v-if="user.role === 'admin'" class="badge badge-admin">Admin</span>
@@ -804,6 +807,13 @@ const deleteAuction = (auctionId) => {
   font-size: 0.8rem;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-name {
