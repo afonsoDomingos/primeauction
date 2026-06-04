@@ -11,6 +11,169 @@
         {{ alertMsg }}
       </div>
 
+      <!-- KPI Stats Row -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap user-kpi">👥</div>
+          <div class="kpi-info">
+            <span class="kpi-label">Utilizadores</span>
+            <h3 class="kpi-value">{{ users.length }}</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap auction-kpi">🏷️</div>
+          <div class="kpi-info">
+            <span class="kpi-label">Total Leilões</span>
+            <h3 class="kpi-value">{{ auctions.length }}</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap active-kpi">⚡</div>
+          <div class="kpi-info">
+            <span class="kpi-label">Leilões Activos</span>
+            <h3 class="kpi-value">{{ kpiStats.activeAuctions }}</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap value-kpi">💰</div>
+          <div class="kpi-info">
+            <span class="kpi-label">Valorização</span>
+            <h3 class="kpi-value">{{ formatCurrencyCompact(kpiStats.totalValueGenerated) }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-row">
+        <!-- Donut Chart: Leilões -->
+        <div class="card chart-card">
+          <h3 class="chart-title">📊 Estado dos Leilões</h3>
+          <div class="chart-content">
+            <div class="donut-wrapper">
+              <svg width="100%" height="150" viewBox="0 0 120 120" class="donut-svg">
+                <!-- Background circle -->
+                <circle cx="60" cy="60" r="40" fill="transparent" stroke="#f3f4f6" stroke-width="10" />
+                
+                <!-- Active circle segment -->
+                <circle 
+                  v-if="donutStats.total > 0 && donutStats.activeCount > 0"
+                  cx="60" 
+                  cy="60" 
+                  r="40" 
+                  fill="transparent" 
+                  stroke="var(--btn-primary-bg)" 
+                  stroke-width="10" 
+                  :stroke-dasharray="donutStats.activeDash"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 60 60)"
+                  class="donut-segment active-segment"
+                />
+                
+                <!-- Ended circle segment -->
+                <circle 
+                  v-if="donutStats.total > 0 && donutStats.endedCount > 0"
+                  cx="60" 
+                  cy="60" 
+                  r="40" 
+                  fill="transparent" 
+                  stroke="#9ca3af" 
+                  stroke-width="10" 
+                  :stroke-dasharray="donutStats.endedDash"
+                  :stroke-dashoffset="donutStats.endedOffset"
+                  transform="rotate(-90 60 60)"
+                  class="donut-segment ended-segment"
+                />
+                
+                <!-- Inner Text -->
+                <g class="donut-text">
+                  <text x="60" y="58" class="donut-number" text-anchor="middle">{{ donutStats.total }}</text>
+                  <text x="60" y="74" class="donut-label" text-anchor="middle">Leilões</text>
+                </g>
+              </svg>
+            </div>
+            
+            <div class="donut-legend">
+              <div class="legend-item">
+                <span class="legend-dot active-dot"></span>
+                <span class="legend-label">Activos</span>
+                <span class="legend-value">{{ donutStats.activeCount }} ({{ donutStats.activePercent }}%)</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot ended-dot"></span>
+                <span class="legend-label">Terminados</span>
+                <span class="legend-value">{{ donutStats.endedCount }} ({{ donutStats.endedPercent }}%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar Chart: Crescimento de Utilizadores -->
+        <div class="card chart-card">
+          <h3 class="chart-title">📈 Registos (Últimos 7 Dias)</h3>
+          <div class="chart-content">
+            <div class="bar-chart-wrapper">
+              <svg width="100%" height="150" viewBox="0 0 300 120" class="bar-svg">
+                <!-- X-Axis Line -->
+                <line x1="10" y1="92" x2="290" y2="92" stroke="#e5e7eb" stroke-width="1" />
+                
+                <!-- Grid Lines -->
+                <line x1="10" y1="52" x2="290" y2="52" stroke="#f3f4f6" stroke-dasharray="2 2" stroke-width="1" />
+                <line x1="10" y1="12" x2="290" y2="12" stroke="#f3f4f6" stroke-dasharray="2 2" stroke-width="1" />
+
+                <!-- Bars -->
+                <g v-for="(bar, idx) in userRegistrationsStats" :key="idx" class="bar-group">
+                  <!-- Bar Rect -->
+                  <rect 
+                    :x="20 + idx * 38" 
+                    :y="92 - bar.heightPercent" 
+                    width="22" 
+                    :height="bar.heightPercent" 
+                    rx="4" 
+                    fill="url(#barGradient)" 
+                    class="chart-bar"
+                  />
+                  <!-- Hover tooltip value inside/above bar -->
+                  <text 
+                    :x="31 + idx * 38" 
+                    :y="87 - bar.heightPercent" 
+                    class="bar-value" 
+                    text-anchor="middle"
+                  >
+                    {{ bar.count }}
+                  </text>
+                  <!-- X-Axis label -->
+                  <text 
+                    :x="31 + idx * 38" 
+                    y="105" 
+                    class="bar-label" 
+                    text-anchor="middle"
+                  >
+                    {{ bar.label }}
+                  </text>
+                  <!-- Small subtitle for date -->
+                  <text 
+                    :x="31 + idx * 38" 
+                    y="115" 
+                    class="bar-date-label" 
+                    text-anchor="middle"
+                  >
+                    {{ bar.dateStr }}
+                  </text>
+                </g>
+
+                <!-- Gradients -->
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--btn-primary-bg)" />
+                    <stop offset="100%" stop-color="#7b5ea7" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="dashboard-grid">
 
         <!-- ── Criar Leilão ── -->
@@ -216,13 +379,82 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 
 const authStore = useAuthStore();
 const users = ref([]);
 const auctions = ref([]);
+
+const kpiStats = computed(() => {
+  const activeAuctions = auctions.value.filter(a => a.status === 'active').length;
+  const totalValueGenerated = auctions.value.reduce((sum, a) => sum + Math.max(0, a.currentPrice - a.startingPrice), 0);
+  return {
+    activeAuctions,
+    totalValueGenerated
+  };
+});
+
+const donutStats = computed(() => {
+  const total = auctions.value.length;
+  if (total === 0) {
+    return { activeDash: '0 251.2', endedDash: '0 251.2', activePercent: 0, endedPercent: 0, total: 0, activeCount: 0, endedCount: 0, endedOffset: 0 };
+  }
+  const activeCount = auctions.value.filter(a => a.status === 'active').length;
+  const endedCount = total - activeCount;
+  const C = 251.2;
+  const activeDash = `${(activeCount / total) * C} ${C}`;
+  const endedDash = `${(endedCount / total) * C} ${C}`;
+  const endedOffset = -((activeCount / total) * C);
+  return {
+    total,
+    activeCount,
+    endedCount,
+    activePercent: Math.round((activeCount / total) * 100),
+    endedPercent: Math.round((endedCount / total) * 100),
+    activeDash,
+    endedDash,
+    endedOffset
+  };
+});
+
+const userRegistrationsStats = computed(() => {
+  const stats = [];
+  const daysName = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    
+    const dayLabel = daysName[d.getDay()];
+    const dayStr = d.toLocaleDateString('pt-MZ', { day: '2-digit', month: '2-digit' });
+    
+    const count = users.value.filter(u => {
+      const uDate = new Date(u.createdAt);
+      return uDate.toDateString() === d.toDateString();
+    }).length;
+    
+    stats.push({
+      label: dayLabel,
+      dateStr: dayStr,
+      count
+    });
+  }
+  
+  const maxCount = Math.max(...stats.map(s => s.count), 1);
+  return stats.map(s => ({
+    ...s,
+    heightPercent: (s.count / maxCount) * 75
+  }));
+});
+
+const formatCurrencyCompact = (value) => {
+  if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M MZN';
+  if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K MZN';
+  return new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN', maximumFractionDigits: 0 }).format(value);
+};
 const creating = ref(false);
 const alertMsg = ref('');
 const alertType = ref('success');
@@ -878,5 +1110,246 @@ const deleteAuction = (auctionId) => {
 
 .animate-scale-in {
   animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── KPI Stats Row ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #f1f1f1;
+}
+
+.kpi-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.user-kpi { background-color: #e8f0fe; }
+.auction-kpi { background-color: #fef3c7; }
+.active-kpi { background-color: #ecfdf5; }
+.value-kpi { background-color: #f3e8ff; }
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.kpi-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* ── Charts Row ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.chart-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #f1f1f1;
+  overflow: hidden;
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+}
+
+.chart-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  width: 100%;
+}
+
+/* Donut Chart Custom styles */
+.donut-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.donut-svg {
+  max-width: 150px;
+}
+
+.donut-segment {
+  transform-origin: center;
+  transition: stroke-dasharray 0.3s ease;
+}
+
+.active-segment {
+  stroke-linecap: round;
+}
+
+.ended-segment {
+  stroke-linecap: round;
+}
+
+.donut-text {
+  transition: opacity 0.2s;
+}
+
+.donut-number {
+  font-size: 20px;
+  font-weight: 700;
+  fill: var(--text-primary);
+}
+
+.donut-label {
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  fill: var(--text-light);
+  font-weight: 600;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-left: 1.5rem;
+  min-width: 130px;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.legend-dot {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.active-dot { background-color: var(--btn-primary-bg); }
+.ended-dot { background-color: #9ca3af; }
+
+.legend-label {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.legend-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Bar Chart Custom styles */
+.bar-chart-wrapper {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.bar-svg {
+  width: 100%;
+}
+
+.chart-bar {
+  transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1), y 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s;
+  cursor: pointer;
+}
+
+.chart-bar:hover {
+  opacity: 0.85;
+}
+
+.bar-value {
+  font-size: 9px;
+  font-weight: 700;
+  fill: var(--btn-primary-bg);
+  opacity: 0;
+  transition: opacity 0.2s, y 0.2s;
+  pointer-events: none;
+}
+
+.bar-group:hover .bar-value {
+  opacity: 1;
+}
+
+.bar-label {
+  font-size: 8px;
+  font-weight: 600;
+  fill: var(--text-secondary);
+}
+
+.bar-date-label {
+  font-size: 7px;
+  fill: var(--text-light);
+}
+
+/* Media Queries for dashboard charts */
+@media (max-width: 1024px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+  .chart-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .donut-legend {
+    margin-left: 0;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.5rem;
+  }
 }
 </style>
