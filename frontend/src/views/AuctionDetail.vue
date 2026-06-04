@@ -95,7 +95,10 @@
             <ul class="bid-list">
               <li v-for="(bid, index) in bids" :key="bid._id" class="bid-item" :class="{ 'top-bid': index === 0 }">
                 <div class="bid-left">
-                  <div class="bid-avatar">{{ bid.user?.name?.charAt(0)?.toUpperCase() }}</div>
+                  <div class="bid-avatar">
+                    <img v-if="bid.user?.profilePhoto" :src="bid.user.profilePhoto" alt="Avatar" class="bid-avatar-img" />
+                    <span v-else>{{ bid.user?.name?.charAt(0)?.toUpperCase() }}</span>
+                  </div>
                   <span class="bid-user">{{ bid.user?.name }}</span>
                   <span v-if="index === 0" class="leader-badge">Líder</span>
                 </div>
@@ -712,6 +715,13 @@ onUnmounted(() => {
   font-size: 0.875rem;
   font-weight: 600;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.bid-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .bid-user {

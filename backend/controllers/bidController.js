@@ -7,7 +7,7 @@ const Auction = require('../models/Auction');
 exports.getBids = async (req, res) => {
   try {
     const bids = await Bid.find({ auction: req.params.auctionId })
-      .populate({ path: 'user', select: 'name' })
+      .populate({ path: 'user', select: 'name profilePhoto' })
       .sort('-amount'); // Highest first
 
     res.status(200).json({ success: true, count: bids.length, data: bids });
@@ -72,7 +72,7 @@ exports.placeBid = async (req, res) => {
     await auction.save();
 
     // Populate user to send to socket
-    await bid.populate({ path: 'user', select: 'name' });
+    await bid.populate({ path: 'user', select: 'name profilePhoto' });
 
     // Emit event to socket room
     req.io.to(auctionId).emit('new_bid', {
