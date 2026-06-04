@@ -10,7 +10,7 @@
   --btn-primary-text: #ffffff;
   --btn-secondary-bg: #f4f4f4;
   --btn-secondary-text: #393c41;
-  --header-glass-bg: rgba(255, 255, 255, 0.8);
+  --header-glass-bg: rgba(255, 255, 255, 0.92);
   --danger-color: #ed4e50;
   --success-color: #4caf50;
   
@@ -26,12 +26,19 @@
   --radius-pill: 9999px;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
+
+  /* Spacing */
+  --navbar-height: 72px;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -41,6 +48,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* Glassmorphism Header */
@@ -53,14 +61,15 @@ header.tesla-nav {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  z-index: 100;
+  z-index: 1000;
   background-color: transparent;
   transition: background-color 0.3s ease;
 }
 
 header.tesla-nav.scrolled {
   background-color: var(--header-glass-bg);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -69,7 +78,7 @@ header.tesla-nav.scrolled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1.5rem;
+  padding: 0.625rem 1.5rem;
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: var(--radius-md);
@@ -77,6 +86,8 @@ header.tesla-nav.scrolled {
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-pill {
@@ -106,9 +117,18 @@ header.tesla-nav.scrolled {
   color: white;
 }
 
+.btn-danger:hover {
+  background-color: #c73d3f;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Forms */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-label {
@@ -126,14 +146,17 @@ header.tesla-nav.scrolled {
   border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   background-color: #f9fafb;
+  /* Prevent zoom on iOS */
+  font-size: max(16px, 1rem);
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--btn-primary-bg);
   background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(62, 106, 225, 0.12);
 }
 
 /* Cards */
@@ -146,7 +169,7 @@ header.tesla-nav.scrolled {
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
@@ -155,15 +178,37 @@ header.tesla-nav.scrolled {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+/* Page titles */
+.page-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
 }

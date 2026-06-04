@@ -1,21 +1,45 @@
 <template>
   <div class="auctions-container">
-    <div class="container animate-fade-in" style="padding-top: 100px;">
-      <h2 class="page-title">Available Auctions</h2>
-      <div v-if="loading" class="loading">Loading...</div>
+    <div class="container animate-fade-in" style="padding-top: 100px; padding-bottom: 60px;">
+      <div class="page-header">
+        <h2 class="page-title">Leilões Activos</h2>
+        <p class="page-subtitle">Encontre os melhores leilões e faça o seu lance agora</p>
+      </div>
+
+      <div v-if="loading" class="loading-grid">
+        <div v-for="n in 6" :key="n" class="skeleton-card"></div>
+      </div>
+      <div v-else-if="auctions.length === 0" class="empty-state">
+        <div class="empty-icon">🏷️</div>
+        <h3>Nenhum leilão disponível</h3>
+        <p>De momento não existem leilões activos. Volte mais tarde.</p>
+      </div>
       <div v-else class="auction-grid">
-        <div v-for="auction in auctions" :key="auction.id" class="card auction-card" @click="goToAuction(auction._id)">
+        <div
+          v-for="auction in auctions"
+          :key="auction.id"
+          class="card auction-card"
+          @click="goToAuction(auction._id)"
+        >
           <div class="card-img-wrapper">
-            <img :src="auction.imageUrl" :alt="auction.title" class="card-img" />
+            <img :src="auction.imageUrl" :alt="auction.title" class="card-img" loading="lazy" />
+            <div class="card-status" :class="auction.status">{{ auction.status === 'active' ? 'Activo' : 'Terminado' }}</div>
           </div>
           <div class="card-content">
             <h3 class="auction-title">{{ auction.title }}</h3>
-            <div class="price-row">
-              <span class="price-label">Current Bid:</span>
-              <span class="price-value">{{ formatCurrency(auction.currentPrice) }}</span>
+            <p class="auction-description">{{ auction.description?.slice(0, 80) }}{{ auction.description?.length > 80 ? '…' : '' }}</p>
+            <div class="card-footer">
+              <div class="price-col">
+                <span class="price-label">Lance actual</span>
+                <span class="price-value">{{ formatCurrency(auction.currentPrice) }}</span>
+              </div>
+              <div class="time-col">
+                <span class="price-label">Termina em</span>
+                <span class="time-value">{{ new Date(auction.endTime).toLocaleDateString('pt-MZ') }}</span>
+              </div>
             </div>
-            <div class="time-row">
-              <span>Ends: {{ new Date(auction.endTime).toLocaleDateString() }}</span>
+            <div class="card-cta">
+              <span class="cta-text">Ver Leilão →</span>
             </div>
           </div>
         </div>
@@ -61,61 +85,212 @@ onMounted(() => {
 <style scoped>
 .auctions-container {
   min-height: 100vh;
-  background-color: var(--bg-color);
+  background-color: #f9fafb;
 }
+
+.page-header {
+  margin-bottom: 2.5rem;
+}
+
 .page-title {
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
   color: var(--text-primary);
-  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
+
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--text-light);
+}
+
+/* ─── Auction Grid ─── */
 .auction-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-  padding-bottom: 4rem;
+  gap: 1.5rem;
 }
+
 .auction-card {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-}
-.card-img-wrapper {
-  height: 200px;
+  border-radius: 12px;
   overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+.auction-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+/* ─── Card Image ─── */
+.card-img-wrapper {
+  position: relative;
+  height: 210px;
+  overflow: hidden;
+  background-color: #eee;
+}
+
 .card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
+
 .auction-card:hover .card-img {
   transform: scale(1.05);
 }
+
+.card-status {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-status.active {
+  background-color: rgba(76, 175, 80, 0.9);
+  color: white;
+}
+
+.card-status.finished {
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+}
+
+/* ─── Card Content ─── */
 .card-content {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+  background: white;
 }
+
 .auction-title {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  font-weight: 500;
-}
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-.price-value {
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.4;
 }
-.time-row {
-  font-size: 0.875rem;
+
+.auction-description {
+  font-size: 0.85rem;
   color: var(--text-light);
-  margin-top: auto;
+  line-height: 1.55;
+  flex-grow: 1;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.price-col, .time-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-col {
+  text-align: right;
+}
+
+.price-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.price-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--btn-primary-bg);
+}
+
+.time-value {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.card-cta {
+  margin-top: 1rem;
+}
+
+.cta-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--btn-primary-bg);
+  transition: letter-spacing 0.2s ease;
+}
+
+.auction-card:hover .cta-text {
+  letter-spacing: 0.5px;
+}
+
+/* ─── Loading skeletons ─── */
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-card {
+  height: 380px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Empty state ─── */
+.empty-state {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: var(--text-light);
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 640px) {
+  .auction-grid,
+  .loading-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

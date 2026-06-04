@@ -1,22 +1,62 @@
 <template>
   <header class="tesla-nav" :class="{ 'scrolled': isScrolled }">
+    <!-- Logo -->
     <div class="nav-brand">
-      <router-link to="/">
+      <router-link to="/" @click="closeMobileMenu">
         <span class="logo-text">PRIME AUCTION</span>
       </router-link>
     </div>
     
-    <nav class="nav-links">
-      <router-link to="/">Início</router-link>
-      <router-link to="/auctions">Leilões Activos</router-link>
-      <router-link v-if="authStore.isAdmin" to="/admin">Painel Admin</router-link>
-      <router-link v-if="authStore.isAuthenticated" to="/profile">O Meu Perfil</router-link>
-    </nav>
+    <!-- Mobile Menu Toggle Button -->
+    <button class="mobile-menu-btn" @click="toggleMobileMenu" aria-label="Toggle menu" :aria-expanded="isMobileMenuOpen">
+      <svg v-if="!isMobileMenuOpen" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <svg v-else viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div class="nav-overlay" :class="{ 'active': isMobileMenuOpen }" @click="closeMobileMenu"></div>
     
-    <div class="nav-actions">
-      <router-link v-if="!authStore.isAuthenticated" to="/login" class="nav-icon">Login</router-link>
-      <router-link v-if="!authStore.isAuthenticated" to="/register" class="nav-icon">Registar</router-link>
-      <a v-if="authStore.isAuthenticated" @click.prevent="logout" class="nav-icon" style="cursor:pointer">Sair</a>
+    <!-- Desktop & Mobile Navigation -->
+    <div class="nav-content" :class="{ 'mobile-open': isMobileMenuOpen }">
+      <!-- Mobile header inside drawer -->
+      <div class="nav-drawer-header">
+        <span class="logo-text">PRIME AUCTION</span>
+      </div>
+
+      <nav class="nav-links">
+        <router-link to="/" @click="closeMobileMenu">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Início
+        </router-link>
+        <router-link to="/auctions" @click="closeMobileMenu">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Leilões Activos
+        </router-link>
+        <router-link v-if="authStore.isAdmin" to="/admin" @click="closeMobileMenu">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Painel Admin
+        </router-link>
+        <router-link v-if="authStore.isAuthenticated" to="/profile" @click="closeMobileMenu">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          O Meu Perfil
+        </router-link>
+      </nav>
+      
+      <div class="nav-actions">
+        <router-link v-if="!authStore.isAuthenticated" to="/login" class="nav-btn nav-btn-ghost" @click="closeMobileMenu">Login</router-link>
+        <router-link v-if="!authStore.isAuthenticated" to="/register" class="nav-btn nav-btn-solid" @click="closeMobileMenu">Registar</router-link>
+        <a v-if="authStore.isAuthenticated" @click.prevent="handleLogout" class="nav-btn nav-btn-ghost" style="cursor:pointer">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sair
+        </a>
+      </div>
     </div>
   </header>
 </template>
@@ -29,74 +69,300 @@ import { useRouter } from 'vue-router';
 const authStore = useAuthStore();
 const router = useRouter();
 const isScrolled = ref(false);
+const isMobileMenuOpen = ref(false);
 
-const logout = () => {
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : '';
+};
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false;
+  document.body.style.overflow = '';
+};
+
+const handleLogout = () => {
   authStore.logout();
+  closeMobileMenu();
   router.push('/');
 };
 
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50;
+  isScrolled.value = window.scrollY > 30;
 };
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener('scroll', handleScroll, { passive: true });
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
+  document.body.style.overflow = '';
 });
 </script>
 
 <style scoped>
+/* ─── Base Navbar ─── */
 .tesla-nav {
-  padding: 1.25rem 3rem;
+  padding: 0 3rem;
+  height: 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: transparent;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, height 0.3s ease;
+}
+
+.tesla-nav.scrolled {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+  height: 64px;
+}
+
+/* ─── Logo ─── */
+.nav-brand a {
+  text-decoration: none;
 }
 
 .logo-text {
   font-weight: 700;
   letter-spacing: 5px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-primary);
-  text-decoration: none;
 }
 
+/* ─── Mobile Toggle Button ─── */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  z-index: 1100;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.mobile-menu-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+/* ─── Overlay ─── */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nav-overlay.active {
+  opacity: 1;
+}
+
+/* ─── Nav Content (Desktop) ─── */
+.nav-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: space-between;
+  margin-left: 3rem;
+}
+
+/* ─── Mobile Drawer Header (hidden on desktop) ─── */
+.nav-drawer-header {
+  display: none;
+}
+
+/* ─── Nav Links ─── */
 .nav-links {
   display: flex;
-  gap: 2rem;
+  gap: 0.25rem;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   text-decoration: none;
   color: var(--text-primary);
-  transition: color 0.3s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius-md);
 }
 
-.nav-links a:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+.nav-links a svg {
+  display: none; /* hide icons on desktop */
 }
 
+.nav-links a:hover,
+.nav-links a.router-link-active {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Nav Action Buttons ─── */
 .nav-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-.nav-icon {
-  color: var(--text-primary);
-  text-decoration: none;
-  display: flex;
+.nav-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-  transition: background-color 0.3s ease;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
 }
 
-.nav-icon:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+.nav-btn-ghost {
+  color: var(--text-primary);
+  background-color: transparent;
+}
+
+.nav-btn-ghost:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.nav-btn-solid {
+  background-color: var(--btn-primary-bg);
+  color: white;
+}
+
+.nav-btn-solid:hover {
+  background-color: #3457b2;
+}
+
+/* ─── Tablet breakpoint ─── */
+@media (max-width: 1024px) {
+  .tesla-nav {
+    padding: 0 2rem;
+  }
+  .nav-content {
+    margin-left: 2rem;
+  }
+}
+
+/* ─── Mobile breakpoint ─── */
+@media (max-width: 768px) {
+  .tesla-nav {
+    padding: 0 1.25rem;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-overlay {
+    display: block;
+    pointer-events: none;
+  }
+
+  .nav-overlay.active {
+    pointer-events: auto;
+  }
+
+  /* Slide-in drawer from right */
+  .nav-content {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(320px, 85vw);
+    background-color: #fff;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0;
+    margin-left: 0;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1050;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+    overflow-y: auto;
+  }
+
+  .nav-content.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Drawer header */
+  .nav-drawer-header {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Nav links vertical */
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+    padding: 0.5rem 0;
+  }
+
+  .nav-links a {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 0;
+    border-bottom: 1px solid #f7f7f7;
+    gap: 10px;
+  }
+
+  .nav-links a svg {
+    display: block; /* show icons on mobile */
+    flex-shrink: 0;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.router-link-active {
+    background-color: #f5f8ff;
+    color: var(--btn-primary-bg);
+  }
+
+  /* Action buttons at bottom of drawer */
+  .nav-actions {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.5rem;
+    gap: 0.75rem;
+    margin-top: auto;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .nav-btn {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    border-radius: var(--radius-md);
+    justify-content: center;
+  }
+
+  .nav-btn-ghost {
+    border: 1px solid #e5e7eb;
+  }
 }
 </style>
