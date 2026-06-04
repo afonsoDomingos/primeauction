@@ -62,7 +62,11 @@ async function run() {
   const testPayload = {
     heroTitle: 'Prime Leilões Moçambique',
     heroSubtitle: 'A melhor plataforma de leilões do país.',
-    heroImageUrl: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1200'
+    heroImageUrl: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1200',
+    heroImageUrls: [
+      'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1200',
+      'https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=1200'
+    ]
   };
 
   const updateRes = await api('PUT', '/api/settings/homepage', testPayload, adminToken);
@@ -93,8 +97,15 @@ async function run() {
   const getUpdated = await api('GET', '/api/settings/homepage');
   if (getUpdated.status === 200) {
     const d = getUpdated.body.data;
-    if (d.heroTitle === testPayload.heroTitle && d.heroSubtitle === testPayload.heroSubtitle && d.heroImageUrl === testPayload.heroImageUrl) {
-      pass('Persisted settings retrieved successfully and match');
+    if (
+      d.heroTitle === testPayload.heroTitle &&
+      d.heroSubtitle === testPayload.heroSubtitle &&
+      d.heroImageUrl === testPayload.heroImageUrl &&
+      Array.isArray(d.heroImageUrls) &&
+      d.heroImageUrls.length === 2 &&
+      d.heroImageUrls[1] === testPayload.heroImageUrls[1]
+    ) {
+      pass('Persisted settings retrieved successfully and match (including multiple URLs)');
     } else {
       fail(`Retrieved settings mismatch: ${JSON.stringify(d)}`);
     }

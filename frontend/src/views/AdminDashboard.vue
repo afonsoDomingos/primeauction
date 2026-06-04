@@ -371,21 +371,38 @@
                 <label class="form-label">Subtítulo / Descrição</label>
                 <textarea v-model="homepageForm.heroSubtitle" class="form-input" rows="3" placeholder="Ex: Leilões Exclusivos. Preços Competitivos."></textarea>
               </div>
+              
               <div class="form-group">
-                <label class="form-label">URL da Imagem de Fundo (opcional)</label>
-                <input type="url" v-model="homepageForm.heroImageUrl" class="form-input" placeholder="https://... (deixe em branco para usar a imagem carregada abaixo)" />
+                <label class="form-label">Adicionar Imagem de Fundo por URL</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="url" v-model="manualHeroImageUrl" class="form-input" placeholder="https://... (URL da imagem)" style="margin-bottom: 0;" />
+                  <button type="button" class="btn btn-pill" @click="addManualHeroImageUrl" style="flex-shrink: 0; padding: 0 1.25rem; height: 42px; background-color: var(--text-primary); color: white; border: none; font-size: 0.8rem; font-weight: 600;">Adicionar</button>
+                </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Carregar Nova Imagem de Fundo</label>
-                <div class="upload-dropzone" @click="triggerHeroImageUpload" title="Clique para carregar imagem do hero">
+                <label class="form-label">Carregar Novas Imagens de Fundo (Múltiplas)</label>
+                <div class="upload-dropzone" @click="triggerHeroImageUpload" title="Clique para carregar imagens do hero">
                   <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-light); margin-bottom: 0.4rem;">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                     <circle cx="8.5" cy="8.5" r="1.5"/>
                     <polyline points="21 15 16 10 5 21"/>
                   </svg>
-                  <span>{{ uploadingHeroImage ? 'A enviar...' : 'Clique para selecionar uma imagem' }}</span>
-                  <input type="file" ref="heroImageInput" accept="image/*" style="display: none" @change="handleHeroImageUpload" />
+                  <span>{{ uploadingHeroImage ? 'A enviar...' : 'Clique para selecionar imagens' }}</span>
+                  <input type="file" ref="heroImageInput" multiple accept="image/*" style="display: none" @change="handleHeroImageUpload" />
+                </div>
+              </div>
+
+              <!-- List of current hero slides -->
+              <div v-if="homepageForm.heroImageUrls && homepageForm.heroImageUrls.length > 0" class="uploaded-thumbnails-grid" style="margin-bottom: 1.5rem;">
+                <div 
+                  v-for="(imgUrl, idx) in homepageForm.heroImageUrls" 
+                  :key="idx" 
+                  class="thumb-wrapper"
+                  style="aspect-ratio: 16/9; height: auto;"
+                >
+                  <img :src="imgUrl" class="thumb-img" style="height: 100%; width: 100%; object-fit: cover;" alt="Capa da Home" />
+                  <button type="button" class="btn-remove-thumb" @click="removeHeroImage(idx)" title="Remover imagem">×</button>
                 </div>
               </div>
 
@@ -397,10 +414,10 @@
 
             <!-- Right: Live Preview -->
             <div class="home-settings-preview">
-              <p class="preview-label">Pré-visualização</p>
+              <p class="preview-label">Pré-visualização (Carrossel Activo)</p>
               <div
                 class="hero-preview"
-                :style="{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.6) 100%), url(${homepageForm.heroImageUrl || defaultHeroImage})` }"
+                :style="{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.6) 100%), url(${activePreviewImage})` }"
               >
                 <p class="preview-eyebrow">Plataforma de Leilões #1 em Moçambique</p>
                 <h2 class="preview-title">{{ homepageForm.heroTitle || 'Prime Auctions' }}</h2>
@@ -437,7 +454,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import { useToastStore } from '../stores/toastStore';
@@ -449,10 +466,21 @@ const auctions = ref([]);
 
 // ── Homepage Settings ──
 const defaultHeroImage = 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
-const homepageForm = ref({ heroTitle: '', heroSubtitle: '', heroImageUrl: '' });
+const homepageForm = ref({ heroTitle: '', heroSubtitle: '', heroImageUrl: '', heroImageUrls: [] });
+const manualHeroImageUrl = ref('');
 const savingHomepage = ref(false);
 const uploadingHeroImage = ref(false);
 const heroImageInput = ref(null);
+const previewActiveIndex = ref(0);
+let previewIntervalId = null;
+
+const activePreviewImage = computed(() => {
+  const urls = homepageForm.value.heroImageUrls;
+  if (urls && urls.length > 0) {
+    return urls[previewActiveIndex.value % urls.length];
+  }
+  return homepageForm.value.heroImageUrl || defaultHeroImage;
+});
 
 const kpiStats = computed(() => {
   const activeAuctions = auctions.value.filter(a => a.status === 'active').length;
@@ -620,12 +648,22 @@ onMounted(async () => {
       homepageForm.value = {
         heroTitle: d.heroTitle || '',
         heroSubtitle: d.heroSubtitle || '',
-        heroImageUrl: d.heroImageUrl || ''
+        heroImageUrl: d.heroImageUrl || '',
+        heroImageUrls: d.heroImageUrls || []
       };
     }
   } catch (err) {
     // No saved settings yet, leave defaults
   }
+
+  // Setup preview cycling interval
+  previewIntervalId = setInterval(() => {
+    previewActiveIndex.value++;
+  }, 3000);
+});
+
+onUnmounted(() => {
+  if (previewIntervalId) clearInterval(previewIntervalId);
 });
 
 const handleCreate = async () => {
@@ -749,24 +787,56 @@ const triggerHeroImageUpload = () => {
 };
 
 const handleHeroImageUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+
   const formData = new FormData();
-  formData.append('image', file);
+  files.forEach(file => {
+    formData.append('images', file);
+  });
+
   uploadingHeroImage.value = true;
   try {
-    const res = await axios.post(`${apiUrl}/api/auctions/upload-image`, formData, {
+    const res = await axios.post(`${apiUrl}/api/auctions/upload-images`, formData, {
       headers: { Authorization: `Bearer ${authStore.token}`, 'Content-Type': 'multipart/form-data' }
     });
     if (res.data.success) {
-      homepageForm.value.heroImageUrl = res.data.imageUrl;
-      showAlert('Imagem carregada com sucesso! ✓');
+      const urls = res.data.imageUrls;
+      if (!homepageForm.value.heroImageUrls) {
+        homepageForm.value.heroImageUrls = [];
+      }
+      homepageForm.value.heroImageUrls = [...homepageForm.value.heroImageUrls, ...urls];
+      if (!homepageForm.value.heroImageUrl && homepageForm.value.heroImageUrls.length > 0) {
+        homepageForm.value.heroImageUrl = homepageForm.value.heroImageUrls[0];
+      }
+      showAlert('Imagens carregadas com sucesso! ✓');
     }
   } catch (err) {
-    showAlert('Erro ao carregar imagem: ' + (err.response?.data?.error || err.message), 'error');
+    showAlert('Erro ao carregar imagens: ' + (err.response?.data?.error || err.message), 'error');
   } finally {
     uploadingHeroImage.value = false;
     if (heroImageInput.value) heroImageInput.value.value = '';
+  }
+};
+
+const addManualHeroImageUrl = () => {
+  if (!manualHeroImageUrl.value.trim()) return;
+  if (!homepageForm.value.heroImageUrls) {
+    homepageForm.value.heroImageUrls = [];
+  }
+  homepageForm.value.heroImageUrls.push(manualHeroImageUrl.value.trim());
+  if (!homepageForm.value.heroImageUrl && homepageForm.value.heroImageUrls.length > 0) {
+    homepageForm.value.heroImageUrl = homepageForm.value.heroImageUrls[0];
+  }
+  manualHeroImageUrl.value = '';
+  showAlert('URL da imagem adicionada! ✓');
+};
+
+const removeHeroImage = (index) => {
+  const removedUrl = homepageForm.value.heroImageUrls[index];
+  homepageForm.value.heroImageUrls.splice(index, 1);
+  if (homepageForm.value.heroImageUrl === removedUrl) {
+    homepageForm.value.heroImageUrl = homepageForm.value.heroImageUrls.length > 0 ? homepageForm.value.heroImageUrls[0] : '';
   }
 };
 
@@ -776,7 +846,8 @@ const saveHomepageSettings = async () => {
     await axios.put(`${apiUrl}/api/settings/homepage`, {
       heroTitle: homepageForm.value.heroTitle,
       heroSubtitle: homepageForm.value.heroSubtitle,
-      heroImageUrl: homepageForm.value.heroImageUrl
+      heroImageUrl: homepageForm.value.heroImageUrl,
+      heroImageUrls: homepageForm.value.heroImageUrls
     }, { headers: { Authorization: `Bearer ${authStore.token}` } });
     showAlert('Configurações da página inicial guardadas com sucesso! ✓');
   } catch (err) {

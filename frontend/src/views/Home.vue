@@ -1,19 +1,30 @@
 <template>
   <div class="home-container">
     <!-- Hero Section -->
-    <section class="hero-section" :style="{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%), url(${heroImage})` }">
-      <div class="hero-content animate-fade-in">
+    <section class="hero-section">
+      <!-- Background Slides for Cross-Fade -->
+      <div class="hero-bg-slides">
+        <div 
+          v-for="(imgUrl, idx) in heroImagesList" 
+          :key="idx" 
+          class="hero-bg-slide"
+          :class="{ active: idx === activeIndex }"
+          :style="{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%), url(${imgUrl})` }"
+        ></div>
+      </div>
+
+      <div class="hero-content animate-fade-in" style="z-index: 2; position: relative;">
         <p class="hero-eyebrow">Plataforma de Leilões #1 em Moçambique</p>
         <h1 class="hero-title">{{ heroTitle }}</h1>
         <p class="hero-subtitle">{{ heroSubtitle }}</p>
       </div>
       
-      <div class="hero-actions animate-fade-in" style="animation-delay: 0.3s;">
+      <div class="hero-actions animate-fade-in" style="animation-delay: 0.3s; z-index: 2; position: relative;">
         <router-link to="/auctions" class="btn btn-primary btn-pill hero-btn">Ver Leilões Activos</router-link>
         <router-link to="/register" class="btn btn-secondary btn-pill hero-btn">Criar Conta</router-link>
       </div>
 
-      <div class="down-arrow" @click="scrollDown">
+      <div class="down-arrow" @click="scrollDown" style="z-index: 2; position: relative;">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
@@ -47,12 +58,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios';
 
 const heroTitle = ref('Prime Auctions');
 const heroSubtitle = ref('Leilões Exclusivos. Preços Competitivos. Totalmente Online.');
 const heroImage = ref('https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+const heroImageUrls = ref([]);
+
+const activeIndex = ref(0);
+let intervalId = null;
 
 const scrollDown = () => {
   const features = document.getElementById('features');
@@ -60,6 +75,13 @@ const scrollDown = () => {
     features.scrollIntoView({ behavior: 'smooth' });
   }
 };
+
+const heroImagesList = computed(() => {
+  if (heroImageUrls.value && heroImageUrls.value.length > 0) {
+    return heroImageUrls.value;
+  }
+  return [heroImage.value];
+});
 
 onMounted(async () => {
   try {
@@ -70,10 +92,21 @@ onMounted(async () => {
       if (data.heroTitle) heroTitle.value = data.heroTitle;
       if (data.heroSubtitle) heroSubtitle.value = data.heroSubtitle;
       if (data.heroImageUrl) heroImage.value = data.heroImageUrl;
+      if (data.heroImageUrls) heroImageUrls.value = data.heroImageUrls;
     }
   } catch (err) {
     console.warn('Failed to load homepage custom settings, using default fallback.', err);
   }
+
+  if (heroImagesList.value.length > 1) {
+    intervalId = setInterval(() => {
+      activeIndex.value = (activeIndex.value + 1) % heroImagesList.value.length;
+    }, 5000);
+  }
+});
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId);
 });
 </script>
 
@@ -87,14 +120,38 @@ onMounted(async () => {
   height: 100svh;
   min-height: 600px;
   width: 100%;
-  background-size: cover;
-  background-position: center;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   padding: clamp(100px, 18vh, 160px) 1.5rem clamp(40px, 6vh, 80px);
   position: relative;
+  overflow: hidden;
+}
+
+.hero-bg-slides {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.hero-bg-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.hero-bg-slide.active {
+  opacity: 1;
 }
 
 .hero-eyebrow {
