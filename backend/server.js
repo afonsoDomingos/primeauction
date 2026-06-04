@@ -43,6 +43,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auctions', require('./routes/auctions'));
 app.use('/api/bids', require('./routes/bids'));
+app.use('/api/settings', require('./routes/settings'));
 
 // Socket.io logic
 io.on('connection', (socket) => {

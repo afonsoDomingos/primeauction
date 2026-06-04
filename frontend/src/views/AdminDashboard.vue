@@ -352,6 +352,64 @@
           </div>
         </div>
 
+        <!-- ── Gerir Página Inicial ── -->
+        <div class="card admin-card">
+          <div class="card-header-row">
+            <span class="card-icon">🏠</span>
+            <h3 class="section-title">Gerir Página Inicial</h3>
+          </div>
+          <p class="settings-hint">Personalize o conteúdo visível na página inicial da plataforma sem precisar alterar o código.</p>
+
+          <div class="home-settings-layout">
+            <!-- Left: Text fields -->
+            <div class="home-settings-fields">
+              <div class="form-group">
+                <label class="form-label">Título Principal (Hero)</label>
+                <input type="text" v-model="homepageForm.heroTitle" class="form-input" placeholder="Ex: Prime Auctions" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subtítulo / Descrição</label>
+                <textarea v-model="homepageForm.heroSubtitle" class="form-input" rows="3" placeholder="Ex: Leilões Exclusivos. Preços Competitivos."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">URL da Imagem de Fundo (opcional)</label>
+                <input type="url" v-model="homepageForm.heroImageUrl" class="form-input" placeholder="https://... (deixe em branco para usar a imagem carregada abaixo)" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Carregar Nova Imagem de Fundo</label>
+                <div class="upload-dropzone" @click="triggerHeroImageUpload" title="Clique para carregar imagem do hero">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-light); margin-bottom: 0.4rem;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span>{{ uploadingHeroImage ? 'A enviar...' : 'Clique para selecionar uma imagem' }}</span>
+                  <input type="file" ref="heroImageInput" accept="image/*" style="display: none" @change="handleHeroImageUpload" />
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-pill" @click="saveHomepageSettings" :disabled="savingHomepage">
+                <span v-if="savingHomepage" class="btn-spinner"></span>
+                {{ savingHomepage ? 'A guardar...' : '💾 Guardar Configurações da Home' }}
+              </button>
+            </div>
+
+            <!-- Right: Live Preview -->
+            <div class="home-settings-preview">
+              <p class="preview-label">Pré-visualização</p>
+              <div
+                class="hero-preview"
+                :style="{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.6) 100%), url(${homepageForm.heroImageUrl || defaultHeroImage})` }"
+              >
+                <p class="preview-eyebrow">Plataforma de Leilões #1 em Moçambique</p>
+                <h2 class="preview-title">{{ homepageForm.heroTitle || 'Prime Auctions' }}</h2>
+                <p class="preview-subtitle">{{ homepageForm.heroSubtitle || 'Leilões Exclusivos. Preços Competitivos.' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -388,6 +446,13 @@ const authStore = useAuthStore();
 const toastStore = useToastStore();
 const users = ref([]);
 const auctions = ref([]);
+
+// ── Homepage Settings ──
+const defaultHeroImage = 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
+const homepageForm = ref({ heroTitle: '', heroSubtitle: '', heroImageUrl: '' });
+const savingHomepage = ref(false);
+const uploadingHeroImage = ref(false);
+const heroImageInput = ref(null);
 
 const kpiStats = computed(() => {
   const activeAuctions = auctions.value.filter(a => a.status === 'active').length;
@@ -545,7 +610,23 @@ const fetchData = async () => {
   }
 };
 
-onMounted(() => { fetchData(); });
+onMounted(async () => {
+  fetchData();
+  // Load current homepage settings
+  try {
+    const res = await axios.get(`${apiUrl}/api/settings/homepage`);
+    if (res.data && res.data.success && res.data.data) {
+      const d = res.data.data;
+      homepageForm.value = {
+        heroTitle: d.heroTitle || '',
+        heroSubtitle: d.heroSubtitle || '',
+        heroImageUrl: d.heroImageUrl || ''
+      };
+    }
+  } catch (err) {
+    // No saved settings yet, leave defaults
+  }
+});
 
 const handleCreate = async () => {
   creating.value = true;
@@ -660,6 +741,49 @@ const deleteAuction = (auctionId) => {
       }
     }
   });
+};
+
+// ── Homepage Settings Handlers ──
+const triggerHeroImageUpload = () => {
+  heroImageInput.value.click();
+};
+
+const handleHeroImageUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('image', file);
+  uploadingHeroImage.value = true;
+  try {
+    const res = await axios.post(`${apiUrl}/api/auctions/upload-image`, formData, {
+      headers: { Authorization: `Bearer ${authStore.token}`, 'Content-Type': 'multipart/form-data' }
+    });
+    if (res.data.success) {
+      homepageForm.value.heroImageUrl = res.data.imageUrl;
+      showAlert('Imagem carregada com sucesso! ✓');
+    }
+  } catch (err) {
+    showAlert('Erro ao carregar imagem: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    uploadingHeroImage.value = false;
+    if (heroImageInput.value) heroImageInput.value.value = '';
+  }
+};
+
+const saveHomepageSettings = async () => {
+  savingHomepage.value = true;
+  try {
+    await axios.put(`${apiUrl}/api/settings/homepage`, {
+      heroTitle: homepageForm.value.heroTitle,
+      heroSubtitle: homepageForm.value.heroSubtitle,
+      heroImageUrl: homepageForm.value.heroImageUrl
+    }, { headers: { Authorization: `Bearer ${authStore.token}` } });
+    showAlert('Configurações da página inicial guardadas com sucesso! ✓');
+  } catch (err) {
+    showAlert('Erro ao guardar: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    savingHomepage.value = false;
+  }
 };
 </script>
 
@@ -1337,6 +1461,102 @@ const deleteAuction = (auctionId) => {
     flex-direction: row;
     justify-content: center;
     gap: 1.5rem;
+  }
+}
+
+/* ── Homepage Settings ── */
+.settings-hint {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.home-settings-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.home-settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.home-settings-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.preview-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+}
+
+.hero-preview {
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 220px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  gap: 0.5rem;
+  transition: background-image 0.4s ease;
+}
+
+.preview-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+.preview-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.preview-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.85);
+  max-width: 260px;
+  line-height: 1.5;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 900px) {
+  .home-settings-layout {
+    grid-template-columns: 1fr;
   }
 }
 </style>

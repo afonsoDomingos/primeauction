@@ -1,11 +1,11 @@
 <template>
   <div class="home-container">
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section" :style="{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%), url(${heroImage})` }">
       <div class="hero-content animate-fade-in">
         <p class="hero-eyebrow">Plataforma de Leilões #1 em Moçambique</p>
-        <h1 class="hero-title">Prime Auctions</h1>
-        <p class="hero-subtitle">Leilões Exclusivos. Preços Competitivos. Totalmente Online.</p>
+        <h1 class="hero-title">{{ heroTitle }}</h1>
+        <p class="hero-subtitle">{{ heroSubtitle }}</p>
       </div>
       
       <div class="hero-actions animate-fade-in" style="animation-delay: 0.3s;">
@@ -47,12 +47,34 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const heroTitle = ref('Prime Auctions');
+const heroSubtitle = ref('Leilões Exclusivos. Preços Competitivos. Totalmente Online.');
+const heroImage = ref('https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+
 const scrollDown = () => {
   const features = document.getElementById('features');
   if (features) {
     features.scrollIntoView({ behavior: 'smooth' });
   }
 };
+
+onMounted(async () => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/settings/homepage`);
+    if (res.data && res.data.success && res.data.data) {
+      const data = res.data.data;
+      if (data.heroTitle) heroTitle.value = data.heroTitle;
+      if (data.heroSubtitle) heroSubtitle.value = data.heroSubtitle;
+      if (data.heroImageUrl) heroImage.value = data.heroImageUrl;
+    }
+  } catch (err) {
+    console.warn('Failed to load homepage custom settings, using default fallback.', err);
+  }
+});
 </script>
 
 <style scoped>
@@ -65,9 +87,6 @@ const scrollDown = () => {
   height: 100svh;
   min-height: 600px;
   width: 100%;
-  background-image:
-    linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.55) 100%),
-    url('https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
   background-size: cover;
   background-position: center;
   display: flex;
