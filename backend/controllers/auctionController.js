@@ -1,4 +1,5 @@
 const Auction = require('../models/Auction');
+const Bid = require('../models/Bid');
 
 // @desc    Get all auctions
 // @route   GET /api/auctions
@@ -17,17 +18,41 @@ exports.getAuctions = async (req, res) => {
 // @access  Public
 exports.getAuction = async (req, res) => {
   try {
-    const auction = await Auction.findById(req.params.id).populate({
-      path: 'createdBy winner',
-      select: 'name email'
-    });
+    let auction = await Auction.findById(req.params.id);
 
     if (!auction) {
       return res.status(404).json({ success: false, error: 'Auction not found' });
     }
 
+    // Resolve winner on-demand if auction has expired but still marked active
+    if (Date.now() > new Date(auction.endTime).getTime() && auction.status === 'active') {
+      const highestBid = await Bid.findOne({ auction: auction._id })
+        .sort('-amount')
+        .populate({ path: 'user', select: 'name email' });
+
+      const updatePayload = { status: 'finished' };
+      if (highestBid) {
+        updatePayload.winner = highestBid.user._id;
+      }
+
+      // Use atomic update so we don't have race conditions with cron
+      auction = await Auction.findByIdAndUpdate(
+        auction._id,
+        updatePayload,
+        { new: true }
+      );
+
+      console.log(`[ON-DEMAND] Auction "${auction.title}" resolved as finished. Winner: ${highestBid ? highestBid.user.name : 'No bids'}`);
+    }
+
+    await auction.populate({
+      path: 'createdBy winner',
+      select: 'name email'
+    });
+
     res.status(200).json({ success: true, data: auction });
   } catch (err) {
+    console.error('[getAuction] Error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };

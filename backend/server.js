@@ -63,6 +63,10 @@ io.on('connection', (socket) => {
   });
 });
 
+// Start Cron Jobs
+const startCronJobs = require('./cron');
+startCronJobs(io);
+
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {

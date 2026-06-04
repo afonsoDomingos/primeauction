@@ -62,9 +62,17 @@
             </form>
           </div>
 
-          <div v-else class="ended-section">
+          <div v-else class="ended-section winner-celebration animate-fade-in">
+            <div class="trophy-icon">🏆</div>
             <h3 class="section-title">Leilão Terminado</h3>
-            <p class="ended-text">Este leilão já não está activo.</p>
+            <div class="winner-info" v-if="auction.winner">
+              <p class="winner-label">Arrematado por</p>
+              <h4 class="winner-name">{{ auction.winner.name }}</h4>
+              <p class="winner-price">Valor Final: <span>{{ formatCurrency(auction.currentPrice) }}</span></p>
+            </div>
+            <div class="winner-info" v-else>
+              <p class="ended-text">Este leilão terminou sem lances.</p>
+            </div>
           </div>
 
           <!-- Bids History -->
@@ -166,6 +174,16 @@ onMounted(() => {
       }
     }
     bids.value.unshift(data.bid);
+  });
+
+  socket.on('auction_ended', (data) => {
+    if (auction.value) {
+      auction.value.status = 'finished';
+      auction.value.winner = data.winner;
+      if (data.winningBid) {
+        auction.value.currentPrice = data.winningBid;
+      }
+    }
   });
 });
 
@@ -408,6 +426,65 @@ onUnmounted(() => {
 .ended-text {
   color: var(--text-light);
   font-size: 0.9rem;
+}
+
+/* ─── Winner Celebration ─── */
+.winner-celebration {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(255, 215, 0, 0.05) 100%);
+  border: 1px dashed rgba(76, 175, 80, 0.35);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.winner-celebration .section-title {
+  margin-bottom: 0.5rem;
+  color: #2e7d32;
+}
+
+.trophy-icon {
+  font-size: 3rem;
+  margin-bottom: 0.25rem;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.winner-info {
+  margin-top: 0.25rem;
+}
+
+.winner-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-light);
+  letter-spacing: 1px;
+  margin-bottom: 0.25rem;
+}
+
+.winner-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-bottom: 0.4rem;
+}
+
+.winner-price {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.winner-price span {
+  font-weight: 700;
+  color: var(--btn-primary-bg);
 }
 
 /* ─── Bid List ─── */
