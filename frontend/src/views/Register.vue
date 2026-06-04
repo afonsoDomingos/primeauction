@@ -17,11 +17,7 @@
       <!-- Right: Form -->
       <div class="auth-form-side">
         <div class="auth-form-wrap animate-fade-in">
-          <div class="auth-logo">
-            <router-link to="/">
-              <img src="/PRIME LOGO.png" alt="PRIME AUCTION" class="auth-logo-img" />
-            </router-link>
-          </div>
+
 
           <h1 class="auth-title">Criar Conta</h1>
           <p class="auth-subtitle">Já tem conta? <router-link to="/login">Faça Login</router-link></p>
