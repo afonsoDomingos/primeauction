@@ -107,7 +107,7 @@ onMounted(() => {
 /* ─── Auction Grid ─── */
 .auction-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
@@ -247,7 +247,7 @@ onMounted(() => {
 /* ─── Loading skeletons ─── */
 .loading-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
@@ -287,7 +287,7 @@ onMounted(() => {
 }
 
 /* ─── Mobile ─── */
-@media (max-width: 640px) {
+@media (max-width: 580px) {
   .auction-grid,
   .loading-grid {
     grid-template-columns: 1fr;

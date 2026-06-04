@@ -448,15 +448,28 @@ const logout = () => {
   .bid-right {
     flex-direction: row;
     align-items: center;
-    width: 100%;
+    flex-grow: 1;
     justify-content: space-between;
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
+    margin-left: 68px; /* Aligns with details text under image */
+  }
+}
+
+@media (max-width: 500px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stats-row .stat-card:last-child {
+    grid-column: span 2;
   }
 }
 
 @media (max-width: 380px) {
   .stats-row {
     grid-template-columns: 1fr;
+  }
+  .stats-row .stat-card:last-child {
+    grid-column: auto;
   }
 }
 </style>
