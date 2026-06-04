@@ -4,6 +4,15 @@
     <router-view />
   </main>
 
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>&copy; {{ new Date().getFullYear() }} Prime Auctions. Todos os direitos reservados.</p>
+      <p class="footer-attribution">
+        Powered by <a href="https://linkedin.com/in/afonso-domingos-6b59361a5/" target="_blank" rel="noopener noreferrer" class="footer-link">Vibe</a>
+      </p>
+    </div>
+  </footer>
+
   <!-- Global Toast Notifications -->
   <Teleport to="body">
     <div class="toast-container">
@@ -47,6 +56,58 @@ onMounted(() => {
 </script>
 
 <style>
-/* Global styles can also go here if needed, but we use main.css */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex-grow: 1;
+}
+
+.app-footer {
+  background-color: #171a20;
+  color: #a3a3a3;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #2a2d36;
+  font-size: 0.85rem;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.footer-attribution {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footer-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #3e6ae1;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
 </style>
 
