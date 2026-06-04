@@ -30,6 +30,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'blocked'],
     default: 'active'
+  },
+  profilePhoto: {
+    type: String,
+    default: null
+  },
+  phone: {
+    type: String,
+    default: null
+  },
+  bio: {
+    type: String,
+    maxlength: [200, 'Bio cannot be more than 200 characters'],
+    default: null
   }
 }, {
   timestamps: true

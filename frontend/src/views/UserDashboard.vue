@@ -4,13 +4,35 @@
 
       <!-- Profile Header -->
       <div class="profile-header">
-        <div class="profile-avatar">{{ authStore.user?.name?.charAt(0)?.toUpperCase() }}</div>
+        <div class="avatar-container" @click="triggerPhotoUpload" title="Clique para alterar a foto de perfil">
+          <img v-if="authStore.user?.profilePhoto" :src="authStore.user.profilePhoto" alt="Foto de Perfil" class="profile-avatar-img" />
+          <div v-else class="profile-avatar">{{ authStore.user?.name?.charAt(0)?.toUpperCase() }}</div>
+          
+          <div class="avatar-overlay">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <div v-if="photoLoading" class="avatar-spinner-wrap">
+            <div class="spinner-sm"></div>
+          </div>
+          <input type="file" ref="photoInput" style="display: none" accept="image/*" @change="handlePhotoUpload" />
+        </div>
+
         <div class="profile-info">
-          <h2 class="page-title" style="margin-bottom: 0.25rem;">{{ authStore.user?.name }}</h2>
+          <h2 class="page-title" style="margin-bottom: 0.25rem; font-size: 1.75rem;">{{ authStore.user?.name }}</h2>
           <p class="profile-email">{{ authStore.user?.email }}</p>
-          <span class="status-badge" :class="authStore.user?.status">
-            {{ authStore.user?.status === 'active' ? 'Activo' : 'Bloqueado' }}
-          </span>
+          <p v-if="authStore.user?.phone" class="profile-phone">📞 {{ authStore.user.phone }}</p>
+          <p v-if="authStore.user?.bio" class="profile-bio">“{{ authStore.user.bio }}”</p>
+          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+            <span class="status-badge" :class="authStore.user?.status">
+              {{ authStore.user?.status === 'active' ? 'Activo' : 'Bloqueado' }}
+            </span>
+            <span class="status-badge role-badge">
+              {{ authStore.user?.role === 'admin' ? 'Administrador' : 'Cliente' }}
+            </span>
+          </div>
         </div>
         <button @click="logout" class="btn btn-logout">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -22,67 +44,156 @@
         </button>
       </div>
 
-      <!-- Stats Row -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <span class="stat-value">{{ bids.length }}</span>
-          <span class="stat-label">Lances Dados</span>
+      <!-- Navigation Tabs -->
+      <div class="tabs-nav">
+        <button 
+          class="tab-btn" 
+          :class="{ active: activeTab === 'activity' }" 
+          @click="activeTab = 'activity'"
+        >
+          🏷️ Actividade & Lances
+        </button>
+        <button 
+          class="tab-btn" 
+          :class="{ active: activeTab === 'edit-profile' }" 
+          @click="activeTab = 'edit-profile'"
+        >
+          ⚙️ Editar Perfil
+        </button>
+      </div>
+
+      <!-- TAB Content: Activity -->
+      <div v-if="activeTab === 'activity'">
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-value">{{ bids.length }}</span>
+            <span class="stat-label">Lances Dados</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">{{ uniqueAuctions }}</span>
+            <span class="stat-label">Leilões Activos</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">{{ formatCurrencyCompact(totalBid) }}</span>
+            <span class="stat-label">Total Licitado</span>
+          </div>
         </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ uniqueAuctions }}</span>
-          <span class="stat-label">Leilões Activos</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ formatCurrencyCompact(totalBid) }}</span>
-          <span class="stat-label">Total Licitado</span>
+
+        <!-- Bid History -->
+        <div class="card bids-card">
+          <div class="bids-header">
+            <h3 class="section-title">Histórico de Lances</h3>
+            <router-link v-if="bids.length > 0" to="/auctions" class="btn btn-primary btn-pill btn-sm">
+              Explorar Mais
+            </router-link>
+          </div>
+
+          <div v-if="loading" class="loading-state">
+            <div class="spinner"></div>
+            <p>A carregar lances...</p>
+          </div>
+
+          <div v-else-if="bids.length === 0" class="empty-state">
+            <div class="empty-icon">🏷️</div>
+            <h4>Ainda não fez nenhum lance</h4>
+            <p>Explore os leilões activos e faça o seu primeiro lance!</p>
+            <router-link to="/auctions" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
+              Ver Leilões Activos
+            </router-link>
+          </div>
+
+          <ul v-else class="bid-list">
+            <li v-for="bid in bids" :key="bid._id" class="bid-item">
+              <div class="bid-img-wrap" v-if="bid.auction?.imageUrl">
+                <img :src="bid.auction.imageUrl" :alt="bid.auction.title" class="bid-img" />
+              </div>
+              <div class="bid-img-wrap placeholder-img" v-else>🏷️</div>
+
+              <div class="bid-details">
+                <strong class="bid-auction-title">{{ bid.auction?.title || 'Leilão Removido' }}</strong>
+                <span class="bid-date">{{ new Date(bid.createdAt).toLocaleString('pt-MZ') }}</span>
+              </div>
+
+              <div class="bid-right">
+                <span class="bid-amount">{{ formatCurrency(bid.amount) }}</span>
+                <router-link
+                  v-if="bid.auction"
+                  :to="`/auction/${bid.auction._id}`"
+                  class="btn btn-secondary btn-sm btn-pill"
+                >Ver</router-link>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <!-- Bid History -->
-      <div class="card bids-card">
-        <div class="bids-header">
-          <h3 class="section-title">Histórico de Lances</h3>
-          <router-link v-if="bids.length > 0" to="/auctions" class="btn btn-primary btn-pill btn-sm">
-            Explorar Mais
-          </router-link>
+      <!-- TAB Content: Edit Profile -->
+      <div v-else class="edit-profile-layout">
+        <!-- Profile Info Form -->
+        <div class="card edit-card">
+          <h3 class="edit-title">📋 Informações Pessoais</h3>
+          
+          <form @submit.prevent="handleUpdateProfile" class="edit-form">
+            <div v-if="profileError" class="alert error-alert">{{ profileError }}</div>
+            <div v-if="profileSuccess" class="alert success-alert">{{ profileSuccess }}</div>
+            
+            <div class="form-group">
+              <label class="form-label" for="edit-name">Nome Completo</label>
+              <input type="text" id="edit-name" v-model="profileForm.name" class="form-input" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="edit-email">Endereço de Email</label>
+              <input type="email" id="edit-email" v-model="profileForm.email" class="form-input" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="edit-phone">Contacto Telefónico</label>
+              <input type="text" id="edit-phone" v-model="profileForm.phone" class="form-input" placeholder="Ex: +258 84 123 4567" />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="edit-bio">Biografia / Nota</label>
+              <textarea id="edit-bio" v-model="profileForm.bio" class="form-input" rows="3" placeholder="Escreva algo sobre si (máx. 200 caracteres)..." maxlength="200"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="updatingProfile">
+              <span v-if="updatingProfile" class="btn-spinner"></span>
+              {{ updatingProfile ? 'A guardar...' : 'Guardar Alterações' }}
+            </button>
+          </form>
         </div>
 
-        <div v-if="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>A carregar lances...</p>
+        <!-- Security Form -->
+        <div class="card edit-card">
+          <h3 class="edit-title">🔒 Segurança & Palavra-passe</h3>
+          
+          <form @submit.prevent="handleUpdatePassword" class="edit-form">
+            <div v-if="securityError" class="alert error-alert">{{ securityError }}</div>
+            <div v-if="securitySuccess" class="alert success-alert">{{ securitySuccess }}</div>
+            
+            <div class="form-group">
+              <label class="form-label" for="edit-curr-pass">Palavra-passe Actual</label>
+              <input type="password" id="edit-curr-pass" v-model="securityForm.currentPassword" class="form-input" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="edit-new-pass">Nova Palavra-passe</label>
+              <input type="password" id="edit-new-pass" v-model="securityForm.newPassword" class="form-input" minlength="6" placeholder="Mínimo 6 caracteres" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="edit-conf-pass">Confirmar Nova Palavra-passe</label>
+              <input type="password" id="edit-conf-pass" v-model="securityForm.confirmPassword" class="form-input" minlength="6" required />
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="updatingSecurity">
+              <span v-if="updatingSecurity" class="btn-spinner"></span>
+              {{ updatingSecurity ? 'A alterar...' : 'Actualizar Palavra-passe' }}
+            </button>
+          </form>
         </div>
-
-        <div v-else-if="bids.length === 0" class="empty-state">
-          <div class="empty-icon">🏷️</div>
-          <h4>Ainda não fez nenhum lance</h4>
-          <p>Explore os leilões activos e faça o seu primeiro lance!</p>
-          <router-link to="/auctions" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
-            Ver Leilões Activos
-          </router-link>
-        </div>
-
-        <ul v-else class="bid-list">
-          <li v-for="bid in bids" :key="bid._id" class="bid-item">
-            <div class="bid-img-wrap" v-if="bid.auction?.imageUrl">
-              <img :src="bid.auction.imageUrl" :alt="bid.auction.title" class="bid-img" />
-            </div>
-            <div class="bid-img-wrap placeholder-img" v-else>🏷️</div>
-
-            <div class="bid-details">
-              <strong class="bid-auction-title">{{ bid.auction?.title || 'Leilão Removido' }}</strong>
-              <span class="bid-date">{{ new Date(bid.createdAt).toLocaleString('pt-MZ') }}</span>
-            </div>
-
-            <div class="bid-right">
-              <span class="bid-amount">{{ formatCurrency(bid.amount) }}</span>
-              <router-link
-                v-if="bid.auction"
-                :to="`/auction/${bid.auction._id}`"
-                class="btn btn-secondary btn-sm btn-pill"
-              >Ver</router-link>
-            </div>
-          </li>
-        </ul>
       </div>
 
     </div>
@@ -90,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -99,6 +210,43 @@ const authStore = useAuthStore();
 const router = useRouter();
 const bids = ref([]);
 const loading = ref(true);
+const activeTab = ref('activity');
+
+// Edit Forms State
+const profileForm = ref({
+  name: '',
+  email: '',
+  phone: '',
+  bio: ''
+});
+
+const securityForm = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+});
+
+const profileError = ref('');
+const profileSuccess = ref('');
+const securityError = ref('');
+const securitySuccess = ref('');
+const updatingProfile = ref(false);
+const updatingSecurity = ref(false);
+const photoLoading = ref(false);
+
+const photoInput = ref(null);
+
+// Populate fields when user details load
+watch(() => authStore.user, (newVal) => {
+  if (newVal) {
+    profileForm.value = {
+      name: newVal.name || '',
+      email: newVal.email || '',
+      phone: newVal.phone || '',
+      bio: newVal.bio || ''
+    };
+  }
+}, { immediate: true });
 
 const uniqueAuctions = computed(() => {
   const ids = new Set(bids.value.map(b => b.auction?._id).filter(Boolean));
@@ -123,7 +271,9 @@ const fetchMyBids = async () => {
   }
 };
 
-onMounted(() => { fetchMyBids(); });
+onMounted(() => { 
+  fetchMyBids(); 
+});
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(value);
@@ -138,6 +288,100 @@ const logout = () => {
   authStore.logout();
   router.push('/');
 };
+
+// Update profile logic
+const handleUpdateProfile = async () => {
+  profileError.value = '';
+  profileSuccess.value = '';
+  updatingProfile.value = true;
+  
+  try {
+    const res = await authStore.updateProfile({
+      name: profileForm.value.name,
+      email: profileForm.value.email,
+      phone: profileForm.value.phone,
+      bio: profileForm.value.bio
+    });
+    
+    if (res.success) {
+      profileSuccess.value = 'Perfil actualizado com sucesso! ✓';
+      setTimeout(() => { profileSuccess.value = ''; }, 4000);
+    } else {
+      profileError.value = res.error || 'Erro ao actualizar o perfil.';
+    }
+  } catch (err) {
+    profileError.value = 'Ocorreu um erro no servidor.';
+  } finally {
+    updatingProfile.value = false;
+  }
+};
+
+// Update password logic
+const handleUpdatePassword = async () => {
+  securityError.value = '';
+  securitySuccess.value = '';
+  
+  if (securityForm.value.newPassword !== securityForm.value.confirmPassword) {
+    securityError.value = 'As palavras-passe novas não coincidem.';
+    return;
+  }
+  
+  updatingSecurity.value = true;
+  
+  try {
+    const res = await authStore.updateProfile({
+      currentPassword: securityForm.value.currentPassword,
+      newPassword: securityForm.value.newPassword
+    });
+    
+    if (res.success) {
+      securitySuccess.value = 'Palavra-passe alterada com sucesso! ✓';
+      securityForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' };
+      setTimeout(() => { securitySuccess.value = ''; }, 4000);
+    } else {
+      securityError.value = res.error || 'Erro ao alterar a palavra-passe.';
+    }
+  } catch (err) {
+    securityError.value = 'Ocorreu um erro no servidor.';
+  } finally {
+    updatingSecurity.value = false;
+  }
+};
+
+const triggerPhotoUpload = () => {
+  photoInput.value.click();
+};
+
+const handlePhotoUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  if (!file.type.startsWith('image/')) {
+    profileError.value = 'Por favor seleccione um ficheiro de imagem válido.';
+    return;
+  }
+  
+  const formData = new FormData();
+  formData.append('photo', file);
+  
+  profileError.value = '';
+  profileSuccess.value = '';
+  photoLoading.value = true;
+  
+  try {
+    const res = await authStore.uploadProfilePhoto(formData);
+    if (res.success) {
+      profileSuccess.value = 'Fotografia de perfil actualizada com sucesso! ✓';
+      setTimeout(() => { profileSuccess.value = ''; }, 4000);
+    } else {
+      profileError.value = res.error || 'Erro ao carregar a imagem.';
+    }
+  } catch (err) {
+    profileError.value = 'Erro ao carregar a imagem no servidor.';
+  } finally {
+    photoLoading.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -150,39 +394,110 @@ const logout = () => {
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.5rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  background: white;
+  padding: 1.75rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.avatar-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border: 3px solid white;
+  outline: 2px solid #e2e8f0;
+  transition: transform 0.2s ease, outline-color 0.2s ease;
+}
+
+.avatar-container:hover {
+  transform: scale(1.02);
+  outline-color: var(--btn-primary-bg);
 }
 
 .profile-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, var(--btn-primary-bg), #7b5ea7);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.75rem;
+  font-size: 2.25rem;
   font-weight: 700;
-  flex-shrink: 0;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.avatar-container:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-spinner-wrap {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-sm {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid var(--btn-primary-bg);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 .profile-info {
   flex-grow: 1;
 }
 
-.page-title {
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
 .profile-email {
   font-size: 0.875rem;
   color: var(--text-light);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.profile-phone {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.profile-bio {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  font-style: italic;
+  margin-top: 0.5rem;
+  max-width: 500px;
+  line-height: 1.4;
 }
 
 .status-badge {
@@ -205,6 +520,11 @@ const logout = () => {
   color: #c62828;
 }
 
+.role-badge {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
 .btn-logout {
   display: flex;
   align-items: center;
@@ -218,13 +538,45 @@ const logout = () => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  margin-left: auto;
 }
 
 .btn-logout:hover {
   background-color: #fdecea;
   border-color: var(--danger-color);
   color: var(--danger-color);
+}
+
+/* ── Navigation Tabs ── */
+.tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 2px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--btn-primary-bg);
+  border-bottom-color: var(--btn-primary-bg);
 }
 
 /* ── Stats Row ── */
@@ -283,7 +635,7 @@ const logout = () => {
   margin: 0;
 }
 
-/* ── Loading ── */
+/* ── Loading / Spinners ── */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -415,26 +767,115 @@ const logout = () => {
   font-size: 0.75rem;
 }
 
-/* ── Mobile ── */
+/* ── Edit Profile Tab Layout ── */
+.edit-profile-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.edit-card {
+  padding: 1.75rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.edit-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.submit-btn {
+  margin-top: 1rem;
+  font-weight: 600;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Alerts inside form */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.error-alert {
+  background-color: #fdecea;
+  color: #c62828;
+  border: 1px solid #fcdad7;
+}
+
+.success-alert {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #d4edda;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .edit-profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
-  .stats-row {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.25rem;
   }
 
-  .stat-card {
-    padding: 1rem 0.5rem;
+  .profile-bio {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .btn-logout {
-    margin-left: 0;
     width: 100%;
     justify-content: center;
   }
 
-  .profile-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .tabs-nav {
+    justify-content: center;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .stat-card {
+    padding: 0.75rem 0.25rem;
   }
 
   .bids-card {
@@ -451,7 +892,7 @@ const logout = () => {
     flex-grow: 1;
     justify-content: space-between;
     margin-top: 0.5rem;
-    margin-left: 68px; /* Aligns with details text under image */
+    margin-left: 68px;
   }
 }
 

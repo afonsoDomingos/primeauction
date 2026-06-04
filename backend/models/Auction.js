@@ -16,6 +16,10 @@ const auctionSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add an image']
   },
+  images: {
+    type: [String],
+    default: []
+  },
   startingPrice: {
     type: Number,
     required: [true, 'Please add a starting price']

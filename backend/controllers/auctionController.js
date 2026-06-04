@@ -112,3 +112,33 @@ exports.deleteAuction = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+// @desc    Upload auction image to Cloudinary
+// @route   POST /api/auctions/upload-image
+// @access  Private/Admin
+exports.uploadAuctionImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Por favor envie uma imagem' });
+    }
+    res.status(200).json({ success: true, imageUrl: req.file.path });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// @desc    Upload multiple auction images to Cloudinary
+// @route   POST /api/auctions/upload-images
+// @access  Private/Admin
+exports.uploadAuctionImages = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, error: 'Por favor envie pelo menos uma imagem' });
+    }
+    const imageUrls = req.files.map(file => file.path);
+    res.status(200).json({ success: true, imageUrls });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+

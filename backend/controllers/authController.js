@@ -16,7 +16,10 @@ const sendTokenResponse = (user, statusCode, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      status: user.status
+      status: user.status,
+      profilePhoto: user.profilePhoto || null,
+      phone: user.phone || null,
+      bio: user.bio || null
     }
   });
 };
@@ -97,6 +100,72 @@ exports.getMe = async (req, res) => {
       success: true,
       data: user
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// @desc    Update profile (name, email, password, phone, bio)
+// @route   PUT /api/auth/updateprofile
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, bio, currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user.id).select('+password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    if (name) user.name = name;
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists) {
+        return res.status(400).json({ success: false, error: 'Este email já está em uso' });
+      }
+      user.email = email;
+    }
+    if (phone !== undefined) user.phone = phone;
+    if (bio !== undefined) user.bio = bio;
+
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, error: 'Por favor insira a palavra-passe actual' });
+      }
+      const isMatch = await user.matchPassword(currentPassword);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, error: 'Palavra-passe actual incorrecta' });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, error: 'A nova palavra-passe deve ter pelo menos 6 caracteres' });
+      }
+      user.password = newPassword;
+    }
+
+    await user.save();
+    sendTokenResponse(user, 200, res);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// @desc    Upload profile photo
+// @route   PUT /api/auth/uploadphoto
+// @access  Private
+exports.uploadProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Por favor envie uma imagem' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { profilePhoto: req.file.path },
+      { new: true }
+    );
+
+    sendTokenResponse(user, 200, res);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

@@ -1,13 +1,29 @@
 <template>
   <div v-if="auction" class="auction-detail-container">
     <div class="split-layout">
-      <!-- Left: Image -->
-      <div class="image-side" :style="{ backgroundImage: `url(${auction.imageUrl})` }">
-        <div class="image-overlay">
-          <button class="back-btn" @click="$router.back()">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-            Voltar
-          </button>
+      <!-- Left: Image side (Gallery) -->
+      <div class="image-side-container">
+        <!-- Main Image -->
+        <div class="main-image-display" :style="{ backgroundImage: `url(${activeImage || auction.imageUrl})` }">
+          <div class="image-overlay">
+            <button class="back-btn" @click="$router.back()">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Voltar
+            </button>
+          </div>
+        </div>
+        
+        <!-- Gallery Thumbnails -->
+        <div v-if="auction.images && auction.images.length > 1" class="gallery-thumbnails">
+          <div 
+            v-for="(img, idx) in auction.images" 
+            :key="idx" 
+            class="gallery-thumb"
+            :class="{ active: (activeImage || auction.imageUrl) === img }"
+            @click="activeImage = img"
+          >
+            <img :src="img" alt="Miniatura do produto" />
+          </div>
         </div>
       </div>
 
@@ -117,6 +133,7 @@ const bids = ref([]);
 const bidAmount = ref(0);
 const errorMsg = ref('');
 const bidSuccess = ref(false);
+const activeImage = ref('');
 let socket = null;
 
 const isEnded = computed(() => {
@@ -138,6 +155,7 @@ const fetchAuctionData = async () => {
     auction.value = auctionRes.data.data;
     bids.value = bidsRes.data.data;
     bidAmount.value = auction.value.currentPrice + 100;
+    activeImage.value = auction.value.imageUrl;
   } catch (err) {
     console.error(err);
   }
@@ -207,14 +225,59 @@ onUnmounted(() => {
   min-height: 100vh;
 }
 
-/* ─── Image Side ─── */
-.image-side {
+/* ─── Image Side & Gallery ─── */
+.image-side-container {
   flex: 6;
-  background-size: cover;
-  background-position: center;
   position: sticky;
   top: 0;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f3f4f6;
+}
+
+.main-image-display {
+  flex-grow: 1;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  transition: background-image 0.3s ease-in-out;
+}
+
+.gallery-thumbnails {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.gallery-thumb {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.65;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-thumb:hover,
+.gallery-thumb.active {
+  opacity: 1;
+  border-color: var(--btn-primary-bg);
+  transform: translateY(-2px);
 }
 
 .image-overlay {
@@ -592,12 +655,22 @@ onUnmounted(() => {
     min-height: auto;
   }
 
-  .image-side {
-    height: 45vh;
-    min-height: 280px;
+  .image-side-container {
+    height: 50vh;
+    min-height: 350px;
     position: relative;
     top: auto;
     flex: none;
+  }
+
+  .main-image-display {
+    height: 75%;
+    flex-grow: 0;
+  }
+
+  .gallery-thumbnails {
+    height: 25%;
+    padding: 0.5rem;
   }
 
   .content-side {
