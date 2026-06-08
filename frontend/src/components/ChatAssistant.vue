@@ -241,7 +241,7 @@ const generateBotResponse = (userText) => {
   if (text.includes('licitar') || text.includes('licitação') || text.includes('lance') || text.includes('como funciona') || text.includes('como posso')) {
     botText = 'Para licitar num produto, primeiro precisa de <strong>criar uma conta gratuita</strong> e iniciar sessão. Depois, aceda ao leilão pretendido, introduza um valor superior ao "Lance Atual" e clique em <strong>Licitar</strong>. Se for superado por outro utilizador, receberá um alerta na plataforma para relicitar.';
   } else if (text.includes('categorias') || text.includes('produto') || text.includes('que produtos') || text.includes('o que vendem') || text.includes('tipos')) {
-    botText = 'Na Prime Auction leiloamos produtos de <strong>diversas categorias</strong>, incluindo:<br/>• 🚗 <strong>Veículos</strong> (automóveis, motos, comerciais)<br/>• 🏠 <strong>Imóveis e Equipamentos</strong><br/>• 💻 <strong>Electrónica e Tecnologia</strong><br/>• 🪑 <strong>Mobiliário e Decoração</strong><br/>• 🏭 <strong>Maquinaria Industrial</strong><br/>• 📦 <strong>Outros bens e artigos</strong><br/><br/>Consulte a página de <a href="/auctions" style="color:#1a56db">Leilões</a> para ver todos os produtos disponíveis.';
+    botText = 'Na Prime Auction leiloamos produtos de <strong>diversas categorias</strong>, incluindo:<br/>• 🚗 <strong>Veículos</strong> (automóveis, motos, comerciais)<br/>• 🏠 <strong>Imóveis e Equipamentos</strong><br/>• 💻 <strong>Electrónica e Tecnologia</strong><br/>• 🪑 <strong>Mobiliário e Decoração</strong><br/>• 🏭 <strong>Maquinaria Industrial</strong><br/>• 📦 <strong>Outros bens e artigos</strong><br/><br/>Consulte a página de <a href="/auctions" style="color:#1800ad">Leilões</a> para ver todos os produtos disponíveis.';
   } else if (text.includes('pagamento') || text.includes('pagar') || text.includes('banco') || text.includes('conta') || text.includes('transferência')) {
     botText = 'Aceitamos pagamento por <strong>transferência bancária direta (MZN)</strong> ou depósito. Trabalhamos com o <strong>BCI</strong>, <strong>Millennium bim</strong> e <strong>Standard Bank</strong>. Os dados bancários detalhados ser-lhe-ão enviados por e-mail assim que ganhar qualquer leilão.';
   } else if (text.includes('levantar') || text.includes('levantamento') || text.includes('recolha') || text.includes('instalações') || text.includes('produto ganho') || text.includes('depois de ganhar')) {
@@ -359,7 +359,7 @@ onMounted(() => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a56db 0%, #10b981 100%);
+  background: linear-gradient(135deg, #1800ad 0%, #10b981 100%);
   border: none;
   color: white;
   cursor: pointer;
@@ -588,7 +588,7 @@ onMounted(() => {
 }
 
 .msg-user .message-bubble {
-  background-color: #1a56db;
+  background-color: #1800ad;
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -684,7 +684,7 @@ onMounted(() => {
 }
 
 .field-input:focus {
-  border-color: #1a56db;
+  border-color: #1800ad;
 }
 
 .field-textarea {
@@ -700,11 +700,11 @@ onMounted(() => {
 }
 
 .field-textarea:focus {
-  border-color: #1a56db;
+  border-color: #1800ad;
 }
 
 .btn-submit-ticket {
-  background-color: #1a56db;
+  background-color: #1800ad;
   color: white;
   border: none;
   padding: 0.5rem;
@@ -808,7 +808,7 @@ onMounted(() => {
   font-size: 0.78rem;
   background-color: #ffffff;
   border: 1px solid rgba(26, 86, 219, 0.15);
-  color: #1a56db;
+  color: #1800ad;
   border-radius: 20px;
   cursor: pointer;
   white-space: nowrap;
@@ -818,9 +818,9 @@ onMounted(() => {
 }
 
 .suggestion-chip-btn:hover {
-  background-color: #1a56db;
+  background-color: #1800ad;
   color: white;
-  border-color: #1a56db;
+  border-color: #1800ad;
   transform: translateY(-1px);
   box-shadow: 0 3px 6px rgba(26, 86, 219, 0.12);
 }
@@ -849,7 +849,7 @@ onMounted(() => {
 
 .chat-input-field:focus {
   background-color: white;
-  border-color: #1a56db;
+  border-color: #1800ad;
   box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
 }
 
@@ -859,7 +859,7 @@ onMounted(() => {
 }
 
 .chat-send-btn {
-  background-color: #1a56db;
+  background-color: #1800ad;
   color: white;
   border: none;
   width: 36px;

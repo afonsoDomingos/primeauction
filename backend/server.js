@@ -45,6 +45,7 @@ app.use('/api/auctions', require('./routes/auctions'));
 app.use('/api/bids', require('./routes/bids'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/support', require('./routes/support'));
+app.use('/api/categories', require('./routes/categories'));
 
 // Socket.io logic
 io.on('connection', (socket) => {

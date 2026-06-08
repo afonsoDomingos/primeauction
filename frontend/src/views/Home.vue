@@ -52,6 +52,14 @@
           </div>
           <router-link to="/auctions" class="btn btn-advanced-search">Pesquisa Avançada</router-link>
         </form>
+        <div class="quick-categories">
+          <span class="quick-categories-label">Pesquisa rápida:</span>
+          <router-link to="/auctions?category=Veículos" class="quick-cat-btn">🚗 Veículos</router-link>
+          <router-link to="/auctions?category=Imóveis%20e%20Equipamentos" class="quick-cat-btn">🏠 Imóveis</router-link>
+          <router-link to="/auctions?category=Electrónica%20e%20Tecnologia" class="quick-cat-btn">💻 Tecnologia</router-link>
+          <router-link to="/auctions?category=Mobiliário%20e%20Decoração" class="quick-cat-btn">🪑 Mobiliário</router-link>
+          <router-link to="/auctions?category=Maquinaria%20Industrial" class="quick-cat-btn">🏭 Maquinaria</router-link>
+        </div>
       </div>
     </section>
 
@@ -629,11 +637,11 @@ onUnmounted(() => {
 }
 
 .btn-primary.hero-btn {
-  background-color: #171a20;
+  background-color: #1800ad;
   color: white;
 }
 .btn-primary.hero-btn:hover {
-  background-color: #2a2d36;
+  background-color: #171a20;
 }
 
 .btn-secondary.hero-btn {
@@ -665,7 +673,7 @@ onUnmounted(() => {
 
 /* ─── Search Section (Blue Banner) ─── */
 .search-section {
-  background-color: #1a56db;
+  background-color: #1800ad;
   padding: 2.5rem 1.5rem;
   color: white;
   text-align: left;
@@ -710,7 +718,7 @@ onUnmounted(() => {
   right: 12px;
   background: none;
   border: none;
-  color: #1a56db;
+  color: #1800ad;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -737,7 +745,39 @@ onUnmounted(() => {
 
 .btn-advanced-search:hover {
   background-color: white;
-  color: #1a56db;
+  color: #1800ad;
+}
+
+.quick-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.quick-categories-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.quick-cat-btn {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.quick-cat-btn:hover {
+  background-color: #ffffff;
+  color: #1800ad;
+  transform: translateY(-1px);
 }
 
 /* ─── Partners Section (Infinite Marquee) ─── */

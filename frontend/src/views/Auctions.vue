@@ -8,16 +8,40 @@
         <p class="page-subtitle">Encontre os melhores leilões e faça o seu lance agora</p>
         
         <!-- Filtros Activos -->
-        <div v-if="route.query.search || route.query.status" class="active-filters">
+        <div v-if="route.query.search || route.query.status || route.query.category" class="active-filters">
           <span v-if="route.query.search" class="filter-badge">
             Pesquisa: <strong>{{ route.query.search }}</strong>
             <button @click="clearSearch" class="clear-btn" title="Limpar pesquisa">&times;</button>
           </span>
           <span v-if="route.query.status" class="filter-badge">
             Estado: <strong>{{ route.query.status === 'active' ? 'Ativo' : 'Terminado' }}</strong>
-            <button @click="clearSearch" class="clear-btn" title="Limpar estado">&times;</button>
+            <button @click="clearStatus" class="clear-btn" title="Limpar estado">&times;</button>
+          </span>
+          <span v-if="route.query.category" class="filter-badge">
+            Categoria: <strong>{{ route.query.category }}</strong>
+            <button @click="clearCategory" class="clear-btn" title="Limpar categoria">&times;</button>
           </span>
         </div>
+      </div>
+
+      <!-- Category Filter Bar (Horizontal Chips) -->
+      <div class="categories-bar">
+        <button 
+          @click="selectCategory('')" 
+          class="category-chip" 
+          :class="{ active: !route.query.category }"
+        >
+          <span>🏷️ Todos</span>
+        </button>
+        <button 
+          v-for="cat in categories" 
+          :key="cat._id" 
+          @click="selectCategory(cat.name)" 
+          class="category-chip" 
+          :class="{ active: route.query.category === cat.name }"
+        >
+          <span>{{ getCategoryEmoji(cat.name) }} {{ cat.name }}</span>
+        </button>
       </div>
 
       <div v-if="loading" class="loading-grid">
@@ -68,9 +92,20 @@ import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 
 const auctions = ref([]);
+const categories = ref([]);
 const loading = ref(true);
 const router = useRouter();
 const route = useRoute();
+
+const fetchCategories = async () => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/categories`);
+    categories.value = res.data.data;
+  } catch (err) {
+    console.error('Failed to load categories:', err);
+  }
+};
 
 const fetchAuctions = async () => {
   loading.value = true;
@@ -78,11 +113,13 @@ const fetchAuctions = async () => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const searchVal = route.query.search || '';
     const statusVal = route.query.status || '';
+    const categoryVal = route.query.category || '';
     
     let url = `${apiUrl}/api/auctions`;
     const params = [];
     if (searchVal) params.push(`search=${encodeURIComponent(searchVal)}`);
     if (statusVal) params.push(`status=${encodeURIComponent(statusVal)}`);
+    if (categoryVal) params.push(`category=${encodeURIComponent(categoryVal)}`);
     if (params.length > 0) {
       url += `?${params.join('&')}`;
     }
@@ -96,8 +133,30 @@ const fetchAuctions = async () => {
   }
 };
 
+const selectCategory = (catName) => {
+  const query = { ...route.query };
+  if (catName) {
+    query.category = catName;
+  } else {
+    delete query.category;
+  }
+  router.push({ path: '/auctions', query });
+};
+
 const clearSearch = () => {
-  router.push('/auctions');
+  const query = { ...route.query };
+  delete query.search;
+  router.push({ path: '/auctions', query });
+};
+
+const clearStatus = () => {
+  const query = { ...route.query };
+  delete query.status;
+  router.push({ path: '/auctions', query });
+};
+
+const clearCategory = () => {
+  selectCategory('');
 };
 
 const goToAuction = (id) => {
@@ -108,6 +167,17 @@ const formatCurrency = (value) => {
   return new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(value);
 };
 
+const getCategoryEmoji = (name) => {
+  const norm = name.toLowerCase();
+  if (norm.includes('veiculo') || norm.includes('carro') || norm.includes('moto') || norm.includes('automovel')) return '🚗';
+  if (norm.includes('imovel') || norm.includes('casa') || norm.includes('apartamento') || norm.includes('equipamento')) return '🏠';
+  if (norm.includes('eletronica') || norm.includes('tecnologia') || norm.includes('computador') || norm.includes('telemovel')) return '💻';
+  if (norm.includes('mobiliario') || norm.includes('decoracao') || norm.includes('moveis')) return '🪑';
+  if (norm.includes('maquinaria') || norm.includes('industrial') || norm.includes('fabrica')) return '🏭';
+  if (norm.includes('outro') || norm.includes('geral') || norm.includes('bens')) return '📦';
+  return '🏷️';
+};
+
 // Watch query parameters
 watch(() => route.query.search, () => {
   fetchAuctions();
@@ -115,8 +185,12 @@ watch(() => route.query.search, () => {
 watch(() => route.query.status, () => {
   fetchAuctions();
 });
+watch(() => route.query.category, () => {
+  fetchAuctions();
+});
 
 onMounted(() => {
+  fetchCategories();
   fetchAuctions();
 });
 </script>
@@ -129,6 +203,53 @@ onMounted(() => {
 
 .page-header {
   margin-bottom: 2.5rem;
+}
+
+/* ─── Categories Bar ─── */
+.categories-bar {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem 1.5rem;
+  margin-bottom: 2rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.categories-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 30px;
+  background-color: #ffffff;
+  color: var(--text-secondary);
+  border: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.category-chip:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #d1d5db;
+}
+
+.category-chip.active {
+  background-color: #1800ad;
+  color: #ffffff;
+  border-color: #1800ad;
+  box-shadow: 0 4px 14px rgba(24, 0, 173, 0.3);
+  font-weight: 600;
 }
 
 .active-filters {

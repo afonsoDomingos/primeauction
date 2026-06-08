@@ -198,6 +198,27 @@
               </div>
             </div>
 
+            <div class="form-row">
+              <div class="form-group half">
+                <label class="form-label">Categoria</label>
+                <select v-model="form.category" class="form-input" required>
+                  <option value="" disabled>Selecione uma categoria</option>
+                  <option v-for="cat in categories" :key="cat._id" :value="cat.name">
+                    {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label class="form-label">Nova Categoria (Opcional)</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="text" v-model="newCategoryName" class="form-input" placeholder="Nova categoria..." style="margin-bottom: 0;" />
+                  <button type="button" class="btn btn-secondary" @click="handleAddCategory" :disabled="creatingCategory" style="padding: 0 1rem; height: 42px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; margin-bottom: 0; display: flex; align-items: center; justify-content: center;">
+                    + Adicionar
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="form-label">Imagens do Produto (Capa e Galeria)</label>
               <div class="image-upload-wrapper">
@@ -753,8 +774,13 @@ const form = ref({
   imageUrl: '',
   images: [],
   startingPrice: 0,
-  endTime: ''
+  endTime: '',
+  category: ''
 });
+
+const categories = ref([]);
+const newCategoryName = ref('');
+const creatingCategory = ref(false);
 
 const fileInput = ref(null);
 const uploadingImages = ref(false);
@@ -819,16 +845,40 @@ const formatCurrency = (value) => {
 
 const fetchData = async () => {
   try {
-    const [usersRes, auctionsRes, ticketsRes] = await Promise.all([
+    const [usersRes, auctionsRes, ticketsRes, categoriesRes] = await Promise.all([
       axios.get(`${apiUrl}/api/users`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/auctions`),
-      axios.get(`${apiUrl}/api/support`, { headers: { Authorization: `Bearer ${authStore.token}` } })
+      axios.get(`${apiUrl}/api/support`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
+      axios.get(`${apiUrl}/api/categories`)
     ]);
     users.value = usersRes.data.data;
     auctions.value = auctionsRes.data.data;
     tickets.value = ticketsRes.data.data;
+    categories.value = categoriesRes.data.data;
   } catch (err) {
     console.error('Error fetching admin data:', err);
+  }
+};
+
+const handleAddCategory = async () => {
+  const name = newCategoryName.value.trim();
+  if (!name) return;
+
+  creatingCategory.value = true;
+  try {
+    const res = await axios.post(`${apiUrl}/api/categories`, { name }, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data.success) {
+      categories.value.push(res.data.data);
+      form.value.category = res.data.data.name;
+      newCategoryName.value = '';
+      showAlert('Categoria adicionada e selecionada com sucesso! ✓');
+    }
+  } catch (err) {
+    showAlert('Erro ao adicionar categoria: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    creatingCategory.value = false;
   }
 };
 
@@ -885,7 +935,7 @@ const handleCreate = async () => {
     await axios.post(`${apiUrl}/api/auctions`, form.value, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
-    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, endTime: '' };
+    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, endTime: '', category: '' };
     showAlert('Leilão criado com sucesso! ✓');
     fetchData();
   } catch (err) {

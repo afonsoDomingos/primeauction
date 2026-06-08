@@ -48,6 +48,12 @@ const auctionSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: true
+  },
+  category: {
+    type: String,
+    required: [true, 'Please add a category'],
+    default: 'Outros',
+    trim: true
   }
 }, {
   timestamps: true,

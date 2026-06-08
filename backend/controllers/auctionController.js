@@ -6,11 +6,15 @@ const Bid = require('../models/Bid');
 // @access  Public
 exports.getAuctions = async (req, res) => {
   try {
-    const { search, status } = req.query;
+    const { search, status, category } = req.query;
     let queryObj = {};
 
     if (status) {
       queryObj.status = status;
+    }
+
+    if (category) {
+      queryObj.category = category;
     }
 
     if (search) {

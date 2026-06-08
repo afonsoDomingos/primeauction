@@ -6,7 +6,7 @@
   --text-primary: #171a20;
   --text-secondary: #393c41;
   --text-light: #5c5e62;
-  --btn-primary-bg: #3e6ae1;
+  --btn-primary-bg: #1800ad;
   --btn-primary-text: #ffffff;
   --btn-secondary-bg: #f4f4f4;
   --btn-secondary-text: #393c41;
@@ -100,7 +100,7 @@ header.tesla-nav.scrolled {
 }
 
 .btn-primary:hover {
-  background-color: #3457b2;
+  background-color: #171a20;
 }
 
 .btn-secondary {
@@ -156,7 +156,7 @@ header.tesla-nav.scrolled {
   outline: none;
   border-color: var(--btn-primary-bg);
   background-color: #fff;
-  box-shadow: 0 0 0 3px rgba(62, 106, 225, 0.12);
+  box-shadow: 0 0 0 3px rgba(24, 0, 173, 0.12);
 }
 
 /* Cards */
@@ -278,8 +278,8 @@ header.tesla-nav.scrolled {
   color: #fff;
   border-color: rgba(62,106,225,0.4);
 }
-.toast-item.info .toast-icon { color: #3e6ae1; }
-.toast-item.info .toast-progress-bar { background: #3e6ae1; }
+.toast-item.info .toast-icon { color: #1800ad; }
+.toast-item.info .toast-progress-bar { background: #1800ad; }
 
 .toast-icon {
   flex-shrink: 0;
