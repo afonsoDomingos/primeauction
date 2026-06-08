@@ -6,6 +6,22 @@
 
   <ChatAssistant />
 
+  <!-- Scroll to Top Button -->
+  <Transition name="scroll-top">
+    <button
+      v-if="showScrollTop"
+      id="scroll-top-btn"
+      class="scroll-top-btn"
+      @click="scrollToTop"
+      aria-label="Voltar ao topo"
+      title="Voltar ao topo"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"/>
+      </svg>
+    </button>
+  </Transition>
+
   <footer class="app-footer">
     <div class="footer-content">
       <p>&copy; {{ new Date().getFullYear() }} Prime Auctions. Todos os direitos reservados.</p>
@@ -42,7 +58,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import Navbar from './components/Navbar.vue';
 import ChatAssistant from './components/ChatAssistant.vue';
 import { useAuthStore } from './stores/authStore';
@@ -51,10 +67,25 @@ import { useToastStore } from './stores/toastStore';
 const authStore = useAuthStore();
 const toastStore = useToastStore();
 
+const showScrollTop = ref(false);
+
+const handleScroll = () => {
+  showScrollTop.value = window.scrollY > 300;
+};
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 onMounted(() => {
   if (authStore.token) {
     authStore.fetchUser();
   }
+  window.addEventListener('scroll', handleScroll, { passive: true });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
 });
 </script>
 
@@ -112,5 +143,44 @@ main {
     text-align: center;
   }
 }
-</style>
 
+/* ─── Scroll to Top Button ─── */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.5rem;
+  z-index: 998;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3e6ae1 0%, #1a56db 100%);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(62, 106, 225, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.scroll-top-btn:hover {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 8px 24px rgba(62, 106, 225, 0.55);
+}
+
+.scroll-top-btn:active {
+  transform: scale(0.95);
+}
+
+/* Transition animation */
+.scroll-top-enter-active,
+.scroll-top-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.scroll-top-enter-from,
+.scroll-top-leave-to {
+  opacity: 0;
+  transform: translateY(16px) scale(0.85);
+}
+</style>
