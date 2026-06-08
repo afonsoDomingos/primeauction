@@ -119,63 +119,125 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- Profile Completion Modal -->
+  <!-- Profile Completion Modal (Multi-Step Wizard) -->
   <Transition name="modal-fade">
     <div v-if="showProfileModal" class="custom-modal-overlay" @click.self="closeProfileModal">
-      <div class="custom-modal-card animate-scale-in">
+      <div class="custom-modal-card wizard-card animate-scale-in">
+
+        <!-- Header -->
         <div class="modal-header-row">
           <span class="modal-title-icon">📋</span>
           <h4>Completar Perfil</h4>
+          <button type="button" class="wizard-close-btn" @click="closeProfileModal" aria-label="Fechar">✕</button>
         </div>
-        <p class="modal-subtitle">Preencha estes dados obrigatórios para poder licitar:</p>
-        
-        <form @submit.prevent="submitProfileDetails" class="modal-form">
-          <div class="form-group">
-            <label class="form-label" for="modal-name">Nome Completo</label>
-            <input type="text" id="modal-name" v-model="profileForm.name" class="form-input" required />
-          </div>
 
-          <div class="form-group">
-            <label class="form-label" for="modal-phone">Contacto Telefónico</label>
-            <input type="text" id="modal-phone" v-model="profileForm.phone" class="form-input" placeholder="Ex: +258 84 123 4567" required />
-          </div>
+        <!-- Step Dots -->
+        <div class="wizard-steps">
+          <div v-for="n in 4" :key="n" class="wizard-dot" :class="{ active: profileStep === n, done: profileStep > n }"></div>
+        </div>
+        <p class="wizard-step-label">Passo {{ profileStep }} de 4</p>
 
-          <div class="form-group">
-            <label class="form-label" for="modal-province">Província</label>
-            <select id="modal-province" v-model="profileForm.province" class="form-input" required>
-              <option value="" disabled>Seleccione a sua província</option>
-              <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
-            </select>
-          </div>
+        <!-- Steps Content -->
+        <div class="wizard-body">
 
-          <div class="form-group">
-            <label class="form-label">Sexo</label>
-            <div class="radio-group">
-              <label class="radio-label">
-                <input type="radio" v-model="profileForm.gender" value="Masculino" required /> Masculino
-              </label>
-              <label class="radio-label">
-                <input type="radio" v-model="profileForm.gender" value="Feminino" required /> Feminino
-              </label>
-              <label class="radio-label">
-                <input type="radio" v-model="profileForm.gender" value="Outro" required /> Outro
-              </label>
+          <!-- Step 1: Nome -->
+          <Transition name="step-slide" mode="out-in">
+            <div v-if="profileStep === 1" key="step1">
+              <label class="form-label">👤 Nome Completo</label>
+              <input
+                type="text"
+                v-model="profileForm.name"
+                class="form-input wizard-input"
+                placeholder="Ex: João Silva"
+                autofocus
+                @keyup.enter="nextStep"
+              />
             </div>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label" for="modal-age">Idade</label>
-            <input type="number" id="modal-age" v-model="profileForm.age" class="form-input" min="1" max="120" required />
-          </div>
+            <!-- Step 2: Telefone -->
+            <div v-else-if="profileStep === 2" key="step2">
+              <label class="form-label">📞 Contacto Telefónico</label>
+              <input
+                type="text"
+                v-model="profileForm.phone"
+                class="form-input wizard-input"
+                placeholder="Ex: +258 84 123 4567"
+                @keyup.enter="nextStep"
+              />
+            </div>
 
-          <div class="modal-footer">
-            <button type="button" @click="closeProfileModal" class="btn btn-secondary btn-pill btn-sm">Cancelar</button>
-            <button type="submit" class="btn btn-primary btn-pill btn-sm" :disabled="submittingProfile">
-              <span v-if="submittingProfile" class="btn-spinner"></span>
-              {{ submittingProfile ? 'A processar...' : 'Confirmar & Licitar' }}
-            </button>
-          </div>
-        </form>
+            <!-- Step 3: Província -->
+            <div v-else-if="profileStep === 3" key="step3">
+              <label class="form-label">📍 Província</label>
+              <select v-model="profileForm.province" class="form-input wizard-input">
+                <option value="" disabled>Seleccione a sua província</option>
+                <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
+              </select>
+            </div>
+
+            <!-- Step 4: Sexo + Idade -->
+            <div v-else-if="profileStep === 4" key="step4">
+              <label class="form-label">⚧ Sexo</label>
+              <div class="wizard-gender-group">
+                <label
+                  v-for="g in ['Masculino', 'Feminino', 'Outro']"
+                  :key="g"
+                  class="wizard-gender-btn"
+                  :class="{ selected: profileForm.gender === g }"
+                >
+                  <input type="radio" v-model="profileForm.gender" :value="g" style="display:none" />
+                  {{ g === 'Masculino' ? '♂ Masculino' : g === 'Feminino' ? '♀ Feminino' : '⊕ Outro' }}
+                </label>
+              </div>
+              <label class="form-label" style="margin-top:1.25rem;">🎂 Idade</label>
+              <input
+                type="number"
+                v-model="profileForm.age"
+                class="form-input wizard-input"
+                min="1"
+                max="120"
+                placeholder="Ex: 28"
+              />
+            </div>
+          </Transition>
+
+          <!-- Error message -->
+          <p v-if="wizardError" class="wizard-error">{{ wizardError }}</p>
+        </div>
+
+        <!-- Footer Navigation -->
+        <div class="wizard-footer">
+          <button
+            v-if="profileStep > 1"
+            type="button"
+            class="btn btn-secondary btn-pill btn-sm"
+            @click="prevStep"
+          >← Anterior</button>
+          <button
+            v-else
+            type="button"
+            class="btn btn-secondary btn-pill btn-sm"
+            @click="closeProfileModal"
+          >Cancelar</button>
+
+          <button
+            v-if="profileStep < 4"
+            type="button"
+            class="btn btn-primary btn-pill btn-sm"
+            @click="nextStep"
+          >Próximo →</button>
+          <button
+            v-else
+            type="button"
+            class="btn btn-primary btn-pill btn-sm"
+            :disabled="submittingProfile"
+            @click="submitProfileDetails"
+          >
+            <span v-if="submittingProfile" class="btn-spinner"></span>
+            {{ submittingProfile ? 'A processar...' : '✓ Confirmar & Licitar' }}
+          </button>
+        </div>
+
       </div>
     </div>
   </Transition>
@@ -200,6 +262,8 @@ let socket = null;
 
 const showProfileModal = ref(false);
 const submittingProfile = ref(false);
+const profileStep = ref(1);
+const wizardError = ref('');
 const provinces = [
   'Maputo Cidade', 'Maputo Província', 'Gaza', 'Inhambane', 'Sofala',
   'Manica', 'Tete', 'Zambézia', 'Nampula', 'Cabo Delgado', 'Niassa'
@@ -211,6 +275,28 @@ const profileForm = ref({
   gender: '',
   age: null
 });
+
+const nextStep = () => {
+  wizardError.value = '';
+  if (profileStep.value === 1 && !profileForm.value.name.trim()) {
+    wizardError.value = 'Por favor, preencha o seu nome completo.';
+    return;
+  }
+  if (profileStep.value === 2 && !profileForm.value.phone.trim()) {
+    wizardError.value = 'Por favor, preencha o contacto telefónico.';
+    return;
+  }
+  if (profileStep.value === 3 && !profileForm.value.province) {
+    wizardError.value = 'Por favor, seleccione a sua província.';
+    return;
+  }
+  profileStep.value++;
+};
+
+const prevStep = () => {
+  wizardError.value = '';
+  profileStep.value--;
+};
 
 const isEnded = computed(() => {
   if (!auction.value) return true;
@@ -239,9 +325,20 @@ const fetchAuctionData = async () => {
 
 const closeProfileModal = () => {
   showProfileModal.value = false;
+  profileStep.value = 1;
+  wizardError.value = '';
 };
 
 const submitProfileDetails = async () => {
+  wizardError.value = '';
+  if (!profileForm.value.gender) {
+    wizardError.value = 'Por favor, seleccione o seu sexo.';
+    return;
+  }
+  if (!profileForm.value.age) {
+    wizardError.value = 'Por favor, indique a sua idade.';
+    return;
+  }
   submittingProfile.value = true;
   try {
     const res = await authStore.updateProfile({
@@ -255,6 +352,7 @@ const submitProfileDetails = async () => {
     if (res.success) {
       toastStore.success('Perfil actualizado com sucesso! ✓');
       showProfileModal.value = false;
+      profileStep.value = 1;
       await executePlaceBid();
     } else {
       toastStore.error(res.error || 'Erro ao actualizar o perfil.');
@@ -850,8 +948,8 @@ onUnmounted(() => {
   background: white;
   border-radius: 16px;
   width: 100%;
-  max-width: 480px;
-  padding: 2.25rem 2rem;
+  max-width: 400px;
+  padding: 1.75rem 1.75rem 1.5rem;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
   position: relative;
 }
@@ -938,5 +1036,153 @@ onUnmounted(() => {
 @keyframes scaleIn {
   from { transform: scale(0.9); opacity: 0; }
   to   { transform: scale(1); opacity: 1; }
+}
+
+/* ─── Wizard Card ─── */
+.wizard-card {
+  max-width: 380px;
+}
+
+.modal-header-row {
+  position: relative;
+}
+
+.wizard-close-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.2s;
+  margin-left: auto;
+}
+.wizard-close-btn:hover {
+  color: var(--text-primary);
+}
+
+.wizard-steps {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 1rem 0 0.25rem;
+}
+
+.wizard-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  transition: all 0.3s ease;
+}
+.wizard-dot.active {
+  background-color: var(--btn-primary-bg, #1a56db);
+  width: 22px;
+  border-radius: 4px;
+}
+.wizard-dot.done {
+  background-color: #10b981;
+}
+
+.wizard-step-label {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.wizard-body {
+  min-height: 110px;
+  margin-bottom: 1.25rem;
+}
+
+.wizard-input {
+  margin-bottom: 0;
+}
+
+.wizard-gender-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wizard-gender-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.6rem 0.5rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.wizard-gender-btn:hover {
+  border-color: var(--btn-primary-bg, #1a56db);
+  color: var(--btn-primary-bg, #1a56db);
+}
+.wizard-gender-btn.selected {
+  border-color: var(--btn-primary-bg, #1a56db);
+  background-color: rgba(26, 86, 219, 0.07);
+  color: var(--btn-primary-bg, #1a56db);
+  font-weight: 600;
+}
+
+.wizard-error {
+  font-size: 0.8rem;
+  color: #ef4444;
+  margin-top: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.wizard-error::before {
+  content: '!';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.wizard-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 1rem;
+}
+
+/* Step transition animation */
+.step-slide-enter-active,
+.step-slide-leave-active {
+  transition: all 0.2s ease;
+}
+.step-slide-enter-from {
+  opacity: 0;
+  transform: translateX(12px);
+}
+.step-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-12px);
 }
 </style>
