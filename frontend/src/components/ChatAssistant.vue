@@ -157,9 +157,10 @@ const messagesArea = ref(null);
 
 const messages = ref([]);
 const suggestionChips = [
-  { label: '🚗 Como licitar?', value: 'Como posso licitar num veículo?' },
+  { label: '🔨 Como licitar?', value: 'Como posso licitar num produto?' },
+  { label: '📦 Que produtos existem?', value: 'Que categorias de produtos existem nos leilões?' },
   { label: '💰 Formas de pagamento?', value: 'Quais são as formas de pagamento disponíveis?' },
-  { label: '📍 Levantamentos?', value: 'Onde são feitos os levantamentos dos veículos?' },
+  { label: '📍 Levantamento de produto?', value: 'Como funciona o levantamento do produto depois de ganhar o leilão?' },
   { label: '🤝 Suporte Humano', value: 'Falar com suporte humano' }
 ];
 
@@ -237,19 +238,23 @@ const generateBotResponse = (userText) => {
   let botText = '';
   let isForm = false;
 
-  if (text.includes('licitar') || text.includes('licitação') || text.includes('lance') || text.includes('como funciona')) {
-    botText = 'Para licitar num veículo, primeiro precisa de <strong>criar uma conta</strong> e iniciar sessão. Depois, aceda ao leilão do veículo pretendido, introduza um valor superior ao "Lance Atual" e clique no botão <strong>Licitar</strong>. Se for superado, receberá um alerta na plataforma.';
-  } else if (text.includes('pagamento') || text.includes('pagar') || text.includes('banco') || text.includes('conta')) {
-    botText = 'Aceitamos pagamento por <strong>transferência bancária direta (MZN)</strong> ou depósito. Trabalhamos com o <strong>BCI</strong>, <strong>Millennium bim</strong> e <strong>Standard Bank</strong>. Os dados detalhados da conta ser-lhe-ão enviados por e-mail assim que vencer qualquer leilão.';
-  } else if (text.includes('levantar') || text.includes('levantamento') || text.includes('recolha') || text.includes('instalações')) {
-    botText = 'Os levantamentos dos veículos são feitos nas nossas instalações centrais em <strong>Maputo</strong> após a confirmação total do pagamento. A nossa equipa de operações entrará em contacto consigo em até 24h para agendar a data e hora de recolha.';
-  } else if (text.includes('humano') || text.includes('assistente') || text.includes('falar') || text.includes('contacto') || text.includes('mensagem')) {
-    botText = 'Perfeito! Deixe os seus dados de contacto e mensagem no formulário abaixo, e um agente de apoio ao cliente entrará em contacto muito brevemente.';
+  if (text.includes('licitar') || text.includes('licitação') || text.includes('lance') || text.includes('como funciona') || text.includes('como posso')) {
+    botText = 'Para licitar num produto, primeiro precisa de <strong>criar uma conta gratuita</strong> e iniciar sessão. Depois, aceda ao leilão pretendido, introduza um valor superior ao "Lance Atual" e clique em <strong>Licitar</strong>. Se for superado por outro utilizador, receberá um alerta na plataforma para relicitar.';
+  } else if (text.includes('categorias') || text.includes('produto') || text.includes('que produtos') || text.includes('o que vendem') || text.includes('tipos')) {
+    botText = 'Na Prime Auction leiloamos produtos de <strong>diversas categorias</strong>, incluindo:<br/>• 🚗 <strong>Veículos</strong> (automóveis, motos, comerciais)<br/>• 🏠 <strong>Imóveis e Equipamentos</strong><br/>• 💻 <strong>Electrónica e Tecnologia</strong><br/>• 🪑 <strong>Mobiliário e Decoração</strong><br/>• 🏭 <strong>Maquinaria Industrial</strong><br/>• 📦 <strong>Outros bens e artigos</strong><br/><br/>Consulte a página de <a href="/auctions" style="color:#1a56db">Leilões</a> para ver todos os produtos disponíveis.';
+  } else if (text.includes('pagamento') || text.includes('pagar') || text.includes('banco') || text.includes('conta') || text.includes('transferência')) {
+    botText = 'Aceitamos pagamento por <strong>transferência bancária direta (MZN)</strong> ou depósito. Trabalhamos com o <strong>BCI</strong>, <strong>Millennium bim</strong> e <strong>Standard Bank</strong>. Os dados bancários detalhados ser-lhe-ão enviados por e-mail assim que ganhar qualquer leilão.';
+  } else if (text.includes('levantar') || text.includes('levantamento') || text.includes('recolha') || text.includes('instalações') || text.includes('produto ganho') || text.includes('depois de ganhar')) {
+    botText = 'Após a confirmação do pagamento, a nossa equipa entra em contacto consigo em até <strong>24 horas</strong> para agendar a entrega ou recolha do produto nas nossas instalações em <strong>Maputo</strong>. Para produtos volumosos (ex: veículos, maquinaria), poderá ser necessário deslocação às nossas instalações.';
+  } else if (text.includes('humano') || text.includes('assistente') || text.includes('falar') || text.includes('contacto') || text.includes('mensagem') || text.includes('ajuda')) {
+    botText = 'Perfeito! Deixe os seus dados de contacto e a sua mensagem no formulário abaixo, e um agente de apoio ao cliente entrará em contacto muito brevemente.';
     isForm = true;
-  } else if (text.includes('ola') || text.includes('olá') || text.includes('bom dia') || text.includes('boa tarde') || text.includes('boa noite')) {
-    botText = 'Olá! Sou o PrimeAssist, o seu assistente virtual. Como o posso ajudar hoje? Pode escolher um dos tópicos rápidos ou escrever a sua dúvida.';
+  } else if (text.includes('ola') || text.includes('olá') || text.includes('bom dia') || text.includes('boa tarde') || text.includes('boa noite') || text.includes('hello') || text.includes('hi')) {
+    botText = 'Olá! Sou o <strong>PrimeAssist</strong>, o assistente virtual da Prime Auction. Leiloamos produtos de <strong>diversas categorias</strong> — veículos, electrónica, imóveis, maquinaria e muito mais! Como o posso ajudar hoje?';
+  } else if (text.includes('regist') || text.includes('criar conta') || text.includes('cadastr')) {
+    botText = 'Para se registar na Prime Auction, clique em <strong>"Criar Conta"</strong> no menu de navegação. O registo é gratuito e permite-lhe licitar em todos os nossos leilões de diversas categorias de produtos.';
   } else {
-    botText = 'Não consegui compreender a sua questão. Quer falar com um assistente humano ou prefere ver as opções frequentes?';
+    botText = 'Não consegui compreender a sua questão. Quer falar com um assistente humano ou prefere ver as perguntas frequentes?';
   }
 
   const botMsg = {
@@ -329,7 +334,7 @@ onMounted(() => {
     messages.value.push({
       id: 'bot-init',
       sender: 'bot',
-      text: 'Olá! Sou o <strong>PrimeAssist</strong>, o assistente virtual da Prime Auction. Como posso ajudá-lo hoje?',
+      text: 'Olá! Sou o <strong>PrimeAssist</strong> 🤖, o assistente virtual da <strong>Prime Auction</strong>.<br/><br/>Leiloamos produtos de <strong>múltiplas categorias</strong>: veículos, electrónica, imóveis, maquinaria e muito mais!<br/><br/>Como posso ajudá-lo hoje?',
       timestamp: new Date()
     });
     saveHistory();
