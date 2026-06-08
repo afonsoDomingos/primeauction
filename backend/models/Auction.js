@@ -60,4 +60,11 @@ auctionSchema.virtual('isEnded').get(function() {
   return Date.now() > this.endTime || this.status === 'finished';
 });
 
+// Virtual for bids count and list
+auctionSchema.virtual('bids', {
+  ref: 'Bid',
+  localField: '_id',
+  foreignField: 'auction'
+});
+
 module.exports = mongoose.model('Auction', auctionSchema);

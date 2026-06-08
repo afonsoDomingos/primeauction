@@ -6,7 +6,21 @@ const Bid = require('../models/Bid');
 // @access  Public
 exports.getAuctions = async (req, res) => {
   try {
-    const auctions = await Auction.find().sort('-createdAt');
+    const { search, status } = req.query;
+    let queryObj = {};
+
+    if (status) {
+      queryObj.status = status;
+    }
+
+    if (search) {
+      queryObj.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const auctions = await Auction.find(queryObj).sort('-createdAt').populate('bids');
     res.status(200).json({ success: true, count: auctions.length, data: auctions });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

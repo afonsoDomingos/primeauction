@@ -2,8 +2,22 @@
   <div class="auctions-container">
     <div class="container animate-fade-in" style="padding-top: 100px; padding-bottom: 60px;">
       <div class="page-header">
-        <h2 class="page-title">Leilões Activos</h2>
+        <h2 class="page-title">
+          {{ route.query.search ? `Resultados para: "${route.query.search}"` : 'Leilões Activos' }}
+        </h2>
         <p class="page-subtitle">Encontre os melhores leilões e faça o seu lance agora</p>
+        
+        <!-- Filtros Activos -->
+        <div v-if="route.query.search || route.query.status" class="active-filters">
+          <span v-if="route.query.search" class="filter-badge">
+            Pesquisa: <strong>{{ route.query.search }}</strong>
+            <button @click="clearSearch" class="clear-btn" title="Limpar pesquisa">&times;</button>
+          </span>
+          <span v-if="route.query.status" class="filter-badge">
+            Estado: <strong>{{ route.query.status === 'active' ? 'Ativo' : 'Terminado' }}</strong>
+            <button @click="clearSearch" class="clear-btn" title="Limpar estado">&times;</button>
+          </span>
+        </div>
       </div>
 
       <div v-if="loading" class="loading-grid">
@@ -49,24 +63,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const auctions = ref([]);
 const loading = ref(true);
 const router = useRouter();
+const route = useRoute();
 
 const fetchAuctions = async () => {
+  loading.value = true;
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const res = await axios.get(`${apiUrl}/api/auctions`);
+    const searchVal = route.query.search || '';
+    const statusVal = route.query.status || '';
+    
+    let url = `${apiUrl}/api/auctions`;
+    const params = [];
+    if (searchVal) params.push(`search=${encodeURIComponent(searchVal)}`);
+    if (statusVal) params.push(`status=${encodeURIComponent(statusVal)}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+
+    const res = await axios.get(url);
     auctions.value = res.data.data;
   } catch (err) {
     console.error(err);
   } finally {
     loading.value = false;
   }
+};
+
+const clearSearch = () => {
+  router.push('/auctions');
 };
 
 const goToAuction = (id) => {
@@ -76,6 +107,14 @@ const goToAuction = (id) => {
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(value);
 };
+
+// Watch query parameters
+watch(() => route.query.search, () => {
+  fetchAuctions();
+});
+watch(() => route.query.status, () => {
+  fetchAuctions();
+});
 
 onMounted(() => {
   fetchAuctions();
@@ -90,6 +129,48 @@ onMounted(() => {
 
 .page-header {
   margin-bottom: 2.5rem;
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--btn-secondary-bg);
+  color: var(--text-secondary);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  border: 1px solid #e5e7eb;
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-light);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background-color: rgba(0,0,0,0.1);
+  color: var(--text-primary);
 }
 
 .page-title {
