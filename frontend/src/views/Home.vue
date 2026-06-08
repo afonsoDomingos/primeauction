@@ -328,7 +328,15 @@ const defaultPartners = [
 ];
 
 const partnersList = computed(() => {
-  return partners.value.length > 0 ? partners.value : defaultPartners;
+  const list = partners.value.length > 0 ? partners.value : defaultPartners;
+  return list.map(p => {
+    if (p.logoUrl) return p;
+    const match = defaultPartners.find(dp => dp.name.toLowerCase() === p.name.toLowerCase());
+    if (match) {
+      return { ...match, ...p };
+    }
+    return p;
+  });
 });
 
 // Search state

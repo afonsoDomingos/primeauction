@@ -559,6 +559,13 @@ const toastStore = useToastStore();
 const users = ref([]);
 
 // ── Partners ──
+const defaultPartners = [
+  { name: 'BCI',            description: 'Apoio Financeiro', logoUrl: '' },
+  { name: 'Millennium bim', description: '',                  logoUrl: '' },
+  { name: 'Standard Bank',  description: '',                  logoUrl: '' },
+  { name: 'Santam',         description: 'Seguros',           logoUrl: '' },
+  { name: 'MFC',            description: 'Financiamento',     logoUrl: '' }
+];
 const partnersForm = ref([]);
 const savingPartners = ref(false);
 const partnerFileInputs = ref([]);
@@ -765,14 +772,18 @@ onMounted(async () => {
     // No saved settings yet, leave defaults
   }
 
-  // Load partners settings
+  // Load partners settings — fall back to defaults if none saved yet
   try {
     const resPartners = await axios.get(`${apiUrl}/api/settings/partners`);
-    if (resPartners.data && resPartners.data.success && Array.isArray(resPartners.data.data)) {
+    if (resPartners.data && resPartners.data.success && Array.isArray(resPartners.data.data) && resPartners.data.data.length > 0) {
       partnersForm.value = resPartners.data.data;
+    } else {
+      // No partners in DB yet — pre-load defaults so admin can see and edit them
+      partnersForm.value = defaultPartners.map(p => ({ ...p }));
     }
   } catch (err) {
-    // No saved partners yet, leave empty list
+    // API error (e.g. 404) — pre-load defaults
+    partnersForm.value = defaultPartners.map(p => ({ ...p }));
   }
 
   // Setup preview cycling interval
