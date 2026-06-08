@@ -62,6 +62,15 @@
               Administradores não podem participar nos leilões.
             </div>
             <form v-else @submit.prevent="placeBid" class="bid-form">
+              <!-- Smart bid incentive message -->
+              <div v-if="bids.length > 0" class="bid-incentive-msg" :class="{ leader: isLeader }">
+                <span v-if="isLeader">🎉 Você é o licitante mais alto de momento! (Líder)</span>
+                <span v-else>💡 Dica: Licite pelo menos <strong>{{ formatCurrency(suggestedBidAmount) }}</strong> para assumir a liderança!</span>
+              </div>
+              <div v-else class="bid-incentive-msg">
+                <span>💡 Dica: Seja o primeiro a licitar! Comece com o valor mínimo de <strong>{{ formatCurrency(auction.currentPrice + 1) }}</strong>.</span>
+              </div>
+
               <div class="input-with-button">
                 <span class="currency-prefix">MZN</span>
                 <input 
@@ -72,6 +81,22 @@
                   required 
                 />
                 <button type="submit" class="btn btn-primary btn-pill bid-submit">Lance!</button>
+              </div>
+
+              <!-- Quick bid buttons -->
+              <div class="quick-bid-suggestions">
+                <span class="suggestion-label">Sugestões de incremento:</span>
+                <div class="suggestion-btns">
+                  <button 
+                    type="button" 
+                    v-for="inc in suggestedIncrements" 
+                    :key="inc" 
+                    class="btn-suggestion"
+                    @click="setBidIncrement(inc)"
+                  >
+                    +{{ formatNumber(inc) }}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -304,7 +329,46 @@ const isEnded = computed(() => {
 });
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(value);
+  if (value === undefined || value === null) return '0,00 MZN';
+  const formatted = new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  return `${formatted} MZN`;
+};
+
+// Smart Bidding Logic
+const isLeader = computed(() => {
+  if (!bids.value.length || !authStore.user) return false;
+  const topBidderId = bids.value[0].user?._id || bids.value[0].user?.id;
+  const currentUserId = authStore.user?.id || authStore.user?._id;
+  return topBidderId === currentUserId;
+});
+
+const minIncrement = computed(() => {
+  if (!auction.value) return 100;
+  const price = auction.value.currentPrice;
+  if (price < 5000) return 100;
+  if (price < 20000) return 500;
+  if (price < 100000) return 1000;
+  return 5000;
+});
+
+const suggestedBidAmount = computed(() => {
+  if (!auction.value) return 0;
+  return auction.value.currentPrice + minIncrement.value;
+});
+
+const suggestedIncrements = computed(() => {
+  const inc = minIncrement.value;
+  return [inc, inc * 2, inc * 5];
+});
+
+const formatNumber = (val) => {
+  return new Intl.NumberFormat('pt-MZ').format(val);
+};
+
+const setBidIncrement = (increment) => {
+  if (auction.value) {
+    bidAmount.value = auction.value.currentPrice + increment;
+  }
 };
 
 const fetchAuctionData = async () => {
@@ -316,7 +380,7 @@ const fetchAuctionData = async () => {
     ]);
     auction.value = auctionRes.data.data;
     bids.value = bidsRes.data.data;
-    bidAmount.value = auction.value.currentPrice + 100;
+    bidAmount.value = suggestedBidAmount.value;
     activeImage.value = auction.value.imageUrl;
   } catch (err) {
     console.error(err);
@@ -390,7 +454,7 @@ const executePlaceBid = async () => {
       { amount: bidVal },
       { headers: { Authorization: `Bearer ${authStore.token}` } }
     );
-    toastStore.success(`Lance de ${new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(bidVal)} registado! ✓`);
+    toastStore.success(`Lance de ${formatCurrency(bidVal)} registado! ✓`);
   } catch (err) {
     toastStore.error(err.response?.data?.error || 'Erro ao registar lance');
   }
@@ -406,7 +470,7 @@ onMounted(() => {
     if (auction.value) {
       auction.value.currentPrice = data.currentPrice;
       if (bidAmount.value <= data.currentPrice) {
-        bidAmount.value = data.currentPrice + 100;
+        bidAmount.value = data.currentPrice + minIncrement.value;
       }
     }
     bids.value.unshift(data.bid);
@@ -1184,5 +1248,73 @@ onUnmounted(() => {
 .step-slide-leave-to {
   opacity: 0;
   transform: translateX(-12px);
+}
+
+/* ─── Smart Bidding Incentive & Quick Bids ─── */
+.bid-incentive-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(26, 86, 219, 0.06);
+  color: #1a56db;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  border: 1px solid rgba(26, 86, 219, 0.15);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.bid-incentive-msg.leader {
+  background-color: rgba(16, 185, 129, 0.08);
+  color: #065f46;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.quick-bid-suggestions {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.suggestion-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.suggestion-btns {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-suggestion {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  color: var(--text-secondary);
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.btn-suggestion:hover {
+  border-color: var(--btn-primary-bg, #1a56db);
+  color: var(--btn-primary-bg, #1a56db);
+  background-color: rgba(26, 86, 219, 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(26, 86, 219, 0.08);
+}
+
+.btn-suggestion:active {
+  transform: translateY(0);
 }
 </style>

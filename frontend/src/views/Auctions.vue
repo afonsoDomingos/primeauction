@@ -164,7 +164,9 @@ const goToAuction = (id) => {
 };
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('pt-MZ', { style: 'currency', currency: 'MZN' }).format(value);
+  if (value === undefined || value === null) return '0,00 MZN';
+  const formatted = new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  return `${formatted} MZN`;
 };
 
 const getCategoryEmoji = (name) => {
