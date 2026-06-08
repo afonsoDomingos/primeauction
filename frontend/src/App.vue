@@ -148,7 +148,7 @@ main {
 .scroll-top-btn {
   position: fixed;
   bottom: 5.5rem;
-  right: 1.5rem;
+  right: 2rem;
   z-index: 998;
   width: 46px;
   height: 46px;

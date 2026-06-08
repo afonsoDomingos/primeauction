@@ -285,6 +285,32 @@
       </div>
     </section>
 
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+      <div class="newsletter-container">
+        <div class="newsletter-content">
+          <h2 class="newsletter-title">Fique por dentro das novidades</h2>
+          <p class="newsletter-subtitle">Subscreva a nossa newsletter para receber alertas de novos leilões e ofertas exclusivas diretamente no seu e-mail.</p>
+        </div>
+        <form @submit.prevent="handleNewsletterSubscribe" class="newsletter-form">
+          <div class="newsletter-input-group">
+            <input 
+              type="email" 
+              v-model="newsletterEmail" 
+              placeholder="Digite o seu melhor e-mail..." 
+              class="newsletter-input"
+              required
+              :disabled="subscribingNewsletter"
+            />
+            <button type="submit" class="btn btn-newsletter-submit" :disabled="subscribingNewsletter">
+              <span v-if="subscribingNewsletter" class="spinner-inline"></span>
+              {{ subscribingNewsletter ? 'A processar...' : 'Subscrever' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
     <!-- Features Section (Porquê escolher) -->
     <section class="features-section" id="features">
       <div class="container">
@@ -315,8 +341,34 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useToastStore } from '../stores/toastStore';
 
 const router = useRouter();
+const toastStore = useToastStore();
+
+const newsletterEmail = ref('');
+const subscribingNewsletter = ref(false);
+
+const handleNewsletterSubscribe = async () => {
+  if (!newsletterEmail.value.trim()) return;
+  subscribingNewsletter.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(`${apiUrl}/api/newsletter/subscribe`, {
+      email: newsletterEmail.value.trim()
+    });
+    if (res.data && res.data.success) {
+      toastStore.add('Subscrição efetuada com sucesso! Obrigado.', 'success');
+      newsletterEmail.value = '';
+    }
+  } catch (err) {
+    console.error('Failed to subscribe newsletter:', err);
+    const msg = err.response?.data?.error || 'Ocorreu um erro ao efetuar a subscrição. Por favor, tente novamente.';
+    toastStore.add(msg, 'error');
+  } finally {
+    subscribingNewsletter.value = false;
+  }
+};
 
 // Homepage customizable settings
 const heroTitle = ref('Prime Auctions');
@@ -1474,6 +1526,132 @@ onUnmounted(() => {
   .hero-btn {
     width: 100%;
     max-width: 100%;
+  }
+}
+
+/* ─── Newsletter Section ─── */
+.newsletter-section {
+  padding: clamp(60px, 8vw, 90px) 1.5rem;
+  background: linear-gradient(135deg, #171a20 0%, #1a56db 100%);
+  color: white;
+  text-align: center;
+}
+
+.newsletter-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.newsletter-title {
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.newsletter-subtitle {
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.newsletter-form {
+  width: 100%;
+  max-width: 600px;
+}
+
+.newsletter-input-group {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  padding: 6px;
+  transition: focus-within 0.3s ease, border-color 0.3s ease;
+}
+
+.newsletter-input-group:focus-within {
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.newsletter-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-size: 0.95rem;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-newsletter-submit {
+  background-color: white;
+  color: #1a56db;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-newsletter-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
+  background-color: #f3f4f6;
+}
+
+.btn-newsletter-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .newsletter-input-group {
+    flex-direction: column;
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: 0.75rem;
+    border-radius: 0;
+  }
+  
+  .newsletter-input {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    padding: 0.85rem 1.5rem;
+    width: 100%;
+  }
+
+  .newsletter-input-group:focus-within .newsletter-input {
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .btn-newsletter-submit {
+    border-radius: 50px;
+    padding: 0.85rem 2rem;
+    width: 100%;
   }
 }
 </style>

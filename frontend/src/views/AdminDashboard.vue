@@ -618,6 +618,76 @@
           </div>
         </div>
 
+        <!-- ── Subscritores da Newsletter ── -->
+        <div class="card admin-card">
+          <div class="card-header-row">
+            <span class="card-icon">✉</span>
+            <h3 class="section-title">Subscritores da Newsletter</h3>
+            <span class="record-count">{{ activeSubscribersCount }} / {{ subscribers.length }}</span>
+          </div>
+          <p class="settings-hint">Gerencie a lista de e-mails subscritos na newsletter para campanhas e comunicações.</p>
+
+          <!-- Search Filter -->
+          <div style="margin-bottom: 1.25rem; max-width: 350px;">
+            <input 
+              type="text" 
+              v-model="subscriberSearchQuery" 
+              class="form-input" 
+              placeholder="Pesquisar subscritor por e-mail..." 
+              style="margin-bottom: 0;"
+            />
+          </div>
+
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>E-mail</th>
+                  <th>Data de Subscrição</th>
+                  <th>Estado</th>
+                  <th>Acções</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="filteredSubscribers.length === 0">
+                  <td colspan="4" class="empty-row">Nenhum subscritor encontrado.</td>
+                </tr>
+                <tr v-for="sub in filteredSubscribers" :key="sub._id">
+                  <td style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">
+                    📧 {{ sub.email }}
+                  </td>
+                  <td style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap;">
+                    {{ formatTicketDate(sub.createdAt) }}
+                  </td>
+                  <td>
+                    <span :class="['badge', sub.active ? 'badge-active' : 'badge-blocked']" style="font-size: 0.7rem;">
+                      {{ sub.active ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-btns">
+                      <button
+                        @click="toggleSubscriber(sub._id)"
+                        :class="['btn', 'btn-sm', sub.active ? 'btn-secondary' : 'btn-primary']"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                      >
+                        {{ sub.active ? 'Desactivar' : 'Activar' }}
+                      </button>
+                      <button
+                        @click="confirmDeleteSubscriber(sub._id)"
+                        class="btn btn-sm btn-danger"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                      >
+                        Apagar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
     </div>
 
     <!-- Custom Confirmation Modal -->
@@ -782,6 +852,9 @@ const categories = ref([]);
 const newCategoryName = ref('');
 const creatingCategory = ref(false);
 
+const subscribers = ref([]);
+const subscriberSearchQuery = ref('');
+
 const fileInput = ref(null);
 const uploadingImages = ref(false);
 
@@ -845,19 +918,72 @@ const formatCurrency = (value) => {
 
 const fetchData = async () => {
   try {
-    const [usersRes, auctionsRes, ticketsRes, categoriesRes] = await Promise.all([
+    const [usersRes, auctionsRes, ticketsRes, categoriesRes, subscribersRes] = await Promise.all([
       axios.get(`${apiUrl}/api/users`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/auctions`),
       axios.get(`${apiUrl}/api/support`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
-      axios.get(`${apiUrl}/api/categories`)
+      axios.get(`${apiUrl}/api/categories`),
+      axios.get(`${apiUrl}/api/newsletter/subscribers`, { headers: { Authorization: `Bearer ${authStore.token}` } })
     ]);
     users.value = usersRes.data.data;
     auctions.value = auctionsRes.data.data;
     tickets.value = ticketsRes.data.data;
     categories.value = categoriesRes.data.data;
+    subscribers.value = subscribersRes.data.data;
   } catch (err) {
     console.error('Error fetching admin data:', err);
   }
+};
+
+const filteredSubscribers = computed(() => {
+  if (!subscriberSearchQuery.value.trim()) return subscribers.value;
+  const q = subscriberSearchQuery.value.toLowerCase().trim();
+  return subscribers.value.filter(s => s.email.toLowerCase().includes(q));
+});
+
+const activeSubscribersCount = computed(() => {
+  return subscribers.value.filter(s => s.active).length;
+});
+
+const toggleSubscriber = async (id) => {
+  try {
+    const res = await axios.put(`${apiUrl}/api/newsletter/subscribers/${id}/toggle`, {}, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data && res.data.success) {
+      const updated = res.data.data;
+      const index = subscribers.value.findIndex(s => s._id === id);
+      if (index !== -1) {
+        subscribers.value[index] = updated;
+      }
+      showAlert('Estado do subscritor atualizado! ✓', 'success');
+    }
+  } catch (err) {
+    console.error('Failed to toggle subscriber:', err);
+    showAlert('Erro ao atualizar o estado do subscritor: ' + (err.response?.data?.error || err.message), 'error');
+  }
+};
+
+const confirmDeleteSubscriber = (id) => {
+  const sub = subscribers.value.find(s => s._id === id);
+  openConfirm({
+    title: 'Apagar Subscritor',
+    message: `Tem a certeza que deseja remover permanentemente o e-mail "${sub?.email}" da newsletter? Esta acção não pode ser desfeita.`,
+    btnText: 'Apagar',
+    btnClass: 'btn-danger',
+    action: async () => {
+      try {
+        await axios.delete(`${apiUrl}/api/newsletter/subscribers/${id}`, {
+          headers: { Authorization: `Bearer ${authStore.token}` }
+        });
+        subscribers.value = subscribers.value.filter(s => s._id !== id);
+        showAlert('Subscritor removido com sucesso. ✓', 'success');
+      } catch (err) {
+        console.error('Failed to delete subscriber:', err);
+        showAlert('Erro ao remover subscritor: ' + (err.response?.data?.error || err.message), 'error');
+      }
+    }
+  });
 };
 
 const handleAddCategory = async () => {
