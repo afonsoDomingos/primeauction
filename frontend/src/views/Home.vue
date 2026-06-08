@@ -59,32 +59,25 @@
     <section class="partners-section">
       <div class="container">
         <div class="partners-grid">
-          <!-- BCI Logo -->
-          <div class="partner-logo" title="BCI">
-            <span class="logo-text red-blue">BCI</span>
-            <span class="logo-desc">Apoio Financeiro</span>
-          </div>
-          <!-- Millennium Bim -->
-          <div class="partner-logo" title="Millennium bim">
-            <span class="logo-text yellow-red">Millennium bim</span>
-          </div>
-          <!-- Standard Bank -->
-          <div class="partner-logo" title="Standard Bank">
-            <svg viewBox="0 0 100 24" width="95" height="22" fill="currentColor">
-              <rect x="2" y="2" width="10" height="20" rx="1" fill="#0033a0" />
-              <rect x="5" y="7" width="4" height="10" fill="#ffffff" />
-            </svg>
-            <span class="logo-text-sb">Standard Bank</span>
-          </div>
-          <!-- Santam -->
-          <div class="partner-logo" title="Santam">
-            <span class="logo-santam">Santam</span>
-            <span class="logo-desc">Seguros</span>
-          </div>
-          <!-- MFC -->
-          <div class="partner-logo" title="MFC">
-            <span class="logo-mfc">MFC</span>
-            <span class="logo-desc">Financiamento</span>
+          <div v-for="partner in partnersList" :key="partner.name" class="partner-logo" :title="partner.name">
+            <!-- Custom Image Logo -->
+            <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+            
+            <!-- Standard Bank Custom SVG Fallback -->
+            <template v-else-if="partner.isStandardBank">
+              <svg viewBox="0 0 100 24" width="95" height="22" fill="currentColor">
+                <rect x="2" y="2" width="10" height="20" rx="1" fill="#0033a0" />
+                <rect x="5" y="7" width="4" height="10" fill="#ffffff" />
+              </svg>
+              <span class="logo-text-sb">{{ partner.name }}</span>
+            </template>
+            
+            <!-- Other fallbacks -->
+            <span v-else :class="['logo-text', partner.class, { 'logo-santam': partner.isSantam, 'logo-mfc': partner.isMfc }]">
+              {{ partner.name }}
+            </span>
+            
+            <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
           </div>
         </div>
       </div>
@@ -98,7 +91,16 @@
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
         
-        <div class="live-events-scroll-container">
+        <div v-if="loadingAuctions" class="loading-placeholder">
+          <div class="loading-spinner"></div>
+          <p>A carregar leilões ao vivo...</p>
+        </div>
+        
+        <div v-else-if="liveEvents.length === 0" class="empty-state-card" style="text-align: center; padding: 3rem 1.5rem; background: white; border-radius: 12px; border: 1px solid #e5e7eb; color: var(--text-light); margin-bottom: 2rem;">
+          <p>Nenhum leilão ao vivo no momento.</p>
+        </div>
+        
+        <div v-else class="live-events-scroll-container">
           <div class="live-events-scroll">
             <div 
               v-for="event in liveEvents" 
@@ -112,11 +114,12 @@
               
               <!-- Event Body -->
               <div class="event-card-body">
-                <div class="event-img-container">
+                <div class="event-img-container" @click="goToAuction(event.id)" style="cursor: pointer;">
                   <img :src="event.image" alt="Imagem do Evento" class="event-img" />
                 </div>
                 
                 <div class="event-details">
+                  <h4 class="event-card-title" @click="goToAuction(event.id)">{{ event.title }}</h4>
                   <div class="detail-item">
                     <span class="detail-icon">🚗</span>
                     <span class="detail-text"><strong>{{ event.lots }}</strong> Lotes</span>
@@ -142,8 +145,8 @@
               
               <!-- Event Footer Buttons -->
               <div class="event-card-footer">
-                <router-link to="/auctions" class="btn btn-event-outline">Catálogo</router-link>
-                <router-link to="/auctions" class="btn btn-event-solid">Entrar no Leilão</router-link>
+                <router-link :to="'/auction/' + event.id" class="btn btn-event-outline">Catálogo</router-link>
+                <router-link :to="'/auction/' + event.id" class="btn btn-event-solid">Entrar no Leilão</router-link>
               </div>
               <div v-if="event.hasPreBid" class="event-prebid-note">
                 Pré-licitação aberta. Faça o seu lance agora.
@@ -217,32 +220,43 @@
       <div class="container">
         <h2 class="section-title-premium">Mais Procurados</h2>
         
-        <div class="interests-grid">
+        <div v-if="loadingAuctions" class="loading-placeholder">
+          <div class="loading-spinner"></div>
+          <p>A carregar mais procurados...</p>
+        </div>
+        
+        <div v-else-if="comingSoonItems.length === 0" class="empty-state-card" style="text-align: center; padding: 3rem 1.5rem; background: white; border-radius: 12px; border: 1px solid #e5e7eb; color: var(--text-light); margin-bottom: 2rem;">
+          <p>Nenhum leilão em destaque no momento.</p>
+        </div>
+        
+        <div v-else class="interests-grid">
           <div 
             v-for="item in comingSoonItems" 
-            :key="item.id"
+            :key="item._id"
             class="interest-card"
+            @click="goToAuction(item._id)"
+            style="cursor: pointer;"
           >
             <div class="interest-img-wrapper">
-              <img :src="item.image" :alt="item.title" class="interest-img" />
-              <span class="coming-soon-badge">Brevemente</span>
+              <img :src="item.imageUrl" :alt="item.title" class="interest-img" />
+              <span class="coming-soon-badge" style="background-color: #e31b23;">🔥 Popular</span>
               
               <button 
-                @click="toggleSoonLike(item)" 
+                @click.stop="toggleLike(item._id)" 
                 class="interest-heart-btn"
-                :class="{ liked: item.liked }"
+                :class="{ liked: isLiked(item._id) }"
                 aria-label="Gostar"
               >
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
-                <span>{{ item.likes }}</span>
+                <span>{{ getLikesCount(item._id) }}</span>
               </button>
             </div>
             
             <div class="interest-info">
               <h3 class="interest-title">{{ item.title }}</h3>
-              <p class="interest-sub">Leilão de Salvados</p>
+              <p class="interest-sub">🔨 {{ item.bids?.length || 0 }} Lances &bull; Lance Atual: <strong>{{ formatCurrency(item.currentPrice) }}</strong></p>
             </div>
           </div>
         </div>
@@ -288,6 +302,20 @@ const heroSubtitle = ref('Leilões Exclusivos. Preços Competitivos. Totalmente 
 const heroImage = ref('https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 const heroImageUrls = ref([]);
 const heroMobileImageUrls = ref([]);
+
+// Partners list and settings
+const partners = ref([]);
+const defaultPartners = [
+  { name: 'BCI', description: 'Apoio Financeiro', logoUrl: '', class: 'red-blue' },
+  { name: 'Millennium bim', description: '', logoUrl: '', class: 'yellow-red' },
+  { name: 'Standard Bank', description: '', logoUrl: '', isStandardBank: true },
+  { name: 'Santam', description: 'Seguros', logoUrl: '', isSantam: true },
+  { name: 'MFC', description: 'Financiamento', logoUrl: '', isMfc: true }
+];
+
+const partnersList = computed(() => {
+  return partners.value.length > 0 ? partners.value : defaultPartners;
+});
 
 // Search state
 const searchQuery = ref('');
@@ -393,84 +421,8 @@ const toggleLike = (id) => {
   }
 };
 
-// Live events mock list in Portuguese
-const liveEvents = ref([
-  {
-    id: 1,
-    dateText: 'Segunda, 8 Jun — 09:00',
-    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80',
-    lots: 202,
-    location: 'Nacional',
-    code: 'Código 2',
-    type: 'Apenas Online',
-    hasPreBid: false,
-    badge: ''
-  },
-  {
-    id: 2,
-    dateText: 'Terça, 9 Jun — 09:00',
-    image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80',
-    lots: 200,
-    location: 'Nacional',
-    code: 'Código 2',
-    type: 'Apenas Online',
-    hasPreBid: true,
-    badge: ''
-  },
-  {
-    id: 3,
-    dateText: 'Terça, 9 Jun — 19:00',
-    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80',
-    lots: 50,
-    location: 'Nacional',
-    code: 'Código 2',
-    type: 'Apenas Online',
-    hasPreBid: true,
-    badge: 'Apenas Pick-ups / Bakkies'
-  }
-]);
-
-// Coming soon list mock in Portuguese
-const comingSoonItems = ref([
-  {
-    id: 101,
-    title: '2021 BMW M4 Coupe',
-    image: 'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=600&q=80',
-    likes: 2472,
-    liked: false
-  },
-  {
-    id: 102,
-    title: '2023 TOYOTA HILUX 2.8 GD-6',
-    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80',
-    likes: 1970,
-    liked: false
-  },
-  {
-    id: 103,
-    title: '2022 MERCEDES-BENZ A45 AMG',
-    image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80',
-    likes: 1104,
-    liked: false
-  },
-  {
-    id: 104,
-    title: '2020 FORD RANGER WILDTRAK',
-    image: 'https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?auto=format&fit=crop&w=600&q=80',
-    likes: 1074,
-    liked: false
-  }
-]);
-
-const toggleSoonLike = (item) => {
-  if (item.liked) {
-    item.liked = false;
-    item.likes--;
-  } else {
-    item.liked = true;
-    item.likes++;
-  }
-};
+const liveEvents = ref([]);
+const comingSoonItems = ref([]);
 
 const fetchActiveAuctions = async () => {
   loadingAuctions.value = true;
@@ -478,11 +430,38 @@ const fetchActiveAuctions = async () => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const res = await axios.get(`${apiUrl}/api/auctions?status=active`);
     if (res.data && res.data.success) {
-      // slice top 4 for Featured Sales
-      featuredAuctions.value = res.data.data.slice(0, 4);
+      const activeData = res.data.data;
+
+      // 1. Vendas em Destaque: Slice top 4
+      featuredAuctions.value = activeData.slice(0, 4);
+
+      // 2. Leilões ao Vivo: Map active auctions to event structure
+      liveEvents.value = activeData.map((auction) => {
+        const date = new Date(auction.endTime);
+        const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const dateText = `${dayNames[date.getDay()]}, ${date.getDate()} ${monthNames[date.getMonth()]} — ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        
+        return {
+          id: auction._id,
+          title: auction.title,
+          dateText: dateText,
+          image: auction.imageUrl,
+          lots: auction.images?.length || 1,
+          location: 'Nacional',
+          code: `Lote #${auction._id.substring(auction._id.length - 4).toUpperCase()}`,
+          type: 'Apenas Online',
+          hasPreBid: auction.bids && auction.bids.length > 0,
+          badge: auction.startingPrice > 500000 ? 'Veículo Premium' : ''
+        };
+      });
+
+      // 3. Mais Procurados: Sort by bids count descending and slice top 4
+      const sortedByBids = [...activeData].sort((a, b) => (b.bids?.length || 0) - (a.bids?.length || 0));
+      comingSoonItems.value = sortedByBids.slice(0, 4);
     }
   } catch (err) {
-    console.error('Failed to load active auctions for featured section:', err);
+    console.error('Failed to load active auctions:', err);
   } finally {
     loadingAuctions.value = false;
   }
@@ -505,6 +484,17 @@ onMounted(async () => {
     }
   } catch (err) {
     console.warn('Failed to load homepage custom settings, using default fallback.', err);
+  }
+
+  // Load partners custom settings
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const resPartners = await axios.get(`${apiUrl}/api/settings/partners`);
+    if (resPartners.data && resPartners.data.success && Array.isArray(resPartners.data.data)) {
+      partners.value = resPartners.data.data;
+    }
+  } catch (err) {
+    console.warn('Failed to load partners settings, using default fallback.', err);
   }
 
   // Load active auctions
@@ -808,6 +798,20 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
 }
 
+.partner-logo-img-dynamic {
+  max-height: 38px;
+  max-width: 140px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
+
+.partner-logo:hover .partner-logo-img-dynamic {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
 /* ─── Premium Titles ─── */
 .section-title-premium {
   font-size: 1.5rem;
@@ -899,6 +903,25 @@ onUnmounted(() => {
   font-size: 0.85rem;
   display: flex;
   justify-content: space-between;
+}
+
+.event-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 0.65rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-card-title:hover {
+  color: #006643;
 }
 
 .event-card-body {

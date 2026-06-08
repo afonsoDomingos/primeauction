@@ -476,6 +476,53 @@
         </div>
 
       </div>
+
+        <!-- ── Gerir Parceiros ── -->
+        <div class="card admin-card">
+          <div class="card-header-row">
+            <span class="card-icon">🤝</span>
+            <h3 class="section-title">Gerir Parceiros</h3>
+            <span class="record-count">{{ partnersForm.length }}</span>
+          </div>
+          <p class="settings-hint">Adicione, edite ou remova os logótipos e nomes dos parceiros visíveis na página inicial.</p>
+
+          <!-- Existing Partners List -->
+          <div v-if="partnersForm.length > 0" class="partners-admin-list">
+            <div v-for="(partner, idx) in partnersForm" :key="idx" class="partner-admin-item">
+              <!-- Logo Preview -->
+              <div class="partner-logo-preview">
+                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img" />
+                <div v-else class="partner-logo-placeholder">{{ partner.name?.charAt(0) }}</div>
+              </div>
+
+              <!-- Fields -->
+              <div class="partner-fields">
+                <input type="text" v-model="partner.name" class="form-input partner-input" placeholder="Nome do Parceiro" />
+                <input type="text" v-model="partner.description" class="form-input partner-input" placeholder="Descrição (ex: Seguros, Financiamento...)" />
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="url" v-model="partner.logoUrl" class="form-input partner-input" placeholder="URL do Logótipo" style="margin-bottom: 0;" />
+                  <button type="button" @click="triggerPartnerLogoUpload(idx)" class="btn btn-sm" style="flex-shrink: 0; white-space: nowrap; background: #f3f4f6; border: 1px solid #e5e7eb; color: var(--text-secondary); font-size:0.75rem;">📂 Carregar</button>
+                  <input type="file" :ref="el => partnerFileInputs[idx] = el" accept="image/*" style="display:none" @change="handlePartnerLogoUpload($event, idx)" />
+                </div>
+              </div>
+
+              <!-- Remove Button -->
+              <button type="button" @click="removePartner(idx)" class="btn btn-sm btn-danger" style="flex-shrink:0; align-self: flex-start;">✕</button>
+            </div>
+          </div>
+
+          <div v-else class="empty-partners-hint">Ainda não existem parceiros. Adicione o primeiro abaixo.</div>
+
+          <!-- Add New Partner -->
+          <div class="add-partner-row">
+            <button type="button" @click="addPartner" class="btn btn-secondary btn-pill btn-sm">+ Adicionar Parceiro</button>
+            <button type="button" @click="savePartners" :disabled="savingPartners" class="btn btn-primary btn-pill btn-sm">
+              <span v-if="savingPartners" class="btn-spinner"></span>
+              {{ savingPartners ? 'A guardar...' : '💾 Guardar Parceiros' }}
+            </button>
+          </div>
+        </div>
+
     </div>
 
     <!-- Custom Confirmation Modal -->
@@ -510,6 +557,11 @@ import { useToastStore } from '../stores/toastStore';
 const authStore = useAuthStore();
 const toastStore = useToastStore();
 const users = ref([]);
+
+// ── Partners ──
+const partnersForm = ref([]);
+const savingPartners = ref(false);
+const partnerFileInputs = ref([]);
 const auctions = ref([]);
 
 // ── Homepage Settings ──
@@ -711,6 +763,16 @@ onMounted(async () => {
     }
   } catch (err) {
     // No saved settings yet, leave defaults
+  }
+
+  // Load partners settings
+  try {
+    const resPartners = await axios.get(`${apiUrl}/api/settings/partners`);
+    if (resPartners.data && resPartners.data.success && Array.isArray(resPartners.data.data)) {
+      partnersForm.value = resPartners.data.data;
+    }
+  } catch (err) {
+    // No saved partners yet, leave empty list
   }
 
   // Setup preview cycling interval
@@ -960,6 +1022,54 @@ const saveHomepageSettings = async () => {
     showAlert('Erro ao guardar: ' + (err.response?.data?.error || err.message), 'error');
   } finally {
     savingHomepage.value = false;
+  }
+};
+
+// ── Partners Handlers ──
+const addPartner = () => {
+  partnersForm.value.push({ name: '', description: '', logoUrl: '' });
+};
+
+const removePartner = (index) => {
+  partnersForm.value.splice(index, 1);
+};
+
+const triggerPartnerLogoUpload = (idx) => {
+  const input = partnerFileInputs.value[idx];
+  if (input) input.click();
+};
+
+const handlePartnerLogoUpload = async (e, idx) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('images', file);
+  try {
+    const res = await axios.post(`${apiUrl}/api/auctions/upload-images`, formData, {
+      headers: { Authorization: `Bearer ${authStore.token}`, 'Content-Type': 'multipart/form-data' }
+    });
+    if (res.data.success && res.data.imageUrls?.length > 0) {
+      partnersForm.value[idx].logoUrl = res.data.imageUrls[0];
+      showAlert('Logo carregado com sucesso! ✓');
+    }
+  } catch (err) {
+    showAlert('Erro ao carregar logo: ' + (err.response?.data?.error || err.message), 'error');
+  }
+  e.target.value = '';
+};
+
+const savePartners = async () => {
+  savingPartners.value = true;
+  try {
+    await axios.put(`${apiUrl}/api/settings/partners`,
+      partnersForm.value,
+      { headers: { Authorization: `Bearer ${authStore.token}` } }
+    );
+    showAlert('Parceiros guardados com sucesso! ✓');
+  } catch (err) {
+    showAlert('Erro ao guardar parceiros: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    savingPartners.value = false;
   }
 };
 </script>
@@ -1788,5 +1898,78 @@ const saveHomepageSettings = async () => {
   .home-settings-layout {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Gestão de Parceiros no Admin ── */
+.partners-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.partner-admin-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.partner-logo-preview {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.partner-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.partner-logo-placeholder {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-light);
+}
+
+.partner-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.partner-input {
+  margin-bottom: 0 !important;
+}
+
+.empty-partners-hint {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+  font-style: italic;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.add-partner-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
