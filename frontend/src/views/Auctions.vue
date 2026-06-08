@@ -245,10 +245,10 @@ onMounted(() => {
 }
 
 .category-chip.active {
-  background-color: #1800ad;
+  background-color: #1a56db;
   color: #ffffff;
-  border-color: #1800ad;
-  box-shadow: 0 4px 14px rgba(24, 0, 173, 0.3);
+  border-color: #1a56db;
+  box-shadow: 0 4px 14px rgba(26, 86, 219, 0.3);
   font-weight: 600;
 }
 

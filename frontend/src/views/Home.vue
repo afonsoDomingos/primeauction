@@ -637,7 +637,7 @@ onUnmounted(() => {
 }
 
 .btn-primary.hero-btn {
-  background-color: #1800ad;
+  background-color: #1a56db;
   color: white;
 }
 .btn-primary.hero-btn:hover {
@@ -673,7 +673,7 @@ onUnmounted(() => {
 
 /* ─── Search Section (Blue Banner) ─── */
 .search-section {
-  background-color: #1800ad;
+  background-color: #1a56db;
   padding: 2.5rem 1.5rem;
   color: white;
   text-align: left;
@@ -718,7 +718,7 @@ onUnmounted(() => {
   right: 12px;
   background: none;
   border: none;
-  color: #1800ad;
+  color: #1a56db;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -745,7 +745,7 @@ onUnmounted(() => {
 
 .btn-advanced-search:hover {
   background-color: white;
-  color: #1800ad;
+  color: #1a56db;
 }
 
 .quick-categories {
@@ -776,7 +776,7 @@ onUnmounted(() => {
 
 .quick-cat-btn:hover {
   background-color: #ffffff;
-  color: #1800ad;
+  color: #1a56db;
   transform: translateY(-1px);
 }
 
