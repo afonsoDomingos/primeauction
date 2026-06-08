@@ -31,10 +31,10 @@
       </div>
     </section>
 
-    <!-- Search Section (Pesquisar Veículos) -->
+    <!-- Search Section (Pesquisar Leilões) -->
     <section class="search-section" id="search-section">
       <div class="container">
-        <h2 class="search-section-title">Pesquisar Veículos</h2>
+        <h2 class="search-section-title">Pesquisar Leilões</h2>
         <form @submit.prevent="handleSearch" class="search-bar-form">
           <div class="search-input-wrapper">
             <input 
@@ -641,9 +641,9 @@ onUnmounted(() => {
   50% { transform: translateX(-50%) translateY(-10px); }
 }
 
-/* ─── Search Section (Green Banner) ─── */
+/* ─── Search Section (Blue Banner) ─── */
 .search-section {
-  background-color: #006643;
+  background-color: #1a56db;
   padding: 2.5rem 1.5rem;
   color: white;
   text-align: left;
@@ -688,7 +688,7 @@ onUnmounted(() => {
   right: 12px;
   background: none;
   border: none;
-  color: #006643;
+  color: #1a56db;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -715,7 +715,7 @@ onUnmounted(() => {
 
 .btn-advanced-search:hover {
   background-color: white;
-  color: #006643;
+  color: #1a56db;
 }
 
 /* ─── Partners Section ─── */

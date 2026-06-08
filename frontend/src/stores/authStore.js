@@ -22,6 +22,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = res.data.token;
         this.user = res.data.user;
         localStorage.setItem('token', this.token);
+        localStorage.setItem('userRole', this.user.role);
       } catch (err) {
         this.error = err.response?.data?.error || 'Login failed';
       } finally {
@@ -51,6 +52,7 @@ export const useAuthStore = defineStore('auth', {
           gender: user.gender || null,
           age: user.age || null
         };
+        localStorage.setItem('userRole', this.user.role);
       } catch (err) {
         console.error('Failed to fetch user:', err);
         this.logout();
@@ -69,6 +71,7 @@ export const useAuthStore = defineStore('auth', {
         this.user = res.data.user;
         this.token = res.data.token;
         localStorage.setItem('token', this.token);
+        localStorage.setItem('userRole', this.user.role);
         return { success: true };
       } catch (err) {
         this.error = err.response?.data?.error || 'Erro ao actualizar perfil';
@@ -91,6 +94,7 @@ export const useAuthStore = defineStore('auth', {
         this.user = res.data.user;
         this.token = res.data.token;
         localStorage.setItem('token', this.token);
+        localStorage.setItem('userRole', this.user.role);
         return { success: true };
       } catch (err) {
         this.error = err.response?.data?.error || 'Erro ao carregar fotografia';
@@ -103,6 +107,7 @@ export const useAuthStore = defineStore('auth', {
       this.token = null;
       this.user = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
     }
   }
 })
