@@ -57,27 +57,41 @@
 
     <!-- Partners Section -->
     <section class="partners-section">
-      <div class="container">
-        <div class="partners-grid">
-          <div v-for="partner in partnersList" :key="partner.name" class="partner-logo" :title="partner.name">
-            <!-- Custom Image Logo -->
-            <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
-            
-            <!-- Standard Bank Custom SVG Fallback -->
-            <template v-else-if="partner.isStandardBank">
-              <svg viewBox="0 0 100 24" width="95" height="22" fill="currentColor">
-                <rect x="2" y="2" width="10" height="20" rx="1" fill="#0033a0" />
-                <rect x="5" y="7" width="4" height="10" fill="#ffffff" />
-              </svg>
-              <span class="logo-text-sb">{{ partner.name }}</span>
-            </template>
-            
-            <!-- Other fallbacks -->
-            <span v-else :class="['logo-text', partner.class, { 'logo-santam': partner.isSantam, 'logo-mfc': partner.isMfc }]">
-              {{ partner.name }}
-            </span>
-            
-            <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
+      <div class="partners-marquee-wrapper">
+        <div class="partners-marquee-track">
+          <!-- Original set -->
+          <div class="partners-marquee-group">
+            <div v-for="partner in partnersList" :key="'a-' + partner.name" class="partner-logo" :title="partner.name">
+              <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+              <template v-else-if="partner.isStandardBank">
+                <svg viewBox="0 0 100 24" width="95" height="22" fill="currentColor">
+                  <rect x="2" y="2" width="10" height="20" rx="1" fill="#0033a0" />
+                  <rect x="5" y="7" width="4" height="10" fill="#ffffff" />
+                </svg>
+                <span class="logo-text-sb">{{ partner.name }}</span>
+              </template>
+              <span v-else :class="['logo-text', partner.class, { 'logo-santam': partner.isSantam, 'logo-mfc': partner.isMfc }]">
+                {{ partner.name }}
+              </span>
+              <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
+            </div>
+          </div>
+          <!-- Duplicate set for seamless loop -->
+          <div class="partners-marquee-group" aria-hidden="true">
+            <div v-for="partner in partnersList" :key="'b-' + partner.name" class="partner-logo" :title="partner.name">
+              <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+              <template v-else-if="partner.isStandardBank">
+                <svg viewBox="0 0 100 24" width="95" height="22" fill="currentColor">
+                  <rect x="2" y="2" width="10" height="20" rx="1" fill="#0033a0" />
+                  <rect x="5" y="7" width="4" height="10" fill="#ffffff" />
+                </svg>
+                <span class="logo-text-sb">{{ partner.name }}</span>
+              </template>
+              <span v-else :class="['logo-text', partner.class, { 'logo-santam': partner.isSantam, 'logo-mfc': partner.isMfc }]">
+                {{ partner.name }}
+              </span>
+              <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -718,21 +732,44 @@ onUnmounted(() => {
   color: #1a56db;
 }
 
-/* ─── Partners Section ─── */
+/* ─── Partners Section (Infinite Marquee) ─── */
 .partners-section {
   background-color: #ffffff;
-  padding: 1.5rem 1.5rem;
+  padding: 1.25rem 0;
   border-bottom: 1px solid #e5e7eb;
+  overflow: hidden;
 }
 
-.partners-grid {
+/* Fade mask on left and right edges */
+.partners-marquee-wrapper {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+/* The scrolling track — two groups side by side */
+.partners-marquee-track {
   display: flex;
-  justify-content: space-around;
+  width: max-content;
+  animation: marquee-scroll 22s linear infinite;
+}
+
+.partners-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Each group holds one full set of logos */
+.partners-marquee-group {
+  display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 1100px;
-  margin: 0 auto;
+  gap: 3.5rem;
+  padding: 0 3.5rem;
+  flex-shrink: 0;
+}
+
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .partner-logo {
@@ -740,9 +777,10 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  opacity: 0.75;
+  opacity: 0.65;
   transition: opacity 0.3s;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .partner-logo:hover {
