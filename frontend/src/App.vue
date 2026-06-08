@@ -4,6 +4,8 @@
     <router-view />
   </main>
 
+  <ChatAssistant />
+
   <footer class="app-footer">
     <div class="footer-content">
       <p>&copy; {{ new Date().getFullYear() }} Prime Auctions. Todos os direitos reservados.</p>
@@ -42,6 +44,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import Navbar from './components/Navbar.vue';
+import ChatAssistant from './components/ChatAssistant.vue';
 import { useAuthStore } from './stores/authStore';
 import { useToastStore } from './stores/toastStore';
 

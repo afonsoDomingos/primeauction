@@ -38,6 +38,13 @@
             <h3 class="kpi-value">{{ formatCurrencyCompact(kpiStats.totalValueGenerated) }}</h3>
           </div>
         </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap ticket-kpi">✉</div>
+          <div class="kpi-info">
+            <span class="kpi-label">Tickets Pendentes</span>
+            <h3 class="kpi-value">{{ kpiStats.pendingTickets }}</h3>
+          </div>
+        </div>
       </div>
 
       <!-- Charts Section -->
@@ -523,6 +530,73 @@
           </div>
         </div>
 
+        <!-- ── Gerir Suporte (Tickets) ── -->
+        <div class="card admin-card">
+          <div class="card-header-row">
+            <span class="card-icon">✉</span>
+            <h3 class="section-title">Tickets de Suporte</h3>
+            <span class="record-count">{{ tickets.length }}</span>
+          </div>
+          <p class="settings-hint">Visualize e faça a gestão dos pedidos de contacto submetidos pelo assistente virtual de chat.</p>
+
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Contacto</th>
+                  <th>Mensagem</th>
+                  <th>Data</th>
+                  <th>Estado</th>
+                  <th>Acções</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="tickets.length === 0">
+                  <td colspan="5" class="empty-row">Nenhum ticket de suporte encontrado.</td>
+                </tr>
+                <tr v-for="ticket in tickets" :key="ticket._id">
+                  <td>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <span v-if="ticket.email" style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">📧 {{ ticket.email }}</span>
+                      <span v-if="ticket.phone" style="font-size: 0.8rem; color: var(--text-light);">📞 {{ ticket.phone }}</span>
+                      <span v-if="!ticket.email && !ticket.phone" style="font-style: italic; font-size: 0.8rem; color: var(--text-light);">Anónimo</span>
+                    </div>
+                  </td>
+                  <td style="max-width: 300px; white-space: normal; word-break: break-all; font-size: 0.85rem;">
+                    {{ ticket.message }}
+                  </td>
+                  <td style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap;">
+                    {{ formatTicketDate(ticket.createdAt) }}
+                  </td>
+                  <td>
+                    <span :class="['badge', ticket.status === 'resolved' ? 'badge-active' : 'badge-ended']" style="font-size: 0.7rem;">
+                      {{ ticket.status === 'resolved' ? 'Resolvido' : 'Pendente' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-btns">
+                      <button
+                        @click="toggleTicketStatus(ticket._id, ticket.status)"
+                        :class="['btn', 'btn-sm', ticket.status === 'resolved' ? 'btn-secondary' : 'btn-primary']"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                      >
+                        {{ ticket.status === 'resolved' ? 'Reabrir' : '✓ Resolver' }}
+                      </button>
+                      <button
+                        @click="confirmDeleteTicket(ticket._id)"
+                        class="btn btn-sm btn-danger"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                      >
+                        Apagar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
     </div>
 
     <!-- Custom Confirmation Modal -->
@@ -570,6 +644,7 @@ const partnersForm = ref([]);
 const savingPartners = ref(false);
 const partnerFileInputs = ref([]);
 const auctions = ref([]);
+const tickets = ref([]);
 
 // ── Homepage Settings ──
 const defaultHeroImage = 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
@@ -600,9 +675,11 @@ const activePreviewImage = computed(() => {
 const kpiStats = computed(() => {
   const activeAuctions = auctions.value.filter(a => a.status === 'active').length;
   const totalValueGenerated = auctions.value.reduce((sum, a) => sum + Math.max(0, a.currentPrice - a.startingPrice), 0);
+  const pendingTickets = tickets.value.filter(t => t.status === 'pending').length;
   return {
     activeAuctions,
-    totalValueGenerated
+    totalValueGenerated,
+    pendingTickets
   };
 });
 
@@ -742,12 +819,14 @@ const formatCurrency = (value) => {
 
 const fetchData = async () => {
   try {
-    const [usersRes, auctionsRes] = await Promise.all([
+    const [usersRes, auctionsRes, ticketsRes] = await Promise.all([
       axios.get(`${apiUrl}/api/users`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
-      axios.get(`${apiUrl}/api/auctions`)
+      axios.get(`${apiUrl}/api/auctions`),
+      axios.get(`${apiUrl}/api/support`, { headers: { Authorization: `Bearer ${authStore.token}` } })
     ]);
     users.value = usersRes.data.data;
     auctions.value = auctionsRes.data.data;
+    tickets.value = ticketsRes.data.data;
   } catch (err) {
     console.error('Error fetching admin data:', err);
   }
@@ -1082,6 +1161,45 @@ const savePartners = async () => {
   } finally {
     savingPartners.value = false;
   }
+};
+
+// ── Support Tickets Handlers ──
+const toggleTicketStatus = async (id, currentStatus) => {
+  const newStatus = currentStatus === 'pending' ? 'resolved' : 'pending';
+  try {
+    await axios.put(`${apiUrl}/api/support/${id}`, { status: newStatus }, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    showAlert(newStatus === 'resolved' ? 'Ticket resolvido. ✓' : 'Ticket reaberto.');
+    fetchData();
+  } catch (err) {
+    showAlert('Erro ao atualizar ticket: ' + (err.response?.data?.error || err.message), 'error');
+  }
+};
+
+const confirmDeleteTicket = (id) => {
+  openConfirm({
+    title: 'Apagar Ticket',
+    message: 'Tem a certeza que deseja apagar permanentemente este ticket de suporte? Esta acção não pode ser desfeita.',
+    btnText: 'Apagar',
+    btnClass: 'btn-danger',
+    action: async () => {
+      try {
+        await axios.delete(`${apiUrl}/api/support/${id}`, {
+          headers: { Authorization: `Bearer ${authStore.token}` }
+        });
+        showAlert('Ticket apagado. ✓');
+        fetchData();
+      } catch (err) {
+        showAlert('Erro ao apagar ticket: ' + (err.response?.data?.error || err.message), 'error');
+      }
+    }
+  });
+};
+
+const formatTicketDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('pt-MZ', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + date.toLocaleTimeString('pt-MZ', { hour: '2-digit', minute: '2-digit' });
 };
 </script>
 
@@ -1555,6 +1673,7 @@ const savePartners = async () => {
 .auction-kpi { background-color: #fef3c7; }
 .active-kpi { background-color: #ecfdf5; }
 .value-kpi { background-color: #f3e8ff; }
+.ticket-kpi { background-color: #ffe4e6; color: #e11d48; }
 
 .kpi-info {
   display: flex;
