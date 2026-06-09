@@ -365,6 +365,12 @@
                     <div class="action-btns">
                       <button
                         v-if="auction.status === 'active'"
+                        @click="openExtendModal(auction)"
+                        class="btn btn-sm btn-extend"
+                        title="Estender prazo do leilão"
+                      >⏱ Estender</button>
+                      <button
+                        v-if="auction.status === 'active'"
                         @click="endAuction(auction._id)"
                         class="btn btn-sm btn-warning"
                       >Terminar</button>
@@ -705,6 +711,63 @@
             <button type="button" @click="closeConfirm" class="btn btn-secondary btn-pill btn-sm">Cancelar</button>
             <button type="button" @click="executeConfirm" class="btn btn-pill btn-sm" :class="confirmBtnClass">
               {{ confirmBtnText }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Extend Auction Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showExtendModal" class="custom-modal-overlay" @click.self="closeExtendModal">
+        <div class="custom-modal-card extend-modal-card animate-scale-in">
+          <div class="modal-header-row">
+            <span class="modal-title-icon">⏱</span>
+            <h4>Estender Leilão</h4>
+            <button type="button" class="wizard-close-btn" @click="closeExtendModal" aria-label="Fechar">✕</button>
+          </div>
+          <div class="modal-body">
+            <p class="extend-auction-name">📦 {{ extendTargetAuction?.title }}</p>
+            <p class="extend-current-end">
+              Termina actualmente em:
+              <strong>{{ extendTargetAuction ? new Date(extendTargetAuction.endTime).toLocaleString('pt-MZ') : '' }}</strong>
+            </p>
+
+            <div class="extend-quick-btns">
+              <span class="extend-label">Adicionar rapidamente:</span>
+              <div class="extend-preset-row">
+                <button type="button" class="btn-extend-preset" @click="applyPreset(1)">+1 hora</button>
+                <button type="button" class="btn-extend-preset" @click="applyPreset(6)">+6 horas</button>
+                <button type="button" class="btn-extend-preset" @click="applyPreset(24)">+1 dia</button>
+                <button type="button" class="btn-extend-preset" @click="applyPreset(72)">+3 dias</button>
+                <button type="button" class="btn-extend-preset" @click="applyPreset(168)">+7 dias</button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.25rem;">
+              <label class="form-label">Ou definir data/hora exacta:</label>
+              <input
+                type="datetime-local"
+                v-model="extendCustomDateTime"
+                class="form-input"
+                :min="minExtendDateTime"
+              />
+            </div>
+
+            <p v-if="extendCustomDateTime" class="extend-preview">
+              ✅ Nova data de término: <strong>{{ new Date(extendCustomDateTime).toLocaleString('pt-MZ') }}</strong>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" @click="closeExtendModal" class="btn btn-secondary btn-pill btn-sm">Cancelar</button>
+            <button
+              type="button"
+              @click="submitExtendAuction"
+              class="btn btn-primary btn-pill btn-sm"
+              :disabled="!extendCustomDateTime || extendingAuction"
+            >
+              <span v-if="extendingAuction" class="btn-spinner"></span>
+              {{ extendingAuction ? 'A guardar...' : '✓ Confirmar Extensão' }}
             </button>
           </div>
         </div>
@@ -1078,6 +1141,62 @@ const showConfirmModal = ref(false);
 const confirmTitle = ref('');
 const confirmMessage = ref('');
 const confirmAction = ref(null);
+
+// ── Extend Auction ──
+const showExtendModal = ref(false);
+const extendTargetAuction = ref(null);
+const extendCustomDateTime = ref('');
+const extendingAuction = ref(false);
+
+const minExtendDateTime = computed(() => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+});
+
+const openExtendModal = (auction) => {
+  extendTargetAuction.value = auction;
+  // Pre-fill with current endTime
+  const current = new Date(auction.endTime);
+  current.setMinutes(current.getMinutes() - current.getTimezoneOffset());
+  extendCustomDateTime.value = current.toISOString().slice(0, 16);
+  showExtendModal.value = true;
+};
+
+const closeExtendModal = () => {
+  showExtendModal.value = false;
+  extendTargetAuction.value = null;
+  extendCustomDateTime.value = '';
+};
+
+const applyPreset = (hours) => {
+  const base = extendTargetAuction.value
+    ? new Date(Math.max(new Date(extendTargetAuction.value.endTime).getTime(), Date.now()))
+    : new Date();
+  base.setHours(base.getHours() + hours);
+  base.setMinutes(base.getMinutes() - base.getTimezoneOffset());
+  extendCustomDateTime.value = base.toISOString().slice(0, 16);
+};
+
+const submitExtendAuction = async () => {
+  if (!extendTargetAuction.value || !extendCustomDateTime.value) return;
+  extendingAuction.value = true;
+  try {
+    const newEndTime = new Date(extendCustomDateTime.value).toISOString();
+    await axios.put(
+      `${apiUrl}/api/auctions/${extendTargetAuction.value._id}`,
+      { endTime: newEndTime, status: 'active' },
+      { headers: { Authorization: `Bearer ${authStore.token}` } }
+    );
+    showAlert(`Leilão "${extendTargetAuction.value.title}" estendido com sucesso! ✓`);
+    closeExtendModal();
+    fetchData();
+  } catch (err) {
+    showAlert('Erro ao estender leilão: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    extendingAuction.value = false;
+  }
+};
 const confirmBtnText = ref('Confirmar');
 const confirmBtnClass = ref('btn-primary');
 
@@ -1601,6 +1720,78 @@ const formatTicketDate = (dateString) => {
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+.btn-extend {
+  background-color: #5c6bc0;
+  color: white;
+}
+.btn-extend:hover {
+  background-color: #3949ab;
+}
+
+/* ── Extend Modal Specifics ── */
+.extend-modal-card {
+  max-width: 480px;
+}
+
+.extend-auction-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.extend-current-end {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(0,0,0,0.04);
+  border-radius: 8px;
+}
+
+.extend-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-light);
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.extend-preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn-extend-preset {
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  border: 2px solid #5c6bc0;
+  background: transparent;
+  color: #5c6bc0;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.btn-extend-preset:hover {
+  background: #5c6bc0;
+  color: white;
+}
+
+.extend-preview {
+  font-size: 0.85rem;
+  color: #2e7d32;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.85rem;
+  background: rgba(76, 175, 80, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
 
 /* ── Mobile ── */
 @media (max-width: 640px) {

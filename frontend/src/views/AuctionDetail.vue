@@ -74,10 +74,11 @@
               <div class="input-with-button">
                 <span class="currency-prefix">MZN</span>
                 <input 
-                  type="number" 
-                  v-model="bidAmount" 
+                  type="text" 
+                  v-model="displayBidAmount" 
+                  @input="handleBidInput"
                   class="form-input bid-input" 
-                  :min="auction.currentPrice + 1"
+                  placeholder="Introduza o valor"
                   required 
                 />
                 <button type="submit" class="btn btn-primary btn-pill bid-submit">Lance!</button>
@@ -269,7 +270,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -282,8 +283,73 @@ const toastStore = useToastStore();
 const auction = ref(null);
 const bids = ref([]);
 const bidAmount = ref(0);
+const displayBidAmount = ref('');
 const activeImage = ref('');
 let socket = null;
+
+// Utility functions for bid input formatting (thousands: dot, decimals: comma)
+const parseFormattedNumber = (str) => {
+  if (!str) return 0;
+  let normalized = str.replace(/[\s.]/g, '').replace(',', '.');
+  let num = parseFloat(normalized);
+  return isNaN(num) ? 0 : num;
+};
+
+const formatInputString = (str) => {
+  if (typeof str !== 'string') str = String(str);
+  let clean = str.replace(/[^0-9,.]/g, '');
+  let parts = clean.split(/[.,]/);
+  let integerPart = parts[0];
+  let decimalPart = parts.slice(1).join('');
+  
+  if (integerPart) {
+    if (integerPart.length > 1 && integerPart.startsWith('0')) {
+      integerPart = integerPart.replace(/^0+/, '') || '0';
+    }
+    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  
+  let result = integerPart;
+  if (clean.includes(',') || clean.includes('.')) {
+    result += ',' + decimalPart.slice(0, 2);
+  }
+  return result;
+};
+
+// Input event handler preserving cursor position
+const handleBidInput = (e) => {
+  const input = e.target;
+  const originalValue = input.value;
+  const originalSelectionStart = input.selectionStart;
+  
+  const formatted = formatInputString(originalValue);
+  const digitsBeforeCursor = originalValue.substring(0, originalSelectionStart).replace(/[^0-9]/g, '').length;
+  
+  displayBidAmount.value = formatted;
+  bidAmount.value = parseFormattedNumber(formatted);
+  
+  nextTick(() => {
+    let newCursorPosition = 0;
+    let digitsFound = 0;
+    for (let i = 0; i < formatted.length; i++) {
+      if (/[0-9]/.test(formatted[i])) {
+        digitsFound++;
+      }
+      newCursorPosition = i + 1;
+      if (digitsFound === digitsBeforeCursor) {
+        break;
+      }
+    }
+    input.setSelectionRange(newCursorPosition, newCursorPosition);
+  });
+};
+
+// Sync displayBidAmount when bidAmount changes programmatically
+watch(bidAmount, (newVal) => {
+  if (parseFormattedNumber(displayBidAmount.value) !== newVal) {
+    displayBidAmount.value = formatInputString(newVal.toString());
+  }
+}, { immediate: true });
 
 const showProfileModal = ref(false);
 const submittingProfile = ref(false);
@@ -429,6 +495,13 @@ const submitProfileDetails = async () => {
 };
 
 const placeBid = async () => {
+  // Validate bid amount is greater than currentPrice
+  const minBid = auction.value ? auction.value.currentPrice + 1 : 1;
+  if (bidAmount.value < minBid) {
+    toastStore.error(`O valor do lance deve ser no mínimo ${formatCurrency(minBid)}`);
+    return;
+  }
+
   const user = authStore.user;
   if (!user.name || !user.phone || !user.province || !user.gender || !user.age) {
     profileForm.value = {
