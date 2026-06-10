@@ -270,7 +270,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -344,12 +344,6 @@ const handleBidInput = (e) => {
   });
 };
 
-// Sync displayBidAmount when bidAmount changes programmatically
-watch(bidAmount, (newVal) => {
-  if (parseFormattedNumber(displayBidAmount.value) !== newVal) {
-    displayBidAmount.value = formatInputString(newVal.toString());
-  }
-}, { immediate: true });
 
 const showProfileModal = ref(false);
 const submittingProfile = ref(false);
@@ -433,7 +427,9 @@ const formatNumber = (val) => {
 
 const setBidIncrement = (increment) => {
   if (auction.value) {
-    bidAmount.value = auction.value.currentPrice + increment;
+    const newAmount = auction.value.currentPrice + increment;
+    bidAmount.value = newAmount;
+    displayBidAmount.value = formatInputString(newAmount.toString());
   }
 };
 
@@ -446,7 +442,9 @@ const fetchAuctionData = async () => {
     ]);
     auction.value = auctionRes.data.data;
     bids.value = bidsRes.data.data;
-    bidAmount.value = suggestedBidAmount.value;
+    const suggested = suggestedBidAmount.value;
+    bidAmount.value = suggested;
+    displayBidAmount.value = formatInputString(suggested.toString());
     activeImage.value = auction.value.imageUrl;
   } catch (err) {
     console.error(err);
@@ -543,7 +541,9 @@ onMounted(() => {
     if (auction.value) {
       auction.value.currentPrice = data.currentPrice;
       if (bidAmount.value <= data.currentPrice) {
-        bidAmount.value = data.currentPrice + minIncrement.value;
+        const newAmount = data.currentPrice + minIncrement.value;
+        bidAmount.value = newAmount;
+        displayBidAmount.value = formatInputString(newAmount.toString());
       }
     }
     bids.value.unshift(data.bid);
