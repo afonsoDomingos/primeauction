@@ -61,19 +61,23 @@
         >
           <div class="card-img-wrapper">
             <img :src="auction.imageUrl" :alt="auction.title" class="card-img" loading="lazy" />
-            <div class="card-status" :class="auction.status">{{ auction.status === 'active' ? 'Activo' : 'Terminado' }}</div>
+            <div class="card-status" :class="auction.status">
+              {{ auction.status === 'active' ? 'Activo' : (auction.status === 'upcoming' ? 'Agendado' : 'Terminado') }}
+            </div>
           </div>
           <div class="card-content">
             <h3 class="auction-title">{{ auction.title }}</h3>
             <p class="auction-description">{{ auction.description?.slice(0, 80) }}{{ auction.description?.length > 80 ? '…' : '' }}</p>
             <div class="card-footer">
               <div class="price-col">
-                <span class="price-label">Lance actual</span>
-                <span class="price-value">{{ formatCurrency(auction.currentPrice) }}</span>
+                <span class="price-label">{{ auction.status === 'upcoming' ? 'Preço inicial' : 'Lance actual' }}</span>
+                <span class="price-value">{{ formatCurrency(auction.status === 'upcoming' ? auction.startingPrice : auction.currentPrice) }}</span>
               </div>
               <div class="time-col">
-                <span class="price-label">Termina em</span>
-                <span class="time-value">{{ new Date(auction.endTime).toLocaleDateString('pt-MZ') }}</span>
+                <span class="price-label">{{ auction.status === 'upcoming' ? 'Começa em' : 'Termina em' }}</span>
+                <span class="time-value">
+                  {{ auction.status === 'upcoming' ? new Date(auction.startTime).toLocaleDateString('pt-MZ') : new Date(auction.endTime).toLocaleDateString('pt-MZ') }}
+                </span>
               </div>
             </div>
             <div class="card-cta">
@@ -362,6 +366,11 @@ onMounted(() => {
 
 .card-status.active {
   background-color: rgba(76, 175, 80, 0.9);
+  color: white;
+}
+
+.card-status.upcoming {
+  background-color: rgba(255, 152, 0, 0.9);
   color: white;
 }
 

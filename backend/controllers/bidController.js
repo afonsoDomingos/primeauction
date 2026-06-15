@@ -50,6 +50,11 @@ exports.placeBid = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Auction not found' });
     }
 
+    // Check if auction has started
+    if (auction.status === 'upcoming' || (auction.startTime && Date.now() < new Date(auction.startTime).getTime())) {
+      return res.status(400).json({ success: false, error: 'Este leilão ainda não começou' });
+    }
+
     // Check if auction is active
     if (auction.isEnded || auction.status !== 'active') {
       return res.status(400).json({ success: false, error: 'This auction has ended' });

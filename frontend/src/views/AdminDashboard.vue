@@ -265,9 +265,16 @@
               <textarea v-model="form.description" class="form-input" rows="3" placeholder="Descreva o item..." required></textarea>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Data e Hora de Fim</label>
-              <input type="datetime-local" v-model="form.endTime" class="form-input" required />
+            <div class="form-group-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Data e Hora de Início (opcional)</label>
+                <input type="datetime-local" v-model="form.startTime" class="form-input" />
+                <small class="form-help" style="font-size: 0.75rem; color: #666; margin-top: 0.25rem; display: block;">Vazio = Inicia imediatamente</small>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Data e Hora de Fim</label>
+                <input type="datetime-local" v-model="form.endTime" class="form-input" required />
+              </div>
             </div>
 
             <button type="submit" class="btn btn-primary btn-pill" :disabled="creating">
@@ -356,8 +363,8 @@
                 <tr v-for="auction in auctions" :key="auction._id">
                   <td class="auction-title-cell">{{ auction.title }}</td>
                   <td>
-                    <span :class="['badge', auction.status === 'active' ? 'badge-active' : 'badge-ended']">
-                      {{ auction.status === 'active' ? 'Activo' : 'Terminado' }}
+                    <span :class="['badge', auction.status === 'active' ? 'badge-active' : (auction.status === 'upcoming' ? 'badge-upcoming' : 'badge-ended')]">
+                      {{ auction.status === 'active' ? 'Activo' : (auction.status === 'upcoming' ? 'Agendado' : 'Terminado') }}
                     </span>
                   </td>
                   <td class="price-cell">{{ formatCurrency(auction.currentPrice) }}</td>
@@ -908,6 +915,7 @@ const form = ref({
   imageUrl: '',
   images: [],
   startingPrice: 0,
+  startTime: '',
   endTime: '',
   category: ''
 });
@@ -1127,7 +1135,7 @@ const handleCreate = async () => {
     await axios.post(`${apiUrl}/api/auctions`, form.value, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
-    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, endTime: '', category: '' };
+    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, startTime: '', endTime: '', category: '' };
     showAlert('Leilão criado com sucesso! ✓');
     fetchData();
   } catch (err) {
@@ -1691,6 +1699,7 @@ const formatTicketDate = (dateString) => {
 .badge-admin   { background-color: #e3eafe; color: #3e6ae1; }
 .badge-active  { background-color: #e8f5e9; color: #2e7d32; }
 .badge-blocked { background-color: #fdecea; color: #c62828; }
+.badge-upcoming{ background-color: #fff8e1; color: #f57f17; }
 .badge-ended   { background-color: #f0f0f0; color: #666;    }
 
 .you-badge {

@@ -30,14 +30,23 @@ const auctionSchema = new mongoose.Schema({
       return this.startingPrice;
     }
   },
+  startTime: {
+    type: Date,
+    default: Date.now
+  },
   endTime: {
     type: Date,
     required: [true, 'Please add an end time']
   },
   status: {
     type: String,
-    enum: ['active', 'finished'],
-    default: 'active'
+    enum: ['upcoming', 'active', 'finished'],
+    default: function() {
+      if (this.startTime && new Date(this.startTime) > new Date()) {
+        return 'upcoming';
+      }
+      return 'active';
+    }
   },
   winner: {
     type: mongoose.Schema.ObjectId,
@@ -59,6 +68,20 @@ const auctionSchema = new mongoose.Schema({
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
+});
+
+// Pre-save middleware to dynamically update status based on dates
+auctionSchema.pre('save', function(next) {
+  if (this.status !== 'finished') {
+    if (this.startTime && new Date(this.startTime) > new Date()) {
+      this.status = 'upcoming';
+    } else if (this.endTime && new Date(this.endTime) < new Date()) {
+      this.status = 'finished';
+    } else {
+      this.status = 'active';
+    }
+  }
+  next();
 });
 
 // Virtual for checking if ended

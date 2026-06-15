@@ -7,6 +7,27 @@ const startCronJobs = (io) => {
   cron.schedule('*/10 * * * * *', async () => {
     try {
       const now = new Date();
+
+      // 1. Activate upcoming auctions whose startTime is in the past
+      const readyAuctions = await Auction.find({
+        startTime: { $lte: now },
+        status: 'upcoming'
+      });
+
+      for (const auction of readyAuctions) {
+        auction.status = 'active';
+        await auction.save();
+        console.log(`[CRON] Auction "${auction.title}" is now ACTIVE.`);
+
+        if (io) {
+          io.to(auction._id.toString()).emit('auction_started', {
+            auctionId: auction._id,
+            status: 'active'
+          });
+        }
+      }
+
+      // 2. Handle expired auctions
       const expiredAuctions = await Auction.find({
         endTime: { $lt: now },
         status: 'active'

@@ -237,6 +237,53 @@
       </div>
     </section>
 
+    <!-- Upcoming Auctions Section (Leilões por Vir / Próximos Leilões) -->
+    <section class="upcoming-auctions-section" id="upcoming-auctions">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title-premium">Leilões por Vir</h2>
+          <router-link to="/auctions?status=upcoming" class="view-all-link">Ver todos</router-link>
+        </div>
+
+        <div v-if="loadingAuctions" class="loading-placeholder">
+          <div class="loading-spinner"></div>
+          <p>A carregar leilões por vir...</p>
+        </div>
+        
+        <div v-else-if="upcomingAuctions.length === 0" class="empty-state-card" style="text-align: center; padding: 3rem 1.5rem; background: white; border-radius: 12px; border: 1px solid #e5e7eb; color: var(--text-light); margin-bottom: 2rem;">
+          <p>Nenhum leilão agendado de momento.</p>
+        </div>
+
+        <div v-else class="upcoming-scroll-container">
+          <div class="upcoming-scroll">
+            <div 
+              v-for="auction in upcomingAuctions" 
+              :key="auction._id"
+              class="upcoming-card"
+              @click="goToAuction(auction._id)"
+              style="cursor: pointer;"
+            >
+              <div class="upcoming-img-wrapper">
+                <img :src="auction.imageUrl" :alt="auction.title" class="upcoming-img" />
+                <span class="upcoming-badge-time">📅 Começa em: {{ formatBadgeDate(auction.startTime) }}</span>
+              </div>
+              <div class="upcoming-info">
+                <span class="upcoming-category">{{ auction.category }}</span>
+                <h3 class="upcoming-title">{{ auction.title }}</h3>
+                <div class="upcoming-price-row">
+                  <span class="upcoming-price-label">Preço Inicial</span>
+                  <span class="upcoming-price-val">{{ formatCurrency(auction.startingPrice) }}</span>
+                </div>
+              </div>
+              <div class="upcoming-footer">
+                <button class="btn btn-upcoming-detail">Ver Detalhes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- What others are interested in Section (Mais Procurados / Próximos) -->
     <section class="interests-section">
       <div class="container">
@@ -507,6 +554,7 @@ const toggleLike = (id) => {
 
 const liveEvents = ref([]);
 const comingSoonItems = ref([]);
+const upcomingAuctions = ref([]);
 
 const fetchActiveAuctions = async () => {
   loadingAuctions.value = true;
@@ -544,6 +592,17 @@ const fetchActiveAuctions = async () => {
       const sortedByBids = [...activeData].sort((a, b) => (b.bids?.length || 0) - (a.bids?.length || 0));
       comingSoonItems.value = sortedByBids.slice(0, 4);
     }
+
+    // Load upcoming auctions
+    try {
+      const resUpcoming = await axios.get(`${apiUrl}/api/auctions?status=upcoming`);
+      if (resUpcoming.data && resUpcoming.data.success) {
+        upcomingAuctions.value = resUpcoming.data.data;
+      }
+    } catch (errUpcoming) {
+      console.error('Failed to load upcoming auctions:', errUpcoming);
+    }
+
   } catch (err) {
     console.error('Failed to load active auctions:', err);
   } finally {
@@ -1312,6 +1371,166 @@ onUnmounted(() => {
   font-size: 1.15rem;
   font-weight: 700;
   color: #006643;
+}
+
+/* ─── Upcoming Auctions Section ─── */
+.upcoming-auctions-section {
+  padding: 5rem 1.5rem;
+  background-color: #ffffff;
+}
+
+.upcoming-scroll-container {
+  position: relative;
+  width: 100%;
+}
+
+.upcoming-scroll {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0.5rem 0 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.upcoming-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.upcoming-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.upcoming-scroll::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 20px;
+}
+
+.upcoming-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.upcoming-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.upcoming-img-wrapper {
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+
+.upcoming-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.upcoming-card:hover .upcoming-img {
+  transform: scale(1.05);
+}
+
+.upcoming-badge-time {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  background-color: rgba(23, 26, 32, 0.85);
+  backdrop-filter: blur(4px);
+  color: white;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.upcoming-info {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.upcoming-category {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #f57c00;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.35rem;
+}
+
+.upcoming-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.4;
+  height: 2.8em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.upcoming-price-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 0.6rem;
+  margin-top: auto;
+}
+
+.upcoming-price-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.upcoming-price-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.upcoming-footer {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.btn-upcoming-detail {
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid #e5e7eb;
+  color: var(--text-primary);
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upcoming-card:hover .btn-upcoming-detail {
+  background-color: var(--text-primary);
+  color: white;
+  border-color: var(--text-primary);
 }
 
 /* ─── Interests Section (What others are interested in) ─── */

@@ -32,8 +32,8 @@
         <div class="content-wrapper animate-fade-in">
 
           <!-- Status badge -->
-          <span class="status-badge" :class="isEnded ? 'ended' : 'active'">
-            {{ isEnded ? 'Terminado' : 'Activo' }}
+          <span class="status-badge" :class="isEnded ? 'ended' : (isUpcoming ? 'upcoming' : 'active')">
+            {{ isEnded ? 'Terminado' : (isUpcoming ? 'Agendado' : 'Activo') }}
           </span>
 
           <h1 class="title">{{ auction.title }}</h1>
@@ -42,19 +42,25 @@
           <!-- Price & Timer -->
           <div class="status-box">
             <div class="info-col">
-              <span class="label">Lance Actual</span>
-              <span class="price highlight">{{ formatCurrency(auction.currentPrice) }}</span>
+              <span class="label">{{ isUpcoming ? 'Preço Inicial' : 'Lance Actual' }}</span>
+              <span class="price highlight">{{ formatCurrency(isUpcoming ? auction.startingPrice : auction.currentPrice) }}</span>
             </div>
             <div class="info-col info-col-right">
-              <span class="label">Termina Em</span>
-              <span class="time">{{ new Date(auction.endTime).toLocaleString('pt-MZ') }}</span>
+              <span class="label">{{ isUpcoming ? 'Começa Em' : 'Termina Em' }}</span>
+              <span class="time">
+                {{ isUpcoming ? new Date(auction.startTime).toLocaleString('pt-MZ') : new Date(auction.endTime).toLocaleString('pt-MZ') }}
+              </span>
             </div>
           </div>
           
           <!-- Bid Form -->
           <div class="bidding-section" v-if="!isEnded">
             <h3 class="section-title">Fazer Lance</h3>
-            <div v-if="!authStore.isAuthenticated" class="auth-warning">
+            <div v-if="isUpcoming" class="auth-warning" style="background-color: rgba(255, 152, 0, 0.05); border: 1px solid rgba(255, 152, 0, 0.2); color: #f57c00;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #f57c00; margin-right: 8px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Este leilão está agendado e ainda não começou. Começa em <strong>{{ new Date(auction.startTime).toLocaleString('pt-MZ') }}</strong>.
+            </div>
+            <div v-else-if="!authStore.isAuthenticated" class="auth-warning">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <router-link to="/login">Faça login</router-link> para licitar.
             </div>
@@ -388,6 +394,11 @@ const isEnded = computed(() => {
   return new Date() > new Date(auction.value.endTime) || auction.value.status === 'finished';
 });
 
+const isUpcoming = computed(() => {
+  if (!auction.value) return false;
+  return auction.value.status === 'upcoming' || (auction.value.startTime && new Date() < new Date(auction.value.startTime));
+});
+
 const formatCurrency = (value) => {
   if (value === undefined || value === null) return '0,00 MZN';
   const formatted = new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -690,6 +701,12 @@ onUnmounted(() => {
   background-color: rgba(76, 175, 80, 0.12);
   color: #2e7d32;
   border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-badge.upcoming {
+  background-color: rgba(255, 152, 0, 0.12);
+  color: #f57c00;
+  border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
 .status-badge.ended {

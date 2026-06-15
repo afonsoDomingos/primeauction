@@ -42,6 +42,16 @@ exports.getAuction = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Auction not found' });
     }
 
+    // Resolve status on-demand if startTime has passed but still marked upcoming
+    if (Date.now() >= new Date(auction.startTime).getTime() && auction.status === 'upcoming') {
+      auction = await Auction.findByIdAndUpdate(
+        auction._id,
+        { status: 'active' },
+        { new: true }
+      );
+      console.log(`[ON-DEMAND] Auction "${auction.title}" activated.`);
+    }
+
     // Resolve winner on-demand if auction has expired but still marked active
     if (Date.now() > new Date(auction.endTime).getTime() && auction.status === 'active') {
       const highestBid = await Bid.findOne({ auction: auction._id })
