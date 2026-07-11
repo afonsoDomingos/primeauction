@@ -470,17 +470,17 @@
         <h2 class="features-title">Porquê escolher a Prime Auction?</h2>
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon">⚡</div>
+            <div class="feature-number">01</div>
             <h3>Lances em Tempo Real</h3>
             <p>Tecnologia WebSocket garante que todos vêem os lances instantaneamente, sem necessidade de atualizar a página.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🔒</div>
+            <div class="feature-number">02</div>
             <h3>Segurança Garantida</h3>
             <p>Autenticação JWT robusta e gestão completa de utilizadores pelo administrador da plataforma.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🏆</div>
+            <div class="feature-number">03</div>
             <h3>Leilões Exclusivos</h3>
             <p>Produtos de alta qualidade curados pela nossa equipa, garantindo leilões de prestígio e valor real.</p>
           </div>
@@ -1837,57 +1837,115 @@ onUnmounted(() => {
 
 /* ─── Features Section (Original) ─── */
 .features-section {
-  padding: clamp(60px, 10vw, 100px) 1.5rem;
-  background-color: #ffffff;
+  padding: clamp(80px, 12vw, 120px) 1.5rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  position: relative;
+  overflow: hidden;
 }
 
 .features-title {
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  font-weight: 600;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
   text-align: center;
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
-  color: var(--text-primary);
+  margin-bottom: clamp(3rem, 6vw, 4.5rem);
+  color: #171a20;
+  letter-spacing: -0.8px;
+  position: relative;
+  z-index: 1;
+}
+
+.features-title::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 4px;
+  background: #006643;
+  border-radius: 2px;
+  margin: 0.85rem auto 0;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-  max-width: 1100px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .feature-card {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem 1.75rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 3rem 2rem 2.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
-  border: 1px solid #f3f4f6;
+  border: 1px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #e5e7eb;
+  transition: background-color 0.3s ease;
 }
 
 .feature-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 102, 67, 0.25);
 }
 
-.feature-icon {
-  font-size: 2.25rem;
-  margin-bottom: 1.25rem;
+.feature-card:hover::before {
+  background: #006643;
+}
+
+.feature-number {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  color: #006643;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 102, 67, 0.05);
+}
+
+.feature-card:hover .feature-number {
+  background-color: #006643;
+  color: #ffffff;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 102, 67, 0.2);
 }
 
 .feature-card h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin-bottom: 0.75rem;
-  color: var(--text-primary);
+  color: #171a20;
+  letter-spacing: -0.3px;
 }
 
 .feature-card p {
-  font-size: 0.9rem;
-  color: var(--text-light);
+  font-size: 0.92rem;
+  color: #6b7280;
   line-height: 1.65;
+  margin: 0;
 }
 
 /* ─── Placeholders & Empty states ─── */

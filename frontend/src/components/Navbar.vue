@@ -58,6 +58,24 @@
       </nav>
       
       <div class="nav-actions">
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle-btn" @click="toggleTheme" aria-label="Alterar tema" :title="theme === 'light' ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'">
+          <svg v-if="theme === 'light'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
         <router-link v-if="!authStore.isAuthenticated" to="/login" class="nav-btn nav-btn-ghost" @click="closeMobileMenu">Login</router-link>
         <router-link v-if="!authStore.isAuthenticated" to="/register" class="nav-btn nav-btn-solid" @click="closeMobileMenu">Registar</router-link>
 
@@ -102,6 +120,23 @@ const toastStore = useToastStore();
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
 
+const theme = ref('light');
+
+const toggleTheme = () => {
+  theme.value = theme.value === 'light' ? 'dark' : 'light';
+  applyTheme();
+};
+
+const applyTheme = () => {
+  if (theme.value === 'dark') {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }
+};
+
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
   document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : '';
@@ -124,6 +159,15 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    theme.value = 'dark';
+  } else {
+    theme.value = 'light';
+  }
+  applyTheme();
+
   window.addEventListener('scroll', handleScroll, { passive: true });
 });
 
@@ -458,6 +502,47 @@ onUnmounted(() => {
 
   .nav-btn-ghost {
     border: 1px solid #e5e7eb;
+  }
+}
+
+/* ─── Theme Toggle Button ─── */
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.theme-toggle-btn:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.dark .theme-toggle-btn {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f3f4f6;
+}
+
+.dark .theme-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .theme-toggle-btn {
+    align-self: center;
+    margin-bottom: 0.5rem;
   }
 }
 </style>

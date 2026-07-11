@@ -349,3 +349,349 @@ header.tesla-nav.scrolled {
   transform: translateX(60px) scale(0.9);
 }
 
+/* ─── Dark Theme Overrides ─── */
+.dark {
+  --bg-color: #0d0f12;
+  --text-primary: #f3f4f6;
+  --text-secondary: #cbd5e1;
+  --text-light: #9ca3af;
+  --btn-primary-bg: #3e6ae1;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #1f2937;
+  --btn-secondary-text: #f3f4f6;
+  --header-glass-bg: rgba(13, 15, 18, 0.85);
+  --danger-color: #ef4444;
+  --success-color: #10b981;
+}
+
+/* Backgrounds & Text */
+.dark body {
+  background-color: #0d0f12;
+  color: #f3f4f6;
+}
+
+/* Scroll-to-top button border & hover */
+.dark .scroll-top-btn {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+/* Navbar */
+.dark header.tesla-nav.scrolled {
+  background-color: rgba(13, 15, 18, 0.85);
+  border-bottom: 1px solid #1f2937;
+}
+
+.dark .tesla-nav.scrolled {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dark .nav-links a {
+  color: #f3f4f6;
+}
+
+.dark .nav-links a:hover,
+.dark .nav-links a.router-link-active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .nav-btn-ghost {
+  color: #f3f4f6;
+}
+
+.dark .nav-btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .nav-user-chip {
+  background: rgba(22, 27, 34, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f3f4f6;
+}
+
+.dark .nav-user-chip:hover {
+  background: rgba(22, 27, 34, 0.95);
+  border-color: var(--btn-primary-bg);
+}
+
+.dark .mobile-menu-btn {
+  color: #f3f4f6;
+}
+
+.dark .mobile-menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .nav-content {
+  background-color: #161b22;
+}
+
+.dark .nav-drawer-header {
+  border-bottom-color: #30363d;
+}
+
+.dark .nav-links a {
+  border-bottom-color: #21262d;
+}
+
+.dark .nav-actions {
+  border-top-color: #30363d;
+}
+
+.dark .nav-btn-ghost {
+  border-color: #30363d;
+}
+
+/* Headings */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark .section-title-premium,
+.dark .features-title,
+.dark .newsletter-title,
+.dark .page-title {
+  color: #f3f4f6 !important;
+}
+
+/* Links & Text details */
+.dark p,
+.dark span,
+.dark label,
+.dark .newsletter-subtitle {
+  color: #9ca3af;
+}
+
+.dark strong {
+  color: #f3f4f6;
+}
+
+/* Footer */
+.dark .app-footer {
+  background-color: #090b0e;
+  border-top-color: #1f2937;
+}
+
+.dark .footer-link {
+  color: #f3f4f6;
+}
+
+.dark .footer-link:hover {
+  color: #60a5fa;
+}
+
+/* Cards & Grid Containers */
+.dark .card,
+.dark .feature-card,
+.dark .sales-card,
+.dark .upcoming-card,
+.dark .interest-card,
+.dark .event-card,
+.dark .welcome-popup-card,
+.dark .empty-state-inner,
+.dark .detail-card,
+.dark .auth-card,
+.dark .dashboard-card,
+.dark .admin-card {
+  background-color: #161b22 !important;
+  border-color: #30363d !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .feature-card::before {
+  background-color: #30363d;
+}
+
+.dark .feature-card:hover {
+  border-color: rgba(0, 102, 67, 0.4) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .feature-number {
+  background-color: #21262d;
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.1);
+}
+
+.dark .feature-card:hover .feature-number {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+/* Form controls */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #0d0f12 !important;
+  border-color: #30363d !important;
+  color: #f3f4f6 !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--btn-primary-bg) !important;
+  box-shadow: 0 0 0 3px rgba(62, 106, 225, 0.25) !important;
+}
+
+/* Sections backgrounds */
+.dark .features-section,
+.dark .live-events-section,
+.dark .interests-section,
+.dark .upcoming-auctions-section,
+.dark .finished-auctions-section,
+.dark .newsletter-section,
+.dark .detail-section,
+.dark .auth-section,
+.dark .dashboard-section,
+.dark .admin-section {
+  background: #0d0f12 !important;
+  color: #f3f4f6;
+  border-color: #1f2937 !important;
+}
+
+.dark .features-section {
+  background: linear-gradient(180deg, #0d0f12 0%, #161b22 100%) !important;
+}
+
+.dark .finished-auctions-section {
+  background-color: #161b22 !important;
+}
+
+.dark .sales-grid,
+.dark .interests-grid {
+  border-color: #1f2937;
+}
+
+/* Empty states */
+.dark .premium-empty-state,
+.dark .empty-state-card {
+  background: rgba(22, 27, 34, 0.8) !important;
+  border-color: #30363d !important;
+}
+
+.dark .btn-empty-action-outline {
+  background-color: #161b22;
+  color: #f3f4f6;
+  border-color: #30363d;
+}
+
+.dark .btn-empty-action-outline:hover {
+  background-color: #21262d;
+  border-color: #8b949e;
+}
+
+/* Live Events Slider */
+.dark .event-card-body {
+  border-color: #30363d;
+}
+
+.dark .event-card-footer {
+  border-top-color: #30363d;
+}
+
+.dark .btn-event-outline {
+  border-color: #30363d;
+  color: #f3f4f6;
+}
+
+.dark .btn-event-outline:hover {
+  background-color: #21262d;
+}
+
+/* Watchlist heart details */
+.dark .nav-user-chip,
+.dark .sales-card-info,
+.dark .upcoming-info,
+.dark .interest-info {
+  background: #161b22 !important;
+  color: #f3f4f6 !important;
+  border-color: #30363d;
+}
+
+.dark .sales-price-val,
+.dark .upcoming-price-val,
+.dark .finished-price {
+  color: #f3f4f6 !important;
+}
+
+.dark .sales-price-label,
+.dark .upcoming-price-label {
+  color: #9ca3af;
+}
+
+/* Custom overlay styles */
+.dark .badge-overlay-container .badge-item {
+  background-color: rgba(22, 27, 34, 0.85);
+  color: #f3f4f6;
+}
+
+/* Specific elements on individual views */
+.dark .calendar-container,
+.dark .calendar-grid,
+.dark .calendar-day,
+.dark .calendar-day-header {
+  background-color: #161b22 !important;
+  border-color: #30363d !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .calendar-day.today {
+  background-color: rgba(62, 106, 225, 0.15) !important;
+}
+
+.dark .calendar-day.other-month {
+  color: #484f58 !important;
+  background-color: #0d0f12 !important;
+}
+
+.dark .calendar-event {
+  background-color: #3e6ae1 !important;
+  color: #ffffff !important;
+}
+
+/* Admin Dashboard tables */
+.dark .admin-table,
+.dark .admin-table th,
+.dark .admin-table td {
+  border-color: #30363d !important;
+  background-color: #161b22 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .admin-table th {
+  background-color: #21262d !important;
+}
+
+.dark .admin-sidebar,
+.dark .admin-nav-item {
+  background-color: #161b22 !important;
+  color: #f3f4f6 !important;
+  border-color: #30363d !important;
+}
+
+.dark .admin-nav-item:hover,
+.dark .admin-nav-item.active {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Auction details page specifics */
+.dark .detail-main-info,
+.dark .bid-history-container,
+.dark .bid-row,
+.dark .details-grid,
+.dark .detail-label,
+.dark .detail-value {
+  border-color: #30363d !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .bid-row.my-bid {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.dark .bid-row.highest-bid {
+  background-color: rgba(62, 106, 225, 0.1) !important;
+}
+
