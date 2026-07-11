@@ -1,5 +1,21 @@
 <template>
   <div class="home-container">
+    <!-- Welcome Pop-up Card -->
+    <Transition name="fade">
+      <div v-if="showWelcomeCard" class="welcome-overlay" @click.self="closeWelcomeCard">
+        <div class="welcome-popup-card animate-scale-in">
+          <button class="welcome-close-btn" @click="closeWelcomeCard" aria-label="Fechar">✕</button>
+          <div class="welcome-emoji">👋</div>
+          <h2 class="welcome-popup-title">Bem-vindo à Prime Auctions!</h2>
+          <p class="welcome-popup-text">A maior e melhor plataforma de leilões online em Moçambique.</p>
+          <p class="welcome-popup-sub">Aqui encontra veículos, imóveis, eletrónicos e mobiliário em leilões em tempo real. Pode também licitar de forma rápida ou propor os seus próprios artigos para venda!</p>
+          <div class="welcome-footer-row">
+            <button @click="closeWelcomeCard" class="btn btn-primary btn-pill btn-welcome-action">Começar a Explorar</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Hero Section -->
     <section class="hero-section">
       <!-- Background Slides for Cross-Fade -->
@@ -395,6 +411,14 @@ const router = useRouter();
 const toastStore = useToastStore();
 const authStore = useAuthStore();
 
+const showWelcomeCard = ref(false);
+let welcomeTimeoutId = null;
+
+const closeWelcomeCard = () => {
+  showWelcomeCard.value = false;
+  if (welcomeTimeoutId) clearTimeout(welcomeTimeoutId);
+};
+
 const newsletterEmail = ref('');
 const subscribingNewsletter = ref(false);
 
@@ -681,6 +705,15 @@ onMounted(async () => {
   countdownInterval = setInterval(() => {
     now.value = new Date();
   }, 1000);
+
+  // Check welcome popup status
+  if (!sessionStorage.getItem('hasSeenWelcome')) {
+    showWelcomeCard.value = true;
+    sessionStorage.setItem('hasSeenWelcome', 'true');
+    welcomeTimeoutId = setTimeout(() => {
+      showWelcomeCard.value = false;
+    }, 6000);
+  }
 
   // Load custom homepage settings
   try {
@@ -1944,5 +1977,123 @@ onUnmounted(() => {
     padding: 0.85rem 2rem;
     width: 100%;
   }
+  .stats-row .stat-card:last-child {
+    grid-column: auto;
+  }
+}
+
+/* ── Welcome Pop-up Card Styles ── */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.welcome-popup-card {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  padding: 2.5rem 2rem 2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  position: relative;
+  text-align: center;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.welcome-popup-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(90deg, #1a56db, #7c3aed);
+}
+
+.welcome-close-btn {
+  position: absolute;
+  right: 1.25rem;
+  top: 1.25rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.welcome-close-btn:hover {
+  background-color: #f3f4f6;
+  color: var(--text-primary);
+}
+
+.welcome-emoji {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+  animation: wave 1.5s infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+.welcome-popup-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+
+.welcome-popup-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a56db;
+  margin-bottom: 0.75rem;
+}
+
+.welcome-popup-sub {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
+}
+
+.btn-welcome-action {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  font-weight: 600;
+}
+
+/* Animations */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

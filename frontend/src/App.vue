@@ -24,7 +24,7 @@
 
   <footer class="app-footer">
     <div class="footer-content">
-      <p>&copy; {{ new Date().getFullYear() }} Prime Auctions. Todos os direitos reservados. &bull; <router-link to="/vender" class="footer-link">Vender Connosco</router-link></p>
+      <p>&copy; {{ new Date().getFullYear() }} Prime Auctions. Todos os direitos reservados. &bull; <router-link to="/calendario" class="footer-link">Calendário</router-link> &bull; <router-link to="/vender" class="footer-link">Vender Connosco</router-link></p>
       <p class="footer-attribution">
         Powered by <a href="https://linkedin.com/in/afonso-domingos-6b59361a5/" target="_blank" rel="noopener noreferrer" class="footer-link">Vibe</a>
       </p>
