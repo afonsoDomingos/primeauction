@@ -334,6 +334,62 @@
       </div>
     </section>
 
+    <!-- Finished Auctions Section (Leilões Terminados / Resultados Recentes) -->
+    <section class="finished-auctions-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title-premium">Leilões Terminados</h2>
+          <router-link to="/auctions?status=finished" class="view-all-link">Ver todos</router-link>
+        </div>
+
+        <div v-if="loadingAuctions" class="loading-placeholder">
+          <div class="loading-spinner"></div>
+          <p>A carregar leilões terminados...</p>
+        </div>
+        
+        <div v-else-if="finishedAuctions.length === 0" class="premium-empty-state">
+          <div class="empty-state-glow"></div>
+          <div class="empty-state-inner">
+            <div class="empty-icon-pulse">
+              <span class="icon-pulse-shadow" style="background-color: rgba(107, 114, 128, 0.15);"></span>
+              <span class="icon-pulse-core">🏁</span>
+            </div>
+            <h3 class="empty-title">Sem Leilões Terminados</h3>
+            <p class="empty-text">Ainda não existem leilões encerrados na nossa plataforma. Volte a esta secção assim que os primeiros eventos terminarem!</p>
+          </div>
+        </div>
+
+        <div v-else class="sales-grid">
+          <div 
+            v-for="auction in finishedAuctions" 
+            :key="auction._id"
+            class="sales-card finished-card"
+            @click="goToAuction(auction._id)"
+          >
+            <div class="sales-card-img-wrapper finished-img-wrapper">
+              <img :src="auction.imageUrl" :alt="auction.title" class="sales-card-img dimmed" />
+              <span class="finished-overlay-badge">Terminado</span>
+              
+              <!-- Badges Overlay -->
+              <div class="badge-overlay-container">
+                <span class="badge-item bid-badge">
+                  🔨 {{ auction.bids?.length || 0 }} Lances
+                </span>
+              </div>
+            </div>
+
+            <div class="sales-card-info">
+              <h3 class="sales-car-title">{{ auction.title }}</h3>
+              <div class="sales-price-row">
+                <span class="sales-price-label">Preço Final</span>
+                <span class="sales-price-val finished-price">{{ formatCurrency(auction.currentPrice) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- What others are interested in Section (Mais Procurados / Próximos) -->
     <section class="interests-section">
       <div class="container">
@@ -676,6 +732,7 @@ const toggleLike = async (id) => {
 const liveEvents = ref([]);
 const comingSoonItems = ref([]);
 const upcomingAuctions = ref([]);
+const finishedAuctions = ref([]);
 
 const fetchActiveAuctions = async () => {
   loadingAuctions.value = true;
@@ -722,6 +779,16 @@ const fetchActiveAuctions = async () => {
       }
     } catch (errUpcoming) {
       console.error('Failed to load upcoming auctions:', errUpcoming);
+    }
+
+    // Load finished auctions
+    try {
+      const resFinished = await axios.get(`${apiUrl}/api/auctions?status=finished`);
+      if (resFinished.data && resFinished.data.success) {
+        finishedAuctions.value = resFinished.data.data.slice(0, 4);
+      }
+    } catch (errFinished) {
+      console.error('Failed to load finished auctions:', errFinished);
     }
 
   } catch (err) {
@@ -2268,5 +2335,46 @@ onUnmounted(() => {
   background-color: #f9fafb;
   border-color: #d1d5db;
   transform: translateY(-1px);
+}
+
+/* ── Finished Auctions Styles ── */
+.finished-auctions-section {
+  padding: 3.5rem 1.5rem;
+  background-color: #f9fafb;
+}
+
+.finished-card {
+  border-color: #e5e7eb;
+}
+
+.finished-img-wrapper {
+  background-color: #111;
+}
+
+.sales-card-img.dimmed {
+  opacity: 0.65;
+  filter: grayscale(40%);
+}
+
+.finished-overlay-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(17, 24, 39, 0.85);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+
+.finished-price {
+  color: #4b5563 !important;
 }
 </style>
