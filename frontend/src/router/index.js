@@ -6,6 +6,7 @@ import Auctions from '../views/Auctions.vue'
 import AuctionDetail from '../views/AuctionDetail.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import UserDashboard from '../views/UserDashboard.vue'
+import SellWithUs from '../views/SellWithUs.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -13,6 +14,12 @@ const routes = [
   { path: '/register', name: 'Register', component: Register, meta: { guestOnly: true } },
   { path: '/auctions', name: 'Auctions', component: Auctions },
   { path: '/auction/:id', name: 'AuctionDetail', component: AuctionDetail },
+  {
+    path: '/vender',
+    name: 'SellWithUs',
+    component: SellWithUs,
+    meta: { requiresAuth: true }
+  },
   {
     path: '/admin',
     name: 'AdminDashboard',

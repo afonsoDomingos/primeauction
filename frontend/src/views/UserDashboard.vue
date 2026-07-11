@@ -58,6 +58,20 @@
         </button>
         <button 
           class="tab-btn" 
+          :class="{ active: activeTab === 'watchlist' }" 
+          @click="changeTab('watchlist')"
+        >
+          ❤️ Favoritos (Watchlist)
+        </button>
+        <button 
+          class="tab-btn" 
+          :class="{ active: activeTab === 'proposals' }" 
+          @click="changeTab('proposals')"
+        >
+          📦 Minhas Vendas
+        </button>
+        <button 
+          class="tab-btn" 
           :class="{ active: activeTab === 'edit-profile' }" 
           @click="activeTab = 'edit-profile'"
         >
@@ -131,8 +145,124 @@
         </div>
       </div>
 
+      <!-- TAB Content: Watchlist -->
+      <div v-else-if="activeTab === 'watchlist'">
+        <div class="card bids-card">
+          <div class="bids-header">
+            <h3 class="section-title">Os Meus Favoritos</h3>
+          </div>
+
+          <div v-if="loadingWatchlist" class="loading-state">
+            <div class="spinner"></div>
+            <p>A carregar favoritos...</p>
+          </div>
+
+          <div v-else-if="watchlist.length === 0" class="empty-state">
+            <div class="empty-icon">❤️</div>
+            <h4>Sem leilões nos favoritos</h4>
+            <p>Clique no coração dos leilões que deseja acompanhar para os ver aqui!</p>
+            <router-link to="/auctions" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
+              Explorar Leilões
+            </router-link>
+          </div>
+
+          <ul v-else class="bid-list">
+            <li v-for="item in watchlist" :key="item._id" class="bid-item">
+              <div class="bid-img-wrap" v-if="item.imageUrl">
+                <img :src="item.imageUrl" :alt="item.title" class="bid-img" />
+              </div>
+              
+              <div class="bid-details">
+                <strong class="bid-auction-title">{{ item.title }}</strong>
+                <span class="bid-date">
+                  Estado: 
+                  <strong :style="{ color: item.status === 'active' ? '#10b981' : (item.status === 'upcoming' ? '#f57c00' : '#6b7280') }">
+                    {{ item.status === 'active' ? 'Activo' : (item.status === 'upcoming' ? 'Agendado' : 'Terminado') }}
+                  </strong>
+                </span>
+              </div>
+
+              <div class="bid-right">
+                <span class="bid-amount">{{ formatCurrency(item.currentPrice) }}</span>
+                <div style="display: flex; gap: 0.25rem;">
+                  <router-link :to="`/auction/${item._id}`" class="btn btn-primary btn-sm btn-pill">
+                    Licitar
+                  </router-link>
+                  <button @click="removeFromWatchlist(item._id)" class="btn btn-logout" style="padding: 0.25rem 0.5rem; border-radius: 50%;">
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- TAB Content: Proposals -->
+      <div v-else-if="activeTab === 'proposals'">
+        <div class="card bids-card">
+          <div class="bids-header">
+            <h3 class="section-title">Minhas Propostas de Venda</h3>
+            <router-link to="/vender" class="btn btn-primary btn-pill btn-sm">
+              + Nova Proposta
+            </router-link>
+          </div>
+
+          <div v-if="loadingProposals" class="loading-state">
+            <div class="spinner"></div>
+            <p>A carregar propostas...</p>
+          </div>
+
+          <div v-else-if="proposals.length === 0" class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h4>Nenhuma proposta enviada</h4>
+            <p>Tem artigos ou viaturas que gostaria de leiloar? Envie-nos já uma proposta!</p>
+            <router-link to="/vender" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
+              Vender Connosco
+            </router-link>
+          </div>
+
+          <div v-else class="table-responsive">
+            <table class="proposal-table">
+              <thead>
+                <tr>
+                  <th>Artigo</th>
+                  <th>Categoria</th>
+                  <th>Valor Estimado</th>
+                  <th>Estado</th>
+                  <th>Data</th>
+                  <th>Notas Admin</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="prop in proposals" :key="prop._id">
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <img v-if="prop.images && prop.images[0]" :src="prop.images[0]" class="prop-table-img" />
+                      <div class="prop-table-title-wrap">
+                        <span class="prop-table-title">{{ prop.title }}</span>
+                        <span class="prop-table-condition">{{ prop.condition }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ prop.category }}</td>
+                  <td><strong>{{ formatCurrency(prop.estimatedValue) }}</strong></td>
+                  <td>
+                    <span class="status-badge" :class="prop.status">
+                      {{ prop.status === 'pending' ? 'Pendente' : (prop.status === 'approved' ? 'Aprovado' : 'Rejeitado') }}
+                    </span>
+                  </td>
+                  <td>{{ new Date(prop.createdAt).toLocaleDateString('pt-MZ') }}</td>
+                  <td class="admin-notes-cell">{{ prop.adminNotes || '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB Content: Edit Profile -->
-      <div v-else class="edit-profile-layout">
+      <div v-else-if="activeTab === 'edit-profile'" class="edit-profile-layout">
         <!-- Profile Info Form -->
         <div class="card edit-card">
           <h3 class="edit-title">📋 Informações Pessoais</h3>
@@ -245,6 +375,68 @@ const toastStore = useToastStore();
 const bids = ref([]);
 const loading = ref(true);
 const activeTab = ref('activity');
+
+const watchlist = ref([]);
+const loadingWatchlist = ref(false);
+const proposals = ref([]);
+const loadingProposals = ref(false);
+
+const changeTab = (tab) => {
+  activeTab.value = tab;
+  if (tab === 'watchlist') {
+    fetchWatchlist();
+  } else if (tab === 'proposals') {
+    fetchMyProposals();
+  }
+};
+
+const fetchWatchlist = async () => {
+  loadingWatchlist.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/users/watchlist`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    watchlist.value = res.data.data;
+  } catch (err) {
+    console.error('Error fetching watchlist:', err);
+    toastStore.error('Erro ao carregar favoritos.');
+  } finally {
+    loadingWatchlist.value = false;
+  }
+};
+
+const removeFromWatchlist = async (auctionId) => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(`${apiUrl}/api/users/watchlist/${auctionId}`, {}, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data && res.data.success) {
+      toastStore.success('Removido dos favoritos. ✓');
+      fetchWatchlist();
+    }
+  } catch (err) {
+    console.error('Failed to remove from watchlist:', err);
+    toastStore.error('Erro ao remover dos favoritos.');
+  }
+};
+
+const fetchMyProposals = async () => {
+  loadingProposals.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/proposals/myproposals`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    proposals.value = res.data.data;
+  } catch (err) {
+    console.error('Error fetching proposals:', err);
+    toastStore.error('Erro ao carregar propostas.');
+  } finally {
+    loadingProposals.value = false;
+  }
+};
 
 // Edit Forms State
 const profileForm = ref({
@@ -975,5 +1167,79 @@ select.form-input {
   .stats-row .stat-card:last-child {
     grid-column: auto;
   }
+}
+
+/* ── Proposal Table ── */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.proposal-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.proposal-table th,
+.proposal-table td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.88rem;
+}
+
+.proposal-table th {
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  background-color: #fafafa;
+}
+
+.prop-table-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+
+.prop-table-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.prop-table-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.prop-table-condition {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.admin-notes-cell {
+  color: var(--text-secondary);
+  font-style: italic;
+  max-width: 250px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.status-badge.pending {
+  background-color: #fff8e1;
+  color: #b78103;
+}
+
+.status-badge.approved {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.rejected {
+  background-color: #ffebee;
+  color: #c62828;
 }
 </style>

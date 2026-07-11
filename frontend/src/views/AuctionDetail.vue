@@ -36,7 +36,21 @@
             {{ isEnded ? 'Terminado' : (isUpcoming ? 'Agendado' : 'Activo') }}
           </span>
 
-          <h1 class="title">{{ auction.title }}</h1>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1rem;">
+            <h1 class="title" style="margin-bottom: 0;">{{ auction.title }}</h1>
+            <button 
+              v-if="authStore.isAuthenticated && !authStore.isAdmin"
+              @click="toggleWatchlist" 
+              class="btn-detail-heart"
+              :class="{ liked: isLiked }"
+              title="Adicionar aos favoritos"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              <span class="heart-count" v-if="auction.likesCount > 0">{{ auction.likesCount }}</span>
+            </button>
+          </div>
           <p class="description">{{ auction.description }}</p>
           
           <!-- Price & Timer -->
@@ -124,6 +138,151 @@
           <!-- Bids History -->
           <div class="history-section">
             <h3 class="section-title">Histórico de Lances <span class="bid-count">{{ bids.length }}</span></h3>
+            
+            <!-- Graphic Chart of Bids -->
+            <div v-if="chartData.length > 1" class="bid-chart-card animate-fade-in">
+              <h4 class="chart-card-title">Evolução do Preço</h4>
+              <div class="chart-wrapper">
+                <div class="chart-container-relative">
+                  <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" width="100%" height="100%" class="price-chart-svg">
+                    <defs>
+                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#1a56db" stop-opacity="0.25" />
+                        <stop offset="100%" stop-color="#1a56db" stop-opacity="0.00" />
+                      </linearGradient>
+                      <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#3b82f6" />
+                        <stop offset="50%" stop-color="#1a56db" />
+                        <stop offset="100%" stop-color="#7c3aed" />
+                      </linearGradient>
+                    </defs>
+                    
+                    <!-- Horizontal Gridlines -->
+                    <g class="grid-lines">
+                      <line 
+                        v-for="tick in yTicks" 
+                        :key="'grid-' + tick.y"
+                        :x1="padding.left" 
+                        :y1="tick.y" 
+                        :x2="chartWidth - padding.right" 
+                        :y2="tick.y" 
+                        stroke="#f3f4f6" 
+                        stroke-width="1"
+                      />
+                    </g>
+                    
+                    <!-- Y Axis Labels -->
+                    <g class="y-axis-labels">
+                      <text 
+                        v-for="tick in yTicks" 
+                        :key="'label-' + tick.y"
+                        :x="padding.left - 10" 
+                        :y="tick.y + 4" 
+                        text-anchor="end" 
+                        class="axis-text"
+                      >
+                        {{ tick.label }}
+                      </text>
+                    </g>
+                    
+                    <!-- X Axis Line -->
+                    <line 
+                      :x1="padding.left" 
+                      :y1="chartHeight - padding.bottom" 
+                      :x2="chartWidth - padding.right" 
+                      :y2="chartHeight - padding.bottom" 
+                      stroke="#e5e7eb" 
+                      stroke-width="1.5"
+                    />
+
+                    <!-- X Axis Labels (Bid order / dates) -->
+                    <g class="x-axis-labels">
+                      <text 
+                        v-for="tick in xTicks" 
+                        :key="'x-label-' + tick.index"
+                        :x="tick.x" 
+                        :y="chartHeight - padding.bottom + 20" 
+                        text-anchor="middle" 
+                        class="axis-text x-axis-text"
+                      >
+                        {{ tick.index === 0 ? 'Início' : `#${tick.index}` }}
+                      </text>
+                    </g>
+                    
+                    <!-- Hover Guideline -->
+                    <line 
+                      v-if="hoveredPoint" 
+                      :x1="hoveredPoint.x" 
+                      :y1="padding.top" 
+                      :x2="hoveredPoint.x" 
+                      :y2="chartHeight - padding.bottom" 
+                      stroke="#d1d5db" 
+                      stroke-width="1" 
+                      stroke-dasharray="3 3"
+                    />
+                    
+                    <!-- Area Under Line -->
+                    <path :d="areaPath" fill="url(#areaGrad)" />
+                    
+                    <!-- Line Chart Path -->
+                    <path 
+                      :d="linePath" 
+                      fill="none" 
+                      stroke="url(#lineGrad)" 
+                      stroke-width="2.5" 
+                      stroke-linecap="round" 
+                      stroke-linejoin="round"
+                    />
+                    
+                    <!-- Interactive Dots -->
+                    <g class="chart-dots">
+                      <g 
+                        v-for="p in chartPoints" 
+                        :key="'dot-' + p.index"
+                        @mouseover="hoveredPoint = p"
+                        @mouseleave="hoveredPoint = null"
+                      >
+                        <!-- Visual Circle -->
+                        <circle 
+                          :cx="p.x" 
+                          :cy="p.y" 
+                          :r="hoveredPoint && hoveredPoint.index === p.index ? 6 : 4" 
+                          :fill="hoveredPoint && hoveredPoint.index === p.index ? '#1a56db' : '#3b82f6'" 
+                          stroke="white" 
+                          :stroke-width="hoveredPoint && hoveredPoint.index === p.index ? 2.5 : 1.5"
+                          class="chart-circle"
+                        />
+                        <!-- Large Hover hit area -->
+                        <circle 
+                          :cx="p.x" 
+                          :cy="p.y" 
+                          r="16" 
+                          fill="transparent" 
+                          style="cursor: pointer;"
+                        />
+                      </g>
+                    </g>
+                  </svg>
+                  
+                  <!-- Tooltip -->
+                  <div 
+                    v-if="hoveredPoint" 
+                    class="chart-tooltip"
+                    :style="{ 
+                      left: `${(hoveredPoint.x / chartWidth) * 100}%`, 
+                      top: `${(hoveredPoint.y / chartHeight) * 100 - 8}%` 
+                    }"
+                  >
+                    <div class="tooltip-amount">{{ hoveredPoint.label }}</div>
+                    <div class="tooltip-meta">
+                      <span class="tooltip-user">{{ hoveredPoint.user }}</span>
+                      <span class="tooltip-date">{{ hoveredPoint.date }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <ul class="bid-list">
               <li v-for="(bid, index) in bids" :key="bid._id" class="bid-item" :class="{ 'top-bid': index === 0 }">
                 <div class="bid-left">
@@ -293,6 +452,48 @@ const displayBidAmount = ref('');
 const activeImage = ref('');
 let socket = null;
 
+const userWatchlist = ref([]);
+const fetchUserWatchlist = async () => {
+  if (!authStore.isAuthenticated) return;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/users/watchlist`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    userWatchlist.value = res.data.data.map(item => item._id || item.id);
+  } catch (err) {
+    console.error('Error fetching watchlist:', err);
+  }
+};
+
+const isLiked = computed(() => {
+  if (!auction.value) return false;
+  return userWatchlist.value.includes(auction.value._id || auction.value.id);
+});
+
+const toggleWatchlist = async () => {
+  if (!auction.value) return;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(`${apiUrl}/api/users/watchlist/${auction.value._id}`, {}, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data && res.data.success) {
+      if (res.data.isAdded) {
+        userWatchlist.value.push(auction.value._id);
+        toastStore.success('Adicionado aos favoritos! ❤️');
+      } else {
+        userWatchlist.value = userWatchlist.value.filter(id => id !== auction.value._id);
+        toastStore.success('Removido dos favoritos.');
+      }
+      auction.value.likesCount = res.data.count;
+    }
+  } catch (err) {
+    console.error('Error toggling watchlist:', err);
+    toastStore.error('Erro ao atualizar favoritos.');
+  }
+};
+
 // Utility functions for bid input formatting (thousands: dot, decimals: comma)
 const parseFormattedNumber = (str) => {
   if (!str) return 0;
@@ -404,6 +605,140 @@ const formatCurrency = (value) => {
   const formatted = new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   return `${formatted} MZN`;
 };
+
+// --- SVG Chart Logic ---
+const chartWidth = 500;
+const chartHeight = 220;
+const padding = { top: 25, bottom: 40, left: 65, right: 25 };
+const hoveredPoint = ref(null);
+
+const formatShortCurrency = (val) => {
+  if (val === undefined || val === null) return '0 MZN';
+  if (val >= 1000000) {
+    return `${(val / 1000000).toFixed(1).replace('.', ',')}M MZN`;
+  }
+  if (val >= 1000) {
+    return `${(val / 1000).toFixed(0)}k MZN`;
+  }
+  return `${val.toFixed(0)} MZN`;
+};
+
+const chartData = computed(() => {
+  if (!auction.value) return [];
+  
+  const points = [{
+    amount: auction.value.startingPrice,
+    label: formatCurrency(auction.value.startingPrice),
+    date: auction.value.startTime ? new Date(auction.value.startTime).toLocaleString('pt-MZ') : '',
+    user: 'Preço Inicial'
+  }];
+  
+  const chronoBids = [...bids.value].reverse();
+  chronoBids.forEach(bid => {
+    points.push({
+      amount: bid.amount,
+      label: formatCurrency(bid.amount),
+      date: bid.createdAt ? new Date(bid.createdAt).toLocaleString('pt-MZ') : '',
+      user: bid.user?.name || 'Licitante'
+    });
+  });
+  
+  return points;
+});
+
+const chartMinVal = computed(() => {
+  if (!chartData.value.length) return 0;
+  return Math.min(...chartData.value.map(p => p.amount));
+});
+
+const chartMaxVal = computed(() => {
+  if (!chartData.value.length) return 100;
+  const max = Math.max(...chartData.value.map(p => p.amount));
+  const min = chartMinVal.value;
+  return max === min ? max + 1000 : max;
+});
+
+const chartPoints = computed(() => {
+  const data = chartData.value;
+  if (!data.length) return [];
+  
+  const minX = padding.left;
+  const maxX = chartWidth - padding.right;
+  const minY = chartHeight - padding.bottom;
+  const maxY = padding.top;
+  
+  const minVal = chartMinVal.value;
+  const maxVal = chartMaxVal.value;
+  const valRange = maxVal - minVal || 1;
+  const xRange = maxX - minX;
+  const yRange = minY - maxY;
+  
+  const n = data.length;
+  
+  return data.map((d, i) => {
+    const x = n > 1 ? minX + (i / (n - 1)) * xRange : (minX + maxX) / 2;
+    const y = minY - ((d.amount - minVal) / valRange) * yRange;
+    return {
+      x,
+      y,
+      amount: d.amount,
+      label: d.label,
+      date: d.date,
+      user: d.user,
+      index: i
+    };
+  });
+});
+
+const linePath = computed(() => {
+  const points = chartPoints.value;
+  if (points.length === 0) return '';
+  return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+});
+
+const areaPath = computed(() => {
+  const points = chartPoints.value;
+  if (points.length === 0) return '';
+  const first = points[0];
+  const last = points[points.length - 1];
+  const bottomY = chartHeight - padding.bottom;
+  return `${linePath.value} L ${last.x} ${bottomY} L ${first.x} ${bottomY} Z`;
+});
+
+const yTicks = computed(() => {
+  const minVal = chartMinVal.value;
+  const maxVal = chartMaxVal.value;
+  const diff = maxVal - minVal;
+  
+  const ticks = [];
+  const count = 4;
+  for (let i = 0; i < count; i++) {
+    const val = minVal + (diff * (i / (count - 1)));
+    const y = (chartHeight - padding.bottom) - (i / (count - 1)) * (chartHeight - padding.bottom - padding.top);
+    ticks.push({
+      value: val,
+      label: formatShortCurrency(val),
+      y
+    });
+  }
+  return ticks;
+});
+
+const xTicks = computed(() => {
+  const points = chartPoints.value;
+  if (points.length === 0) return [];
+  if (points.length <= 5) return points;
+  
+  const indices = [
+    0,
+    Math.floor((points.length - 1) * 0.25),
+    Math.floor((points.length - 1) * 0.5),
+    Math.floor((points.length - 1) * 0.75),
+    points.length - 1
+  ];
+  const uniqueIndices = [...new Set(indices)];
+  return uniqueIndices.map(idx => points[idx]);
+});
 
 // Smart Bidding Logic
 const isLeader = computed(() => {
@@ -544,6 +879,7 @@ const executePlaceBid = async () => {
 
 onMounted(() => {
   fetchAuctionData();
+  fetchUserWatchlist();
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   socket = io(apiUrl);
   socket.emit('join_auction', route.params.id);
@@ -1406,5 +1742,152 @@ onUnmounted(() => {
 
 .btn-suggestion:active {
   transform: translateY(0);
+}
+
+/* ── Watchlist Detail Heart Button ── */
+.btn-detail-heart {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  color: #9ca3af;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.btn-detail-heart:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  transform: scale(1.06);
+  background-color: #ffebee;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);
+}
+
+.btn-detail-heart.liked {
+  border-color: #ef4444;
+  color: #ef4444;
+  background-color: #ffebee;
+}
+
+.heart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0.1rem 0.35rem;
+  border: 1.5px solid white;
+}
+
+/* ─── Bid Price Evolution Chart ─── */
+.bid-chart-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+}
+
+.chart-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.chart-container-relative {
+  position: relative;
+  width: 100%;
+}
+
+.price-chart-svg {
+  display: block;
+  overflow: visible;
+}
+
+.axis-text {
+  font-size: 0.65rem;
+  fill: #9ca3af;
+  font-weight: 500;
+  font-family: inherit;
+  user-select: none;
+}
+
+.x-axis-text {
+  fill: #6b7280;
+}
+
+.chart-circle {
+  transition: r 0.2s ease, stroke-width 0.2s ease, fill 0.2s ease;
+}
+
+/* Tooltip Container */
+.chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: white;
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+  transition: left 0.1s ease, top 0.1s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Arrow for the tooltip */
+.chart-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(17, 24, 39, 0.95) transparent transparent transparent;
+}
+
+.tooltip-amount {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+.tooltip-meta {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.7rem;
+  color: #d1d5db;
+}
+
+.tooltip-user {
+  font-weight: 600;
+  color: white;
+}
+
+.tooltip-date {
+  color: #9ca3af;
 }
 </style>

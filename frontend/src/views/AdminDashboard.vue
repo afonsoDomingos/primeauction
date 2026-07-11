@@ -283,6 +283,67 @@
           </form>
         </div>
 
+        <!-- ── Propostas de Venda ── -->
+        <div class="card admin-card">
+          <div class="card-header-row">
+            <span class="card-icon">📦</span>
+            <h3 class="section-title">Propostas de Venda</h3>
+            <span class="record-count">{{ proposals.length }}</span>
+          </div>
+          <p class="settings-hint">Análise propostas enviadas por utilizadores para leilões e aprove para convertê-las em leilões activos.</p>
+          
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Artigo</th>
+                  <th>Contacto</th>
+                  <th>Valor</th>
+                  <th>Estado</th>
+                  <th>Acções</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="proposals.length === 0">
+                  <td colspan="5" class="empty-row">Nenhuma proposta de venda recebida.</td>
+                </tr>
+                <tr v-for="prop in proposals" :key="prop._id">
+                  <td>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                      <img v-if="prop.images && prop.images[0]" :src="prop.images[0]" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;" />
+                      <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: 600; font-size: 0.85rem;">{{ prop.title }}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-light)">{{ prop.category }} &bull; {{ prop.condition }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; flex-direction: column; font-size: 0.8rem; gap: 2px;">
+                      <span>👤 {{ prop.user?.name }}</span>
+                      <span>📞 {{ prop.contactPhone }}</span>
+                    </div>
+                  </td>
+                  <td class="price-cell">{{ formatCurrency(prop.estimatedValue) }}</td>
+                  <td>
+                    <span :class="['badge', prop.status === 'approved' ? 'badge-active' : (prop.status === 'pending' ? 'badge-upcoming' : 'badge-ended')]">
+                      {{ prop.status === 'pending' ? 'Pendente' : (prop.status === 'approved' ? 'Aprovado' : 'Rejeitado') }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-btns" v-if="prop.status === 'pending'">
+                      <button @click="approveProposalAndPrefill(prop)" class="btn btn-sm btn-primary">Aprovar & Criar</button>
+                      <button @click="rejectProposal(prop)" class="btn btn-sm btn-danger">Rejeitar</button>
+                    </div>
+                    <span v-else style="font-size: 0.8rem; color: var(--text-light); font-style: italic;">
+                      {{ prop.status === 'approved' ? 'Aprovado' : 'Rejeitado' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- ── Utilizadores ── -->
         <div class="card admin-card">
           <div class="card-header-row">
@@ -806,6 +867,8 @@ const savingPartners = ref(false);
 const partnerFileInputs = ref([]);
 const auctions = ref([]);
 const tickets = ref([]);
+const proposals = ref([]);
+const proposalBeingConverted = ref(null);
 
 // ── Homepage Settings ──
 const defaultHeroImage = 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
@@ -992,21 +1055,66 @@ const formatCurrency = (value) => {
 
 const fetchData = async () => {
   try {
-    const [usersRes, auctionsRes, ticketsRes, categoriesRes, subscribersRes] = await Promise.all([
+    const [usersRes, auctionsRes, ticketsRes, categoriesRes, subscribersRes, proposalsRes] = await Promise.all([
       axios.get(`${apiUrl}/api/users`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/auctions`),
       axios.get(`${apiUrl}/api/support`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/categories`),
-      axios.get(`${apiUrl}/api/newsletter/subscribers`, { headers: { Authorization: `Bearer ${authStore.token}` } })
+      axios.get(`${apiUrl}/api/newsletter/subscribers`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
+      axios.get(`${apiUrl}/api/proposals`, { headers: { Authorization: `Bearer ${authStore.token}` } })
     ]);
     users.value = usersRes.data.data;
     auctions.value = auctionsRes.data.data;
     tickets.value = ticketsRes.data.data;
     categories.value = categoriesRes.data.data;
     subscribers.value = subscribersRes.data.data;
+    proposals.value = proposalsRes.data.data;
   } catch (err) {
     console.error('Error fetching admin data:', err);
   }
+};
+
+const updateProposalStatus = async (id, status, adminNotes = '') => {
+  try {
+    const res = await axios.put(`${apiUrl}/api/proposals/${id}/status`, { status, adminNotes }, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data.success) {
+      showAlert('Estado da proposta atualizado! ✓');
+      fetchData();
+    }
+  } catch (err) {
+    showAlert('Erro ao atualizar proposta: ' + (err.response?.data?.error || err.message), 'error');
+  }
+};
+
+const approveProposalAndPrefill = (prop) => {
+  proposalBeingConverted.value = prop;
+  form.value.title = prop.title;
+  form.value.description = prop.description;
+  form.value.category = prop.category;
+  form.value.startingPrice = prop.estimatedValue;
+  form.value.images = [...prop.images];
+  form.value.imageUrl = prop.images.length > 0 ? prop.images[0] : '';
+  
+  const target = document.querySelector('.create-form');
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth' });
+  }
+  showAlert('Proposta carregada no formulário de criação! Defina as datas e confirme.', 'success');
+};
+
+const rejectProposal = (prop) => {
+  openConfirm({
+    title: 'Rejeitar Proposta',
+    message: `Tem a certeza que deseja rejeitar a proposta "${prop.title}"?`,
+    btnText: 'Rejeitar',
+    btnClass: 'btn-danger',
+    action: async () => {
+      const notes = prompt('Motivo da rejeição (opcional):') || 'Não cumpre os requisitos mínimos da plataforma.';
+      await updateProposalStatus(prop._id, 'rejected', notes);
+    }
+  });
 };
 
 const filteredSubscribers = computed(() => {
@@ -1135,6 +1243,17 @@ const handleCreate = async () => {
     await axios.post(`${apiUrl}/api/auctions`, form.value, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
+
+    if (proposalBeingConverted.value) {
+      await axios.put(`${apiUrl}/api/proposals/${proposalBeingConverted.value._id}/status`, {
+        status: 'approved',
+        adminNotes: 'Convertido em leilão público com sucesso.'
+      }, {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      });
+      proposalBeingConverted.value = null;
+    }
+
     form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, startTime: '', endTime: '', category: '' };
     showAlert('Leilão criado com sucesso! ✓');
     fetchData();

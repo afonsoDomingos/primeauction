@@ -389,9 +389,11 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useToastStore } from '../stores/toastStore';
+import { useAuthStore } from '../stores/authStore';
 
 const router = useRouter();
 const toastStore = useToastStore();
+const authStore = useAuthStore();
 
 const newsletterEmail = ref('');
 const subscribingNewsletter = ref(false);
@@ -522,33 +524,71 @@ const restartSlideshow = () => {
   }
 };
 
-// Likes simulation logic
-const initLikes = (id) => {
-  if (localLikesCount.value[id] === undefined) {
-    // Generate a realistic stable like count based on auction ID string
-    const hex = id.substring(id.length - 4);
-    const numeric = parseInt(hex, 16) || 0;
-    localLikesCount.value[id] = (numeric % 150) + 12;
+const userWatchlist = ref([]);
+
+const fetchWatchlist = async () => {
+  if (!authStore.isAuthenticated) return;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/users/watchlist`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    userWatchlist.value = res.data.data.map(item => item._id || item.id);
+  } catch (err) {
+    console.error('Failed to fetch user watchlist:', err);
   }
 };
 
 const isLiked = (id) => {
-  return !!likedAuctions.value[id];
+  return userWatchlist.value.includes(id);
 };
 
 const getLikesCount = (id) => {
-  initLikes(id);
+  const auctionItem = featuredAuctions.value.find(a => a._id === id) || comingSoonItems.value.find(a => a._id === id);
+  if (auctionItem && auctionItem.likesCount !== undefined) {
+    return auctionItem.likesCount;
+  }
+  
+  if (localLikesCount.value[id] === undefined) {
+    const hex = id.substring(id.length - 4);
+    const numeric = parseInt(hex, 16) || 0;
+    localLikesCount.value[id] = (numeric % 15) + 2;
+  }
   return localLikesCount.value[id];
 };
 
-const toggleLike = (id) => {
-  initLikes(id);
-  if (likedAuctions.value[id]) {
-    likedAuctions.value[id] = false;
-    localLikesCount.value[id]--;
-  } else {
-    likedAuctions.value[id] = true;
-    localLikesCount.value[id]++;
+const toggleLike = async (id) => {
+  if (!authStore.isAuthenticated) {
+    toastStore.add('Por favor, faça login para adicionar aos favoritos.', 'warning');
+    router.push('/login');
+    return;
+  }
+  
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(`${apiUrl}/api/users/watchlist/${id}`, {}, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data && res.data.success) {
+      if (res.data.isAdded) {
+        userWatchlist.value.push(id);
+        toastStore.add('Adicionado aos favoritos! ❤️', 'success');
+      } else {
+        userWatchlist.value = userWatchlist.value.filter(item => item !== id);
+        toastStore.add('Removido dos favoritos.', 'success');
+      }
+      
+      const updateItem = (item) => {
+        if (item._id === id) {
+          item.likesCount = res.data.count;
+        }
+      };
+      featuredAuctions.value.forEach(updateItem);
+      comingSoonItems.value.forEach(updateItem);
+    }
+  } catch (err) {
+    console.error('Failed to toggle watchlist:', err);
+    toastStore.add('Erro ao atualizar favoritos.', 'error');
   }
 };
 
@@ -612,6 +652,7 @@ const fetchActiveAuctions = async () => {
 
 onMounted(async () => {
   window.addEventListener('resize', onResize);
+  await fetchWatchlist();
 
   // Load custom homepage settings
   try {

@@ -56,6 +56,13 @@ const userSchema = new mongoose.Schema({
   age: {
     type: Number,
     default: null
+  },
+  watchlist: {
+    type: [{
+      type: mongoose.Schema.ObjectId,
+      ref: 'Auction'
+    }],
+    default: []
   }
 }, {
   timestamps: true

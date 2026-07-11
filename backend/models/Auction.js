@@ -63,6 +63,10 @@ const auctionSchema = new mongoose.Schema({
     required: [true, 'Please add a category'],
     default: 'Outros',
     trim: true
+  },
+  likesCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true,
