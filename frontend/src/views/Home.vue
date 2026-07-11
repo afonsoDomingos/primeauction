@@ -134,8 +134,20 @@
           <p>A carregar leilões ao vivo...</p>
         </div>
         
-        <div v-else-if="liveEvents.length === 0" class="empty-state-card" style="text-align: center; padding: 3rem 1.5rem; background: white; border-radius: 12px; border: 1px solid #e5e7eb; color: var(--text-light); margin-bottom: 2rem;">
-          <p>Nenhum leilão ao vivo no momento.</p>
+        <div v-else-if="liveEvents.length === 0" class="premium-empty-state">
+          <div class="empty-state-glow"></div>
+          <div class="empty-state-inner">
+            <div class="empty-icon-pulse">
+              <span class="icon-pulse-shadow" style="background-color: rgba(239, 68, 68, 0.15);"></span>
+              <span class="icon-pulse-core">🔴</span>
+            </div>
+            <h3 class="empty-title">Sem Leilões ao Vivo</h3>
+            <p class="empty-text">De momento, não existem eventos a decorrer em direto. Espreite os leilões agendados ou explore o catálogo geral.</p>
+            <div class="empty-actions">
+              <router-link to="/auctions" class="btn btn-empty-action">Ver Catálogo Geral</router-link>
+              <a href="#upcoming-auctions" class="btn btn-empty-action-outline">Ver Próximos Leilões</a>
+            </div>
+          </div>
         </div>
         
         <div v-else class="live-events-scroll-container">
@@ -208,8 +220,19 @@
           <p>A carregar destaques...</p>
         </div>
         
-        <div v-else-if="featuredAuctions.length === 0" class="empty-state-card">
-          <p>Nenhum leilão em destaque no momento.</p>
+        <div v-else-if="featuredAuctions.length === 0" class="premium-empty-state">
+          <div class="empty-state-glow"></div>
+          <div class="empty-state-inner">
+            <div class="empty-icon-pulse">
+              <span class="icon-pulse-shadow" style="background-color: rgba(250, 204, 21, 0.2);"></span>
+              <span class="icon-pulse-core">⭐</span>
+            </div>
+            <h3 class="empty-title">Sem Destaques de Momento</h3>
+            <p class="empty-text">Estamos a selecionar os melhores artigos e veículos para apresentar nesta secção. Volte brevemente!</p>
+            <div class="empty-actions">
+              <router-link to="/vender" class="btn btn-empty-action">Propor o Seu Artigo</router-link>
+            </div>
+          </div>
         </div>
 
         <div v-else class="sales-grid">
@@ -266,8 +289,19 @@
           <p>A carregar leilões por vir...</p>
         </div>
         
-        <div v-else-if="upcomingAuctions.length === 0" class="empty-state-card" style="text-align: center; padding: 3rem 1.5rem; background: white; border-radius: 12px; border: 1px solid #e5e7eb; color: var(--text-light); margin-bottom: 2rem;">
-          <p>Nenhum leilão agendado de momento.</p>
+        <div v-else-if="upcomingAuctions.length === 0" class="premium-empty-state">
+          <div class="empty-state-glow"></div>
+          <div class="empty-state-inner">
+            <div class="empty-icon-pulse">
+              <span class="icon-pulse-shadow" style="background-color: rgba(26, 86, 219, 0.2);"></span>
+              <span class="icon-pulse-core">📅</span>
+            </div>
+            <h3 class="empty-title">Sem Leilões Agendados</h3>
+            <p class="empty-text">Não há novos leilões agendados para os próximos dias. Acompanhe o nosso calendário para ficar a par das novidades!</p>
+            <div class="empty-actions">
+              <router-link to="/calendario" class="btn btn-empty-action">Ver Calendário</router-link>
+            </div>
+          </div>
         </div>
 
         <div v-else class="upcoming-scroll-container">
@@ -2095,5 +2129,144 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* ── Premium Empty State Styles ── */
+.premium-empty-state {
+  position: relative;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(229, 231, 235, 0.7);
+  border-radius: 20px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+}
+
+.premium-empty-state:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(26, 86, 219, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.empty-state-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-icon-pulse {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.icon-pulse-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: rgba(239, 68, 68, 0.15);
+  animation: pulse-ring 2.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+.icon-pulse-core {
+  font-size: 2.2rem;
+  z-index: 2;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.8;
+  }
+  80%, 100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.empty-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 460px;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-empty-action {
+  background-color: var(--btn-primary-bg);
+  color: white;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 30px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(26, 86, 219, 0.15);
+}
+
+.btn-empty-action:hover {
+  background-color: #1a56db;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(26, 86, 219, 0.25);
+  color: white;
+}
+
+.btn-empty-action-outline {
+  background-color: white;
+  color: var(--text-primary);
+  border: 1px solid #e5e7eb;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 30px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.btn-empty-action-outline:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
 }
 </style>
