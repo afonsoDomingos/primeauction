@@ -430,7 +430,7 @@ onUnmounted(() => {
     right: 0;
     bottom: 0;
     width: min(320px, 85vw);
-    background-color: #fff;
+    background-color: var(--bg-color);
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
@@ -452,7 +452,7 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     padding: 1.5rem 1.5rem 1rem;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-color, #f0f0f0);
     margin-bottom: 0.5rem;
   }
 
@@ -469,7 +469,7 @@ onUnmounted(() => {
     padding: 1rem 1.5rem;
     font-size: 1rem;
     border-radius: 0;
-    border-bottom: 1px solid #f7f7f7;
+    border-bottom: 1px solid var(--border-color, #f7f7f7);
     gap: 10px;
   }
 
@@ -480,7 +480,7 @@ onUnmounted(() => {
 
   .nav-links a:hover,
   .nav-links a.router-link-active {
-    background-color: #f5f8ff;
+    background-color: var(--nav-link-hover, #f5f8ff);
     color: var(--btn-primary-bg);
   }
 
@@ -491,7 +491,7 @@ onUnmounted(() => {
     padding: 1.5rem;
     gap: 0.75rem;
     margin-top: auto;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--border-color, #f0f0f0);
   }
 
   .nav-btn {
@@ -503,14 +503,14 @@ onUnmounted(() => {
   }
 
   .nav-btn-ghost {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color, #e5e7eb);
   }
 }
 
 /* ─── Theme Toggle Button ─── */
 .theme-toggle-btn {
   background: none;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
   color: var(--text-primary);
   cursor: pointer;
   padding: 0.5rem;
@@ -526,8 +526,8 @@ onUnmounted(() => {
 }
 
 .theme-toggle-btn:hover {
-  background-color: rgba(0, 0, 0, 0.06);
-  border-color: rgba(0, 0, 0, 0.15);
+  background-color: var(--nav-link-hover, rgba(0, 0, 0, 0.06));
+  border-color: var(--border-color, rgba(0, 0, 0, 0.15));
   transform: scale(1.05);
 }
 
@@ -543,8 +543,20 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .theme-toggle-btn {
+    width: 48px;
+    height: 48px;
+    background-color: var(--btn-secondary-bg);
+    border-color: var(--border-color, rgba(0,0,0,0.1));
+    color: var(--text-primary) !important;
     align-self: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .dark .theme-toggle-btn {
+    background-color: #1f2937;
+    border-color: #30363d;
+    color: #f3f4f6 !important;
   }
 }
 </style>
