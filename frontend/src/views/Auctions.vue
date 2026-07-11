@@ -74,9 +74,9 @@
                 <span class="price-value">{{ formatCurrency(auction.status === 'upcoming' ? auction.startingPrice : auction.currentPrice) }}</span>
               </div>
               <div class="time-col">
-                <span class="price-label">{{ auction.status === 'upcoming' ? 'Começa em' : 'Termina em' }}</span>
-                <span class="time-value">
-                  {{ auction.status === 'upcoming' ? new Date(auction.startTime).toLocaleDateString('pt-MZ') : new Date(auction.endTime).toLocaleDateString('pt-MZ') }}
+                <span class="price-label">{{ auction.status === 'upcoming' ? 'Começa em' : (auction.status === 'active' ? 'Termina em' : 'Terminado') }}</span>
+                <span class="time-value" :style="{ color: auction.status === 'active' ? '#ef4444' : '#6b7280', fontWeight: '600' }">
+                  {{ auction.status === 'finished' ? 'Terminado' : getCountdownText(auction.status === 'upcoming' ? auction.startTime : auction.endTime) }}
                 </span>
               </div>
             </div>
@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 
@@ -173,6 +173,29 @@ const formatCurrency = (value) => {
   return `${formatted} MZN`;
 };
 
+// --- Countdown timer logic ---
+const now = ref(new Date());
+let countdownInterval = null;
+
+const getCountdownText = (targetDateString) => {
+  if (!targetDateString) return '';
+  const diff = new Date(targetDateString).getTime() - now.value.getTime();
+  if (diff <= 0) return 'Terminado';
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  }
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  }
+  return `${minutes}m ${seconds}s`;
+};
+
 const getCategoryEmoji = (name) => {
   const norm = name.toLowerCase();
   if (norm.includes('veiculo') || norm.includes('carro') || norm.includes('moto') || norm.includes('automovel')) return '🚗';
@@ -198,6 +221,14 @@ watch(() => route.query.category, () => {
 onMounted(() => {
   fetchCategories();
   fetchAuctions();
+  
+  countdownInterval = setInterval(() => {
+    now.value = new Date();
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (countdownInterval) clearInterval(countdownInterval);
 });
 </script>
 

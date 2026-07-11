@@ -60,9 +60,9 @@
               <span class="price highlight">{{ formatCurrency(isUpcoming ? auction.startingPrice : auction.currentPrice) }}</span>
             </div>
             <div class="info-col info-col-right">
-              <span class="label">{{ isUpcoming ? 'Começa Em' : 'Termina Em' }}</span>
-              <span class="time">
-                {{ isUpcoming ? new Date(auction.startTime).toLocaleString('pt-MZ') : new Date(auction.endTime).toLocaleString('pt-MZ') }}
+              <span class="label">{{ isEnded ? 'Terminado Em' : (isUpcoming ? 'Começa Em' : 'Termina Em') }}</span>
+              <span class="time" :style="{ color: !isEnded ? '#ef4444' : 'inherit', fontWeight: !isEnded ? '600' : 'normal' }">
+                {{ isEnded ? new Date(auction.endTime).toLocaleString('pt-MZ') : getCountdownText(isUpcoming ? auction.startTime : auction.endTime) }}
               </span>
             </div>
           </div>
@@ -72,7 +72,7 @@
             <h3 class="section-title">Fazer Lance</h3>
             <div v-if="isUpcoming" class="auth-warning" style="background-color: rgba(255, 152, 0, 0.05); border: 1px solid rgba(255, 152, 0, 0.2); color: #f57c00;">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #f57c00; margin-right: 8px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"></polyline></svg>
-              Este leilão está agendado e ainda não começou. Começa em <strong>{{ new Date(auction.startTime).toLocaleString('pt-MZ') }}</strong>.
+              Este leilão está agendado e ainda não começou. Começa em: <strong>{{ getCountdownText(auction.startTime) }} ({{ new Date(auction.startTime).toLocaleString('pt-MZ') }})</strong>.
             </div>
             <div v-else-if="!authStore.isAuthenticated" class="auth-warning">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -494,6 +494,29 @@ const toggleWatchlist = async () => {
   }
 };
 
+// --- Countdown timer logic ---
+const now = ref(new Date());
+let countdownInterval = null;
+
+const getCountdownText = (targetDateString) => {
+  if (!targetDateString) return '';
+  const diff = new Date(targetDateString).getTime() - now.value.getTime();
+  if (diff <= 0) return 'Terminado';
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  }
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  }
+  return `${minutes}m ${seconds}s`;
+};
+
 // Utility functions for bid input formatting (thousands: dot, decimals: comma)
 const parseFormattedNumber = (str) => {
   if (!str) return 0;
@@ -880,6 +903,11 @@ const executePlaceBid = async () => {
 onMounted(() => {
   fetchAuctionData();
   fetchUserWatchlist();
+  
+  countdownInterval = setInterval(() => {
+    now.value = new Date();
+  }, 1000);
+
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   socket = io(apiUrl);
   socket.emit('join_auction', route.params.id);
@@ -912,6 +940,7 @@ onUnmounted(() => {
     socket.emit('leave_auction', route.params.id);
     socket.disconnect();
   }
+  if (countdownInterval) clearInterval(countdownInterval);
 });
 </script>
 

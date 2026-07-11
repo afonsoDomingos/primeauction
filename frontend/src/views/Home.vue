@@ -14,7 +14,7 @@
       </div>
 
       <div class="hero-content animate-fade-in" style="z-index: 2; position: relative;">
-        <p class="hero-eyebrow">Plataforma de Leilões #1 em Moçambique</p>
+        <p class="hero-eyebrow">👋 Bem-vindo à Prime Auctions &bull; Plataforma #1 em Moçambique</p>
         <h1 class="hero-title">{{ heroTitle }}</h1>
         <p class="hero-subtitle">{{ heroSubtitle }}</p>
       </div>
@@ -265,7 +265,7 @@
             >
               <div class="upcoming-img-wrapper">
                 <img :src="auction.imageUrl" :alt="auction.title" class="upcoming-img" />
-                <span class="upcoming-badge-time">📅 Começa em: {{ formatBadgeDate(auction.startTime) }}</span>
+                <span class="upcoming-badge-time">⏱️ Começa em: {{ getCountdownText(auction.startTime) }}</span>
               </div>
               <div class="upcoming-info">
                 <span class="upcoming-category">{{ auction.category }}</span>
@@ -503,6 +503,29 @@ const formatBadgeDate = (dateString) => {
   return formatted.replace(/\b[a-z]/g, char => char.toUpperCase()).replace(' De ', ' ');
 };
 
+// --- Countdown timer logic ---
+const now = ref(new Date());
+let countdownInterval = null;
+
+const getCountdownText = (targetDateString) => {
+  if (!targetDateString) return '';
+  const diff = new Date(targetDateString).getTime() - now.value.getTime();
+  if (diff <= 0) return 'Começou!';
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  }
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  }
+  return `${minutes}m ${seconds}s`;
+};
+
 // Hero Slideshow
 const heroImagesList = computed(() => {
   if (isMobileViewport.value && heroMobileImageUrls.value.length > 0) {
@@ -654,6 +677,11 @@ onMounted(async () => {
   window.addEventListener('resize', onResize);
   await fetchWatchlist();
 
+  // Setup ticking countdown interval
+  countdownInterval = setInterval(() => {
+    now.value = new Date();
+  }, 1000);
+
   // Load custom homepage settings
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -691,6 +719,7 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', onResize);
   if (intervalId) clearInterval(intervalId);
+  if (countdownInterval) clearInterval(countdownInterval);
 });
 </script>
 
