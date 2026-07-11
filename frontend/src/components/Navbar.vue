@@ -124,16 +124,15 @@ const theme = ref('light');
 
 const toggleTheme = () => {
   theme.value = theme.value === 'light' ? 'dark' : 'light';
-  applyTheme();
+  applyThemeClass();
+  localStorage.setItem('theme', theme.value); // Save user's manual preference
 };
 
-const applyTheme = () => {
+const applyThemeClass = () => {
   if (theme.value === 'dark') {
     document.documentElement.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
   } else {
     document.documentElement.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
   }
 };
 
@@ -160,13 +159,16 @@ const handleScroll = () => {
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-    theme.value = 'dark';
+  if (savedTheme) {
+    // If user has manually selected a theme, respect it
+    theme.value = savedTheme;
   } else {
-    theme.value = 'light';
+    // Otherwise, check current hour
+    const currentHour = new Date().getHours();
+    const isNight = currentHour < 6 || currentHour >= 18; // Night is 18:00 (6 PM) to 6:00 AM
+    theme.value = isNight ? 'dark' : 'light';
   }
-  applyTheme();
+  applyThemeClass(); // Apply without writing to localStorage
 
   window.addEventListener('scroll', handleScroll, { passive: true });
 });
