@@ -8,6 +8,7 @@ import AdminDashboard from '../views/AdminDashboard.vue'
 import UserDashboard from '../views/UserDashboard.vue'
 import SellWithUs from '../views/SellWithUs.vue'
 import Calendar from '../views/Calendar.vue'
+import AnalyticsDashboard from '../views/AnalyticsDashboard.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -26,6 +27,12 @@ const routes = [
     path: '/admin',
     name: 'AdminDashboard',
     component: AdminDashboard,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/analytics',
+    name: 'AnalyticsDashboard',
+    component: AnalyticsDashboard,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {

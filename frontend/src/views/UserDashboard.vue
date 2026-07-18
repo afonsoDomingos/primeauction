@@ -72,6 +72,13 @@
         </button>
         <button 
           class="tab-btn" 
+          :class="{ active: activeTab === 'chat' }" 
+          @click="activeTab = 'chat'"
+        >
+          💬 Mensagens
+        </button>
+        <button 
+          class="tab-btn" 
           :class="{ active: activeTab === 'edit-profile' }" 
           @click="activeTab = 'edit-profile'"
         >
@@ -358,6 +365,11 @@
         </div>
       </div>
 
+      <!-- TAB Content: Chat -->
+      <div v-else-if="activeTab === 'chat'">
+        <Chat />
+      </div>
+
     </div>
   </div>
 </template>
@@ -368,6 +380,7 @@ import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useToastStore } from '../stores/toastStore';
+import Chat from '../components/Chat.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

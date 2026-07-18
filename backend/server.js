@@ -48,6 +48,8 @@ app.use('/api/support', require('./routes/support'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/proposals', require('./routes/proposals'));
+app.use('/api/chat', require('./routes/chat'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 // Socket.io logic
 io.on('connection', (socket) => {
@@ -61,6 +63,17 @@ io.on('connection', (socket) => {
   socket.on('leave_auction', (auctionId) => {
     socket.leave(auctionId);
     console.log(`Socket ${socket.id} left auction ${auctionId}`);
+  });
+
+  // Chat functionality
+  socket.on('join_user', (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`Socket ${socket.id} joined user room ${userId}`);
+  });
+
+  socket.on('leave_user', (userId) => {
+    socket.leave(`user_${userId}`);
+    console.log(`Socket ${socket.id} left user room ${userId}`);
   });
 
   socket.on('disconnect', () => {
