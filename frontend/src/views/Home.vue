@@ -5,10 +5,31 @@
       <div v-if="showWelcomeCard" class="welcome-overlay" @click.self="closeWelcomeCard">
         <div class="welcome-popup-card animate-scale-in">
           <button class="welcome-close-btn" @click="closeWelcomeCard" aria-label="Fechar">✕</button>
-          <div class="welcome-emoji">👋</div>
+          <div class="welcome-header">
+            <div class="welcome-badge">🎉 Novo por aqui?</div>
+            <div class="welcome-emoji">👋</div>
+          </div>
           <h2 class="welcome-popup-title">Bem-vindo à Prime Auctions!</h2>
           <p class="welcome-popup-text">A maior e melhor plataforma de leilões online em Moçambique.</p>
-          <p class="welcome-popup-sub">Aqui encontra veículos, imóveis, eletrónicos e mobiliário em leilões em tempo real. Pode também licitar de forma rápida ou propor os seus próprios artigos para venda!</p>
+          <div class="welcome-features">
+            <div class="welcome-feature">
+              <span class="feature-icon">🚗</span>
+              <span class="feature-text">Veículos</span>
+            </div>
+            <div class="welcome-feature">
+              <span class="feature-icon">🏠</span>
+              <span class="feature-text">Imóveis</span>
+            </div>
+            <div class="welcome-feature">
+              <span class="feature-icon">💻</span>
+              <span class="feature-text">Eletrónicos</span>
+            </div>
+            <div class="welcome-feature">
+              <span class="feature-icon">🪑</span>
+              <span class="feature-text">Mobiliário</span>
+            </div>
+          </div>
+          <p class="welcome-popup-sub">Leilões em tempo real. Licite rápido ou proponha os seus artigos!</p>
           <div class="welcome-footer-row">
             <button @click="closeWelcomeCard" class="btn btn-primary btn-pill btn-welcome-action">Começar a Explorar</button>
           </div>
@@ -716,12 +737,12 @@ const fetchStats = async () => {
     }
   } catch (err) {
     console.error('Failed to fetch stats:', err);
-    // Set default values if API fails
+    // Set to 0 if API fails, to ensure only real data is shown
     stats.value = {
-      totalAuctions: 150,
-      totalUsers: 2500,
-      totalBids: 12000,
-      totalRevenue: 8500000
+      totalAuctions: 0,
+      totalUsers: 0,
+      totalBids: 0,
+      totalRevenue: 0
     };
   }
 };
