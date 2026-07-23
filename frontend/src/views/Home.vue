@@ -1083,9 +1083,9 @@ onUnmounted(() => {
 
 /* Floating Ribbon Bar */
 .hero-floating-ribbon {
-  position: absolute;
-  bottom: 20px;
+  position: relative;
   z-index: 3;
+  margin-top: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
