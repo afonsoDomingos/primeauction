@@ -54,42 +54,42 @@
           :class="{ active: activeTab === 'activity' }" 
           @click="activeTab = 'activity'"
         >
-          🏷️ Actividade & Lances
+          Actividade & Lances
         </button>
         <button 
           class="tab-btn" 
           :class="{ active: activeTab === 'watchlist' }" 
           @click="changeTab('watchlist')"
         >
-          ❤️ Favoritos (Watchlist)
+          Favoritos
         </button>
         <button 
           class="tab-btn" 
           :class="{ active: activeTab === 'proposals' }" 
           @click="changeTab('proposals')"
         >
-          📦 Minhas Vendas
+          Minhas Vendas
         </button>
         <button 
           class="tab-btn" 
           :class="{ active: activeTab === 'payments' }" 
           @click="changeTab('payments')"
         >
-          📲 Pagamentos M-Pesa
+          Pagamentos M-Pesa
         </button>
         <button 
           class="tab-btn" 
           :class="{ active: activeTab === 'chat' }" 
           @click="activeTab = 'chat'"
         >
-          💬 Mensagens
+          Mensagens
         </button>
         <button 
           class="tab-btn" 
           :class="{ active: activeTab === 'edit-profile' }" 
           @click="activeTab = 'edit-profile'"
         >
-          ⚙️ Editar Perfil
+          Editar Perfil
         </button>
       </div>
 
