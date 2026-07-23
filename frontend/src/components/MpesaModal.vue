@@ -49,18 +49,63 @@
           </div>
         </div>
 
-        <!-- STEP 1: Phone Entry -->
+        <!-- STEP 1: Phone / Payment Entry -->
         <div v-if="step === 'phone'" class="mpesa-step-content">
-          <h4 class="step-heading">Introduza o seu número M-Pesa</h4>
-          <p class="step-desc">Um pedido de confirmação será enviado diretamente para o seu telemóvel Vodacom.</p>
+          
+          <!-- Payment Method Selector Tabs: M-Pesa | eMola | Visa -->
+          <div class="method-selector-section">
+            <label class="method-section-title">Método de Pagamento</label>
+            <div class="method-tabs-grid">
+              <!-- M-Pesa Tab -->
+              <button 
+                type="button" 
+                class="method-tab-btn" 
+                :class="{ active: selectedMethod === 'mpesa' }"
+                @click="selectedMethod = 'mpesa'"
+              >
+                <div class="method-badge mpesa-bg">
+                  <img src="/mpesa-logo.png" alt="M-Pesa" class="method-logo-img" />
+                </div>
+                <span class="method-tab-label">M-Pesa</span>
+              </button>
 
-          <form @submit.prevent="handleInitiatePayment" class="mpesa-form">
+              <!-- eMola Tab -->
+              <button 
+                type="button" 
+                class="method-tab-btn" 
+                :class="{ active: selectedMethod === 'emola' }"
+                @click="selectedMethod = 'emola'"
+              >
+                <div class="method-badge emola-bg">
+                  <span class="emola-text">eMola</span>
+                </div>
+                <span class="method-tab-label">eMola</span>
+              </button>
+
+              <!-- Visa / Credit Card Tab -->
+              <button 
+                type="button" 
+                class="method-tab-btn" 
+                :class="{ active: selectedMethod === 'visa' }"
+                @click="selectedMethod = 'visa'"
+              >
+                <div class="method-badge visa-bg">
+                  <span class="visa-badge-text">💳</span>
+                </div>
+                <span class="method-tab-label">Cartão de Crédito</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- M-PESA FORM -->
+          <form v-if="selectedMethod === 'mpesa'" @submit.prevent="handleInitiatePayment" class="mpesa-form">
+            <label class="input-label-clean">Número de telefone (9 dígitos)</label>
             <div class="phone-input-group">
               <span class="country-code">🇲🇿 +258</span>
               <input
                 type="tel"
                 v-model="phoneNumber"
-                placeholder="84 XXX XXXX ou 85 XXX XXXX"
+                placeholder="84XXXXXXX / 85XXXXXXX"
                 class="phone-input"
                 maxlength="9"
                 required
@@ -69,9 +114,101 @@
             </div>
             <p v-if="phoneError" class="input-error-msg">{{ phoneError }}</p>
 
-            <button type="submit" class="btn btn-mpesa-submit" :disabled="loading || !phoneNumber || !customAmount || customAmount <= 0">
+            <!-- Order Summary -->
+            <div class="checkout-summary-box">
+              <h5 class="summary-box-title">Resumo da compra</h5>
+              <div class="summary-line">
+                <span>{{ auctionTitle }}</span>
+                <span>{{ formatCurrency(customAmount) }}</span>
+              </div>
+              <div class="summary-line total-line">
+                <strong>Total</strong>
+                <strong class="total-amount">{{ formatCurrency(customAmount) }}</strong>
+              </div>
+            </div>
+
+            <p class="banking-security-note">
+              Nós protegemos seus dados de pagamento com criptografia para garantir segurança em nível bancário.
+            </p>
+
+            <button type="submit" class="btn btn-vibrant-pay" :disabled="loading || !phoneNumber || !customAmount || customAmount <= 0">
               <span v-if="loading" class="spinner-inline"></span>
-              <span>{{ loading ? 'A enviar pedido STK Push...' : `📲 Pagar ${formatCurrency(customAmount)} com M-Pesa` }}</span>
+              <span>{{ loading ? 'A enviar pedido STK Push...' : 'Comprar agora' }}</span>
+            </button>
+          </form>
+
+          <!-- EMOLA FORM -->
+          <form v-else-if="selectedMethod === 'emola'" @submit.prevent="handleInitiatePayment" class="mpesa-form">
+            <label class="input-label-clean">Número de telefone eMola (9 dígitos)</label>
+            <div class="phone-input-group">
+              <span class="country-code">🇲🇿 +258</span>
+              <input
+                type="tel"
+                v-model="phoneNumber"
+                placeholder="86XXXXXXX / 87XXXXXXX"
+                class="phone-input"
+                maxlength="9"
+                required
+                :disabled="loading"
+              />
+            </div>
+
+            <!-- Order Summary -->
+            <div class="checkout-summary-box">
+              <h5 class="summary-box-title">Resumo da compra</h5>
+              <div class="summary-line">
+                <span>{{ auctionTitle }}</span>
+                <span>{{ formatCurrency(customAmount) }}</span>
+              </div>
+              <div class="summary-line total-line">
+                <strong>Total</strong>
+                <strong class="total-amount">{{ formatCurrency(customAmount) }}</strong>
+              </div>
+            </div>
+
+            <p class="banking-security-note">
+              Nós protegemos seus dados de pagamento com criptografia para garantir segurança em nível bancário.
+            </p>
+
+            <button type="submit" class="btn btn-vibrant-pay emola-btn-style" :disabled="loading || !phoneNumber || !customAmount || customAmount <= 0">
+              <span v-if="loading" class="spinner-inline"></span>
+              <span>{{ loading ? 'A enviar...' : 'Comprar agora via eMola' }}</span>
+            </button>
+          </form>
+
+          <!-- VISA FORM -->
+          <form v-else-if="selectedMethod === 'visa'" @submit.prevent="handleInitiatePayment" class="mpesa-form">
+            <label class="input-label-clean">Número do Cartão de Crédito</label>
+            <input
+              type="text"
+              placeholder="4532 •••• •••• ••••"
+              class="phone-input"
+              style="width: 100%; border-radius: 12px; margin-bottom: 0.75rem;"
+            />
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <input type="text" placeholder="MM/AA" class="phone-input" style="flex: 1; border-radius: 12px;" />
+              <input type="text" placeholder="CVV" class="phone-input" style="flex: 1; border-radius: 12px;" />
+            </div>
+
+            <!-- Order Summary -->
+            <div class="checkout-summary-box">
+              <h5 class="summary-box-title">Resumo da compra</h5>
+              <div class="summary-line">
+                <span>{{ auctionTitle }}</span>
+                <span>{{ formatCurrency(customAmount) }}</span>
+              </div>
+              <div class="summary-line total-line">
+                <strong>Total</strong>
+                <strong class="total-amount">{{ formatCurrency(customAmount) }}</strong>
+              </div>
+            </div>
+
+            <p class="banking-security-note">
+              Nós protegemos seus dados de pagamento com criptografia para garantir segurança em nível bancário.
+            </p>
+
+            <button type="submit" class="btn btn-vibrant-pay visa-btn-style" :disabled="loading">
+              <span>Comprar agora com Cartão</span>
             </button>
           </form>
         </div>
@@ -194,6 +331,7 @@ const toastStore = useToastStore();
 const authStore = useAuthStore();
 
 const step = ref('phone'); // 'phone' | 'ussd' | 'success'
+const selectedMethod = ref('mpesa'); // 'mpesa' | 'emola' | 'visa'
 const phoneNumber = ref('');
 const phoneError = ref('');
 const loading = ref(false);
@@ -376,6 +514,187 @@ const closeModal = () => {
 
 .mpesa-close-btn:hover {
   background: rgba(0, 0, 0, 0.3);
+}
+
+/* Payment Method Tabs Selector Grid */
+.method-selector-section {
+  margin-bottom: 1.25rem;
+}
+
+.method-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.method-tabs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.method-tab-btn {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.6rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.method-tab-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.method-tab-btn.active {
+  border-color: #e60000;
+  box-shadow: 0 0 0 3px rgba(230, 0, 0, 0.15);
+  background: #fff5f5;
+}
+
+.method-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.mpesa-bg {
+  background: #e60000;
+}
+
+.method-logo-img {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  background: white;
+  padding: 1px 4px;
+}
+
+.emola-bg {
+  background: #f97316;
+  color: white;
+}
+
+.emola-text {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  text-transform: lowercase;
+}
+
+.visa-bg {
+  background: #0f172a;
+  color: white;
+}
+
+.visa-badge-text {
+  font-size: 1.1rem;
+}
+
+.method-tab-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.input-label-clean {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+/* Purchase Summary Box */
+.checkout-summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin: 1rem 0 0.85rem;
+}
+
+.summary-box-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #334155;
+  padding: 0.2rem 0;
+}
+
+.summary-line.total-line {
+  border-top: 1px dashed #cbd5e1;
+  margin-top: 0.4rem;
+  padding-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.total-amount {
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.banking-security-note {
+  font-size: 0.72rem;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+/* Vibrant Action Button inspired by green checkout button */
+.btn-vibrant-pay {
+  width: 100%;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.9rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-vibrant-pay:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(34, 197, 94, 0.4);
+}
+
+.emola-btn-style {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+}
+
+.visa-btn-style {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
 /* Brand Header */
