@@ -5,48 +5,13 @@
         <!-- Close Button -->
         <button class="mpesa-close-btn" @click="closeModal" aria-label="Fechar">✕</button>
 
-        <!-- Brand Header -->
+        <!-- Brand Header (Prime Auction Checkout Multimeios) -->
         <div class="mpesa-brand-header">
           <div class="mpesa-logo-wrap">
-            <img src="/mpesa-logo.png" alt="Vodacom M-Pesa" class="mpesa-official-logo" />
-            <span class="mpesa-sub-tag">Vodacom C2B</span>
+            <img src="/logo prime.png" alt="Prime Auction" class="checkout-brand-logo" />
+            <span class="mpesa-sub-tag">Checkout Seguro</span>
           </div>
-          <p class="mpesa-merchant">Pagamento seguro para <strong>Prime Auction</strong></p>
-        </div>
-
-        <!-- Auction Summary Card (Hidden on Success Step) -->
-        <div v-if="step !== 'success'" class="mpesa-summary-card">
-          <div class="summary-row">
-            <span class="summary-label">Artigo / Leilão:</span>
-            <strong class="summary-val title-ellipsis">{{ auctionTitle }}</strong>
-          </div>
-
-          <div class="summary-amount-edit-wrap">
-            <label class="summary-label-bold">💰 Valor a Pagar via M-Pesa:</label>
-            <div class="amount-input-group">
-              <span class="amount-currency-tag">MZN</span>
-              <input
-                type="number"
-                v-model.number="customAmount"
-                class="custom-amount-input"
-                :min="1"
-                step="100"
-                placeholder="Insira o valor..."
-                :disabled="loading || step !== 'phone'"
-              />
-            </div>
-
-            <!-- Quick Increments -->
-            <div v-if="step === 'phone'" class="mpesa-quick-increments">
-              <span class="quick-inc-label">Atalhos de incremento:</span>
-              <div class="quick-inc-btns">
-                <button type="button" @click="addAmount(1000)" class="btn-quick-inc">+1.000</button>
-                <button type="button" @click="addAmount(5000)" class="btn-quick-inc">+5.000</button>
-                <button type="button" @click="addAmount(10000)" class="btn-quick-inc">+10.000</button>
-                <button type="button" @click="addAmount(25000)" class="btn-quick-inc">+25.000</button>
-              </div>
-            </div>
-          </div>
+          <p class="mpesa-merchant">Pagamento seguro de leilão para <strong>Prime Auction</strong></p>
         </div>
 
         <!-- STEP 1: Phone / Payment Entry -->
@@ -77,7 +42,7 @@
                 @click="selectedMethod = 'emola'"
               >
                 <div class="method-badge emola-bg">
-                  <span class="emola-text">eMola</span>
+                  <img src="/emola-logo.png" alt="eMola" class="method-logo-img" />
                 </div>
                 <span class="method-tab-label">eMola</span>
               </button>
@@ -90,7 +55,7 @@
                 @click="selectedMethod = 'visa'"
               >
                 <div class="method-badge visa-bg">
-                  <span class="visa-badge-text">💳</span>
+                  <img src="/visa-logo.png" alt="Visa" class="method-logo-img" />
                 </div>
                 <span class="method-tab-label">Cartão de Crédito</span>
               </button>
@@ -560,43 +525,26 @@ const closeModal = () => {
 }
 
 .method-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 44px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-}
-
-.mpesa-bg {
-  background: #e60000;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 2px 4px;
 }
 
 .method-logo-img {
-  height: 24px;
-  width: auto;
+  height: 26px;
+  width: 100%;
   object-fit: contain;
-  border-radius: 4px;
-  background: white;
-  padding: 1px 4px;
-}
-
-.emola-bg {
-  background: #f97316;
-  color: white;
-}
-
-.emola-text {
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  text-transform: lowercase;
 }
 
 .visa-bg {
-  background: #0f172a;
-  color: white;
+  background: #ffffff;
 }
 
 .visa-badge-text {
@@ -711,6 +659,13 @@ const closeModal = () => {
   justify-content: center;
   gap: 10px;
   margin-bottom: 0.35rem;
+}
+
+.checkout-brand-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .mpesa-official-logo {
