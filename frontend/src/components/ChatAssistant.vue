@@ -883,4 +883,21 @@ onMounted(() => {
   color: #9ca3af;
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .chat-assistant-container {
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+  .chat-trigger-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .chat-window {
+    width: calc(100vw - 2.5rem);
+    right: 0;
+    bottom: 3.5rem;
+    max-height: 75vh;
+  }
+}
 </style>

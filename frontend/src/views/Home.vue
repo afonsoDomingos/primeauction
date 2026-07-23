@@ -173,7 +173,7 @@
     <!-- How It Works Section -->
     <section class="how-it-works-section">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header-center">
           <h2 class="section-title-premium">Como Funciona</h2>
           <p class="section-subtitle">Participar nos leilões nunca foi tão simples</p>
         </div>
@@ -425,61 +425,6 @@
       </div>
     </section>
 
-    <!-- Finished Auctions Section (Leilões Terminados / Resultados Recentes) -->
-    <section class="finished-auctions-section">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title-premium">Leilões Terminados</h2>
-          <router-link to="/auctions?status=finished" class="view-all-link">Ver todos</router-link>
-        </div>
-
-        <div v-if="loadingAuctions" class="loading-placeholder">
-          <div class="loading-spinner"></div>
-          <p>A carregar leilões terminados...</p>
-        </div>
-        
-        <div v-else-if="finishedAuctions.length === 0" class="premium-empty-state">
-          <div class="empty-state-glow"></div>
-          <div class="empty-state-inner">
-            <div class="empty-icon-pulse">
-              <span class="icon-pulse-shadow" style="background-color: rgba(107, 114, 128, 0.15);"></span>
-              <span class="icon-pulse-core">🏁</span>
-            </div>
-            <h3 class="empty-title">Sem Leilões Terminados</h3>
-            <p class="empty-text">Ainda não existem leilões encerrados na nossa plataforma. Volte a esta secção assim que os primeiros eventos terminarem!</p>
-          </div>
-        </div>
-
-        <div v-else class="sales-grid">
-          <div 
-            v-for="auction in finishedAuctions" 
-            :key="auction._id"
-            class="sales-card finished-card"
-            @click="goToAuction(auction._id)"
-          >
-            <div class="sales-card-img-wrapper finished-img-wrapper">
-              <img :src="auction.imageUrl" :alt="auction.title" class="sales-card-img dimmed" />
-              <span class="finished-overlay-badge">Terminado</span>
-              
-              <!-- Badges Overlay -->
-              <div class="badge-overlay-container">
-                <span class="badge-item bid-badge">
-                  🔨 {{ auction.bids?.length || 0 }} Lances
-                </span>
-              </div>
-            </div>
-
-            <div class="sales-card-info">
-              <h3 class="sales-car-title">{{ auction.title }}</h3>
-              <div class="sales-price-row">
-                <span class="sales-price-label">Preço Final</span>
-                <span class="sales-price-val finished-price">{{ formatCurrency(auction.currentPrice) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- What others are interested in Section (Mais Procurados / Próximos) -->
     <section class="interests-section">
@@ -862,7 +807,6 @@ const toggleLike = async (id) => {
 const liveEvents = ref([]);
 const comingSoonItems = ref([]);
 const upcomingAuctions = ref([]);
-const finishedAuctions = ref([]);
 
 const fetchActiveAuctions = async () => {
   loadingAuctions.value = true;
@@ -911,15 +855,6 @@ const fetchActiveAuctions = async () => {
       console.error('Failed to load upcoming auctions:', errUpcoming);
     }
 
-    // Load finished auctions
-    try {
-      const resFinished = await axios.get(`${apiUrl}/api/auctions?status=finished`);
-      if (resFinished.data && resFinished.data.success) {
-        finishedAuctions.value = resFinished.data.data.slice(0, 4);
-      }
-    } catch (errFinished) {
-      console.error('Failed to load finished auctions:', errFinished);
-    }
 
   } catch (err) {
     console.error('Failed to load active auctions:', err);
@@ -2623,14 +2558,29 @@ onUnmounted(() => {
   background: #f9fafb;
 }
 
+.section-header-center {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-header-center .section-title-premium {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
 .section-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #6b7280;
   text-align: center;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  line-height: 1.5;
 }
 
 .steps-container {
@@ -2713,32 +2663,202 @@ onUnmounted(() => {
   font-size: 1rem;
 }
 
+/* ── Mobile Responsiveness Enhancements ── */
 @media (max-width: 768px) {
+  .hero-section {
+    padding: 85px 1.25rem 2.5rem;
+    min-height: auto;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
+    margin-bottom: 0.75rem;
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 1.8rem;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+    padding: 0 0.5rem;
+  }
+
+  .hero-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .search-section {
+    padding: 2rem 1.25rem;
+  }
+
+  .search-section-title {
+    font-size: 1.35rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .search-bar-form {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-input-wrapper {
+    width: 100%;
+  }
+
+  .btn-advanced-search {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 0.8rem 1rem;
+  }
+
+  .quick-categories {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    margin-top: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .quick-categories::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quick-cat-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .section-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .section-title-premium {
+    font-size: 1.35rem;
+  }
+
+  .section-header-center {
+    margin-bottom: 1.75rem;
+  }
+
+  .section-header-center .section-title-premium {
+    font-size: 1.5rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+  }
+
+  .how-it-works-section {
+    padding: 2.5rem 1.25rem;
+  }
+
   .steps-container {
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
+    margin: 1.75rem auto 1.5rem;
+  }
+
+  .step-item {
+    width: 100%;
+    max-width: 340px;
+    background: #ffffff;
+    padding: 1.5rem 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f0f0f0;
+  }
+
+  .step-number {
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .step-icon {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-title {
+    font-size: 1.05rem;
+  }
+
+  .step-description {
+    font-size: 0.85rem;
   }
 
   .step-connector {
     width: 2px;
-    height: 2rem;
-    margin: 0 auto;
+    height: 24px;
+    background: linear-gradient(180deg, #3e6ae1, #cbd5e1);
+    margin: -0.25rem auto;
+    position: relative;
   }
 
   .step-connector::after {
-    right: 50%;
-    top: auto;
-    bottom: 0;
-    transform: translateX(50%);
+    display: none;
+  }
+
+  .how-it-works-cta {
+    margin-top: 2rem;
+  }
+
+  .how-it-works-cta .btn-lg {
+    width: 100%;
+    max-width: 340px;
+    padding: 0.875rem 1.5rem;
+  }
+
+  .stats-section {
+    padding: 2rem 1.25rem;
   }
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 0.85rem;
+  }
+
+  .stat-item {
+    padding: 1rem 0.75rem;
+  }
+
+  .stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.35rem;
   }
 
   .stat-number {
-    font-size: 1.75rem;
+    font-size: 1.35rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
   }
 }
 

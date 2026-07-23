@@ -74,8 +74,8 @@ const auctionSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Pre-save middleware to dynamically update status based on dates
-auctionSchema.pre('save', function(next) {
+// Pre-save middleware to dynamically update status based on dates (Mongoose 9 middleware)
+auctionSchema.pre('save', function() {
   if (this.status !== 'finished') {
     if (this.startTime && new Date(this.startTime) > new Date()) {
       this.status = 'upcoming';
@@ -85,7 +85,6 @@ auctionSchema.pre('save', function(next) {
       this.status = 'active';
     }
   }
-  next();
 });
 
 // Virtual for checking if ended

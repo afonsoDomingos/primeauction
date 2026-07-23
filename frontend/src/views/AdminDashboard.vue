@@ -400,6 +400,62 @@
           </div>
         </div>
 
+        <!-- ── Pagamentos M-Pesa ── -->
+        <div class="card admin-card">
+          <div class="card-header-row" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="card-icon" style="background: #e60000; color: white; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900;">M</span>
+              <h3 class="section-title">Controlo de Transações M-Pesa</h3>
+              <span class="record-count">{{ mpesaPayments.length }}</span>
+            </div>
+            <span style="background: #e60000; color: white; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 99px;">
+              Vodacom M-Pesa Sandbox C2B
+            </span>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Utilizador / Cliente</th>
+                  <th>Leilão / Artigo</th>
+                  <th>ID Transação M-Pesa</th>
+                  <th>Referência</th>
+                  <th>Telemóvel</th>
+                  <th>Valor Pago</th>
+                  <th>Estado</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="mpesaPayments.length === 0">
+                  <td colspan="8" class="empty-row">Nenhum pagamento M-Pesa registado até ao momento.</td>
+                </tr>
+                <tr v-for="pay in mpesaPayments" :key="pay._id">
+                  <td>
+                    <div style="display: flex; flex-direction: column;">
+                      <strong style="font-size: 0.85rem;">{{ pay.user?.name || 'Cliente' }}</strong>
+                      <span style="font-size: 0.75rem; color: var(--text-light)">{{ pay.user?.email }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span style="font-weight: 600; font-size: 0.85rem;">{{ pay.auction?.title || 'Leilão' }}</span>
+                  </td>
+                  <td><code style="color: #e60000; font-weight: 700; background: #fff1f2; padding: 0.2rem 0.4rem; border-radius: 4px;">{{ pay.mpesaTransactionId }}</code></td>
+                  <td>{{ pay.reference }}</td>
+                  <td>{{ pay.phoneNumber }}</td>
+                  <td class="price-cell" style="color: #16a34a; font-weight: 700;">{{ formatCurrency(pay.amount) }}</td>
+                  <td>
+                    <span :class="['badge', pay.status === 'completed' ? 'badge-active' : 'badge-upcoming']">
+                      {{ pay.status === 'completed' ? 'COMPLETADO ✓' : 'PENDENTE' }}
+                    </span>
+                  </td>
+                  <td>{{ new Date(pay.createdAt).toLocaleString('pt-MZ') }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- ── Leilões ── -->
         <div class="card admin-card">
           <div class="card-header-row">
@@ -1053,15 +1109,18 @@ const formatCurrency = (value) => {
   return `${formatted} MZN`;
 };
 
+const mpesaPayments = ref([]);
+
 const fetchData = async () => {
   try {
-    const [usersRes, auctionsRes, ticketsRes, categoriesRes, subscribersRes, proposalsRes] = await Promise.all([
+    const [usersRes, auctionsRes, ticketsRes, categoriesRes, subscribersRes, proposalsRes, paymentsRes] = await Promise.all([
       axios.get(`${apiUrl}/api/users`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/auctions`),
       axios.get(`${apiUrl}/api/support`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/categories`),
       axios.get(`${apiUrl}/api/newsletter/subscribers`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
-      axios.get(`${apiUrl}/api/proposals`, { headers: { Authorization: `Bearer ${authStore.token}` } })
+      axios.get(`${apiUrl}/api/proposals`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
+      axios.get(`${apiUrl}/api/payments/all`, { headers: { Authorization: `Bearer ${authStore.token}` } }).catch(() => ({ data: { data: [] } }))
     ]);
     users.value = usersRes.data.data;
     auctions.value = auctionsRes.data.data;
@@ -1069,6 +1128,7 @@ const fetchData = async () => {
     categories.value = categoriesRes.data.data;
     subscribers.value = subscribersRes.data.data;
     proposals.value = proposalsRes.data.data;
+    mpesaPayments.value = paymentsRes.data?.data || [];
   } catch (err) {
     console.error('Error fetching admin data:', err);
   }

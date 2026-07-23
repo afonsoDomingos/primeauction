@@ -173,6 +173,15 @@ main {
   transform: scale(0.95);
 }
 
+@media (max-width: 768px) {
+  .scroll-top-btn {
+    right: 1.25rem;
+    bottom: 5.25rem;
+    width: 42px;
+    height: 42px;
+  }
+}
+
 /* Transition animation */
 .scroll-top-enter-active,
 .scroll-top-leave-active {

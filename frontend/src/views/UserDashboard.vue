@@ -72,6 +72,13 @@
         </button>
         <button 
           class="tab-btn" 
+          :class="{ active: activeTab === 'payments' }" 
+          @click="changeTab('payments')"
+        >
+          📲 Pagamentos M-Pesa
+        </button>
+        <button 
+          class="tab-btn" 
           :class="{ active: activeTab === 'chat' }" 
           @click="activeTab = 'chat'"
         >
@@ -268,6 +275,65 @@
         </div>
       </div>
 
+      <!-- TAB Content: Payments -->
+      <div v-else-if="activeTab === 'payments'">
+        <div class="card bids-card">
+          <div class="bids-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="section-title">Os Meus Pagamentos M-Pesa</h3>
+            <span style="background: #e60000; color: white; padding: 0.25rem 0.75rem; border-radius: 99px; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.5px;">
+              Vodacom M-Pesa C2B
+            </span>
+          </div>
+
+          <div v-if="loadingPayments" class="loading-state">
+            <div class="spinner"></div>
+            <p>A carregar pagamentos M-Pesa...</p>
+          </div>
+
+          <div v-else-if="payments.length === 0" class="empty-state">
+            <div class="empty-icon">📲</div>
+            <h4>Sem pagamentos M-Pesa registados</h4>
+            <p>Ainda não efetuou pagamentos de leilões através do M-Pesa.</p>
+            <router-link to="/auctions" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
+              Explorar Leilões Activos
+            </router-link>
+          </div>
+
+          <div v-else class="table-responsive">
+            <table class="proposal-table">
+              <thead>
+                <tr>
+                  <th>Leilão</th>
+                  <th>ID Transação M-Pesa</th>
+                  <th>Referência</th>
+                  <th>Telemóvel</th>
+                  <th>Valor</th>
+                  <th>Estado</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="pay in payments" :key="pay._id">
+                  <td>
+                    <strong class="prop-table-title">{{ pay.auction?.title || 'Leilão' }}</strong>
+                  </td>
+                  <td><code style="color: #e60000; font-weight: 700; background: #fff1f2; padding: 0.25rem 0.5rem; border-radius: 4px;">{{ pay.mpesaTransactionId }}</code></td>
+                  <td>{{ pay.reference }}</td>
+                  <td>{{ pay.phoneNumber }}</td>
+                  <td><strong style="color: #16a34a;">{{ formatCurrency(pay.amount) }}</strong></td>
+                  <td>
+                    <span class="status-badge" :style="{ background: pay.status === 'completed' ? '#dcfce7' : '#fef3c7', color: pay.status === 'completed' ? '#15803d' : '#b45309', padding: '0.25rem 0.6rem', borderRadius: '6px', fontWeight: '700', fontSize: '0.75rem' }">
+                      {{ pay.status === 'completed' ? 'COMPLETADO ✓' : 'PENDENTE' }}
+                    </span>
+                  </td>
+                  <td>{{ new Date(pay.createdAt).toLocaleString('pt-MZ') }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB Content: Edit Profile -->
       <div v-else-if="activeTab === 'edit-profile'" class="edit-profile-layout">
         <!-- Profile Info Form -->
@@ -393,6 +459,8 @@ const watchlist = ref([]);
 const loadingWatchlist = ref(false);
 const proposals = ref([]);
 const loadingProposals = ref(false);
+const payments = ref([]);
+const loadingPayments = ref(false);
 
 const changeTab = (tab) => {
   activeTab.value = tab;
@@ -400,6 +468,24 @@ const changeTab = (tab) => {
     fetchWatchlist();
   } else if (tab === 'proposals') {
     fetchMyProposals();
+  } else if (tab === 'payments') {
+    fetchMyPayments();
+  }
+};
+
+const fetchMyPayments = async () => {
+  loadingPayments.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/payments/my-payments`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    payments.value = res.data.data;
+  } catch (err) {
+    console.error('Error fetching payments:', err);
+    toastStore.error('Erro ao carregar pagamentos M-Pesa.');
+  } finally {
+    loadingPayments.value = false;
   }
 };
 

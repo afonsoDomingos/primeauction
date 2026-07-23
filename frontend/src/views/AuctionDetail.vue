@@ -135,6 +135,18 @@
             </div>
           </div>
 
+          <!-- M-Pesa Payment Box -->
+          <div v-if="auction" class="mpesa-pay-card animate-fade-in" style="margin-top: 1.5rem; background: linear-gradient(135deg, #fff5f5, #ffffff); border: 1.5px solid #fca5a5; padding: 1.25rem; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(230, 0, 0, 0.05);">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.5rem;">
+              <span style="background: #e60000; color: white; font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 99px; text-transform: lowercase;">m-pesa</span>
+              <strong style="color: #990000; font-size: 1rem;">Pagamento Direto via M-Pesa</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; line-height: 1.4;">Efetue a liquidação deste artigo instantaneamente via Vodacom M-Pesa no seu telemóvel.</p>
+            <button @click="openMpesaModal" type="button" class="btn" style="background: #e60000; color: white; width: 100%; font-weight: 700; border-radius: 12px; padding: 0.85rem; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;">
+              📲 Pagar {{ formatCurrency(auction.currentPrice) }} com M-Pesa
+            </button>
+          </div>
+
           <!-- Bids History -->
           <div class="history-section">
             <h3 class="section-title">Histórico de Lances <span class="bid-count">{{ bids.length }}</span></h3>
@@ -432,6 +444,17 @@
       </div>
     </div>
   </Transition>
+
+  <!-- M-Pesa Payment Modal -->
+  <MpesaModal
+    v-if="auction"
+    :isOpen="isMpesaModalOpen"
+    :auctionId="auction._id"
+    :auctionTitle="auction.title"
+    :amount="auction.currentPrice"
+    @close="isMpesaModalOpen = false"
+    @success="handleMpesaSuccess"
+  />
 </template>
 
 <script setup>
@@ -441,6 +464,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
 import { useToastStore } from '../stores/toastStore';
+import MpesaModal from '../components/MpesaModal.vue';
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -451,6 +475,18 @@ const bidAmount = ref(0);
 const displayBidAmount = ref('');
 const activeImage = ref('');
 let socket = null;
+
+const isMpesaModalOpen = ref(false);
+const openMpesaModal = () => {
+  if (!authStore.isAuthenticated) {
+    toastStore.add('Por favor, faça login para efetuar o pagamento M-Pesa.', 'warning');
+    return;
+  }
+  isMpesaModalOpen.value = true;
+};
+const handleMpesaSuccess = (receipt) => {
+  toastStore.add('Pagamento M-Pesa registado com sucesso! ✓', 'success');
+};
 
 const userWatchlist = ref([]);
 const fetchUserWatchlist = async () => {

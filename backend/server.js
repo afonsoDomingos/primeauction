@@ -50,6 +50,7 @@ app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/proposals', require('./routes/proposals'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/payments', require('./routes/payments'));
 
 // Socket.io logic
 io.on('connection', (socket) => {
