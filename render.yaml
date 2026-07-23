@@ -21,3 +21,11 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      - key: MPESA_API_KEY
+        sync: false
+      - key: MPESA_PUBLIC_KEY
+        sync: false
+      - key: MPESA_C2B_URL
+        sync: false
+      - key: MPESA_SERVICE_PROVIDER_CODE
+        sync: false
