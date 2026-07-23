@@ -51,11 +51,10 @@
       </div>
 
       <div class="hero-content animate-fade-in" style="z-index: 2; position: relative;">
-        <!-- Glowing Live Badge with M-Pesa Logo -->
+        <!-- Glowing Live Badge -->
         <div class="hero-live-pill animate-fade-in">
           <span class="pulse-green-dot"></span>
-          <img src="/mpesa-logo.png" alt="Vodacom M-Pesa" class="hero-mpesa-mini-logo" />
-          <span>Leilões ao Vivo &bull; Pagamentos via Vodacom M-Pesa</span>
+          <span>Leilões ao Vivo em Moçambique &bull; 100% Verificados</span>
         </div>
 
         <h1 class="hero-title hero-title-glowing">{{ heroTitle }}</h1>
