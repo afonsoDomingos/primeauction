@@ -14,8 +14,8 @@
           <p class="mpesa-merchant">Pagamento seguro para <strong>Prime Auction</strong></p>
         </div>
 
-        <!-- Auction Summary Card -->
-        <div class="mpesa-summary-card">
+        <!-- Auction Summary Card (Hidden on Success Step) -->
+        <div v-if="step !== 'success'" class="mpesa-summary-card">
           <div class="summary-row">
             <span class="summary-label">Artigo / Leilão:</span>
             <strong class="summary-val title-ellipsis">{{ auctionTitle }}</strong>
@@ -346,25 +346,26 @@ const closeModal = () => {
 .mpesa-modal-card {
   background: #ffffff;
   width: 100%;
-  max-width: 440px;
+  max-width: 420px;
+  max-height: 88vh;
+  overflow-y: auto;
   border-radius: 20px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   position: relative;
-  overflow: hidden;
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .mpesa-close-btn {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 32px;
-  height: 32px;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.15);
   border: none;
-  color: #64748b;
-  font-size: 1rem;
+  color: #ffffff;
+  font-size: 0.9rem;
   cursor: pointer;
   z-index: 10;
   display: flex;
@@ -374,15 +375,14 @@ const closeModal = () => {
 }
 
 .mpesa-close-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: rgba(0, 0, 0, 0.3);
 }
 
 /* Brand Header */
 .mpesa-brand-header {
   background: linear-gradient(135deg, #e60000 0%, #b30000 100%);
   color: white;
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   text-align: center;
 }
 

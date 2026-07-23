@@ -3,7 +3,7 @@
     <!-- Logo -->
     <div class="nav-brand">
       <router-link to="/" @click="closeMobileMenu">
-        <img src="/prime-logo-new.png" alt="PRIME AUCTION" class="logo-img" />
+        <img src="/logo prime.png" alt="PRIME AUCTION" class="logo-img" />
       </router-link>
     </div>
     
@@ -27,7 +27,7 @@
     <div class="nav-content" :class="{ 'mobile-open': isMobileMenuOpen }">
       <!-- Mobile header inside drawer -->
       <div class="nav-drawer-header">
-        <img src="/prime-logo-new.png" alt="PRIME AUCTION" class="logo-img logo-img-drawer" />
+        <img src="/logo prime.png" alt="PRIME AUCTION" class="logo-img logo-img-drawer" />
       </div>
 
       <nav class="nav-links">
