@@ -152,16 +152,19 @@
             </div>
           </div>
 
-          <!-- M-Pesa Payment Box -->
-          <div v-if="auction" class="mpesa-pay-card animate-fade-in" style="margin-top: 1.5rem; background: linear-gradient(135deg, #fff5f5, #ffffff); border: 1.5px solid #fca5a5; padding: 1.25rem; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(230, 0, 0, 0.05);">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.5rem;">
-              <img src="/mpesa-logo.png" alt="Vodacom M-Pesa" style="height: 26px; width: auto; object-fit: contain; border-radius: 4px; background: white; padding: 2px 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);" />
-              <strong style="color: #990000; font-size: 1rem;">Pagamento Direto via M-Pesa</strong>
+          <!-- Multimeios Payment Box (M-Pesa, eMola, Visa) -->
+          <div v-if="auction" class="multimeios-pay-card animate-fade-in">
+            <div class="pay-card-header">
+              <div class="pay-logos-group">
+                <img src="/mpesa-logo.png" alt="M-Pesa" class="pay-mini-logo" />
+                <img src="/emola-logo.png" alt="eMola" class="pay-mini-logo" />
+                <img src="/visa-logo.png" alt="Visa" class="pay-mini-logo" />
+              </div>
+              <strong class="pay-card-title">Pagamento Direto do Artigo</strong>
             </div>
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; line-height: 1.4;">Efetue a liquidação deste artigo instantaneamente via Vodacom M-Pesa no seu telemóvel.</p>
-            <button @click="openMpesaModal" type="button" class="btn" style="background: #e60000; color: white; width: 100%; font-weight: 700; border-radius: 12px; padding: 0.85rem; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(230, 0, 0, 0.25);">
-              <img src="/mpesa-logo.png" alt="M-Pesa" style="height: 22px; width: auto; object-fit: contain; border-radius: 4px; background: white; padding: 2px 5px;" />
-              <span>Pagar {{ formatCurrency(auction.currentPrice) }} com M-Pesa</span>
+            <p class="pay-card-subtitle">Efetue a liquidação em segurança usando M-Pesa, eMola ou Cartão de Crédito.</p>
+            <button @click="openMpesaModal" type="button" class="btn btn-pay-royal">
+              <span>Pagar {{ formatCurrency(auction.currentPrice) }}</span>
             </button>
           </div>
 
@@ -2067,5 +2070,101 @@ onUnmounted(() => {
 
 .tooltip-date {
   color: #9ca3af;
+}
+
+/* Multimeios Payment Card (Royal Blue & Mobile Responsive) */
+.multimeios-pay-card {
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border: 1.5px solid #bfdbfe;
+  padding: 1.25rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.06);
+}
+
+.dark .multimeios-pay-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #334155;
+}
+
+.pay-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.pay-logos-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pay-mini-logo {
+  height: 22px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #ffffff;
+  padding: 2px 5px;
+  border: 1px solid #e2e8f0;
+}
+
+.pay-card-title {
+  color: #1e3a8a;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.dark .pay-card-title {
+  color: #60a5fa;
+}
+
+.pay-card-subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+
+.dark .pay-card-subtitle {
+  color: #94a3b8;
+}
+
+.btn-pay-royal {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  color: #ffffff;
+  width: 100%;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: 0.85rem;
+  font-size: clamp(0.85rem, 3.5vw, 0.95rem);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
+}
+
+.btn-pay-royal:hover {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(29, 78, 216, 0.35);
+}
+
+@media (max-width: 480px) {
+  .multimeios-pay-card {
+    padding: 1rem 0.85rem;
+  }
+  .pay-card-header {
+    flex-direction: column;
+    gap: 6px;
+  }
 }
 </style>
