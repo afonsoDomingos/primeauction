@@ -169,75 +169,7 @@
       </div>
     </section>
 
-    <!-- Stats/Trust Section -->
-    <section class="stats-section">
-      <div class="container">
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-number">{{ formatNumber(stats.totalAuctions) }}</div>
-            <div class="stat-label">Leilões Realizados</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-icon">👥</div>
-            <div class="stat-number">{{ formatNumber(stats.totalUsers) }}</div>
-            <div class="stat-label">Utilizadores Ativos</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-icon">🔨</div>
-            <div class="stat-number">{{ formatNumber(stats.totalBids) }}</div>
-            <div class="stat-label">Lances Colocados</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-icon">💰</div>
-            <div class="stat-number">{{ formatCurrency(stats.totalRevenue) }}</div>
-            <div class="stat-label">Volume Transacionado</div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- How It Works Section -->
-    <section class="how-it-works-section">
-      <div class="container">
-        <div class="section-header-center">
-          <h2 class="section-title-premium">Como Funciona</h2>
-          <p class="section-subtitle">Participar nos leilões nunca foi tão simples</p>
-        </div>
-        <div class="steps-container">
-          <div class="step-item">
-            <div class="step-number">1</div>
-            <div class="step-icon">📝</div>
-            <h3 class="step-title">Registe-se</h3>
-            <p class="step-description">Crie a sua conta gratuita em poucos segundos</p>
-          </div>
-          <div class="step-connector"></div>
-          <div class="step-item">
-            <div class="step-number">2</div>
-            <div class="step-icon">🔍</div>
-            <h3 class="step-title">Explore</h3>
-            <p class="step-description">Encontre o leilão perfeito para si</p>
-          </div>
-          <div class="step-connector"></div>
-          <div class="step-item">
-            <div class="step-number">3</div>
-            <div class="step-icon">🔨</div>
-            <h3 class="step-title">Licite</h3>
-            <p class="step-description">Coloque o seu lance em tempo real</p>
-          </div>
-          <div class="step-connector"></div>
-          <div class="step-item">
-            <div class="step-number">4</div>
-            <div class="step-icon">🎉</div>
-            <h3 class="step-title">Vença</h3>
-            <p class="step-description">Seja o vencedor e leve o artigo</p>
-          </div>
-        </div>
-        <div class="how-it-works-cta">
-          <router-link to="/register" class="btn btn-primary btn-pill btn-lg">Começar Agora</router-link>
-        </div>
-      </div>
-    </section>
 
     <!-- Live Auctions Section (Leilões ao Vivo) -->
     <section class="live-events-section">
@@ -502,6 +434,67 @@
               <h3 class="interest-title">{{ item.title }}</h3>
               <p class="interest-sub">🔨 {{ item.bids?.length || 0 }} Lances &bull; Lance Atual: <strong>{{ formatCurrency(item.currentPrice) }}</strong></p>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section (Minimalist Redesign at the Bottom) -->
+    <section class="how-it-works-section-minimal">
+      <div class="container">
+        <div class="section-header-center" style="margin-bottom: 2.5rem;">
+          <span class="section-badge-minimal">PLANO DE AÇÃO</span>
+          <h2 class="section-title-premium">Como Funciona</h2>
+          <p class="section-subtitle">A forma mais transparente e rápida de participar em leilões em Moçambique</p>
+        </div>
+
+        <div class="steps-container-minimal">
+          <div class="step-card-minimal">
+            <div class="step-num-badge">01</div>
+            <h3 class="step-title-minimal">Registe-se</h3>
+            <p class="step-desc-minimal">Crie a sua conta de forma gratuita e rápida em menos de 1 minuto.</p>
+          </div>
+
+          <div class="step-card-minimal">
+            <div class="step-num-badge">02</div>
+            <h3 class="step-title-minimal">Explore</h3>
+            <p class="step-desc-minimal">Navegue pelas oportunidades e artigos ativos em todo o país.</p>
+          </div>
+
+          <div class="step-card-minimal">
+            <div class="step-num-badge">03</div>
+            <h3 class="step-title-minimal">Licite</h3>
+            <p class="step-desc-minimal">Faça o seu lance em tempo real com total transparência e histórico.</p>
+          </div>
+
+          <div class="step-card-minimal">
+            <div class="step-num-badge">04</div>
+            <h3 class="step-title-minimal">Liquide via M-Pesa</h3>
+            <p class="step-desc-minimal">Confirme o pagamento seguro com PIN diretamente no telemóvel.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats/Trust Section (Minimalist Dark Glass Banner at the Bottom) -->
+    <section class="stats-section-minimal">
+      <div class="container">
+        <div class="stats-grid-minimal">
+          <div class="stat-card-minimal">
+            <div class="stat-num-bold">{{ formatNumber(stats.totalAuctions) }}</div>
+            <div class="stat-lbl-sub">Leilões Realizados</div>
+          </div>
+          <div class="stat-card-minimal">
+            <div class="stat-num-bold">{{ formatNumber(stats.totalUsers) }}</div>
+            <div class="stat-lbl-sub">Utilizadores Ativos</div>
+          </div>
+          <div class="stat-card-minimal">
+            <div class="stat-num-bold">{{ formatNumber(stats.totalBids) }}</div>
+            <div class="stat-lbl-sub">Lances Colocados</div>
+          </div>
+          <div class="stat-card-minimal">
+            <div class="stat-num-bold highlight-revenue">{{ formatCurrency(stats.totalRevenue) }}</div>
+            <div class="stat-lbl-sub">Volume Transacionado</div>
           </div>
         </div>
       </div>
@@ -2081,6 +2074,148 @@ onUnmounted(() => {
 .interest-sub {
   font-size: 0.75rem;
   color: #6b7280;
+}
+
+/* ─── Minimalist How It Works Section ─── */
+.how-it-works-section-minimal {
+  padding: 5rem 1.5rem;
+  background: #f8fafc;
+}
+
+.section-badge-minimal {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #e60000;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.steps-container-minimal {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 992px) {
+  .steps-container-minimal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .steps-container-minimal {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step-card-minimal {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: left;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.step-card-minimal:hover {
+  border-color: #e60000;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(230, 0, 0, 0.08);
+}
+
+.step-num-badge {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #e60000;
+  background: #fee2e2;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.step-title-minimal {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.4rem;
+}
+
+.step-desc-minimal {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* ─── Minimalist Dark Stats Banner ─── */
+.stats-section-minimal {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 4.5rem 1.5rem;
+  color: white;
+}
+
+.stats-grid-minimal {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  text-align: center;
+}
+
+@media (max-width: 992px) {
+  .stats-grid-minimal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-grid-minimal {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card-minimal {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2.25rem 1.25rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.stat-card-minimal:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px);
+}
+
+.stat-num-bold {
+  font-size: clamp(1.8rem, 3.5vw, 2.75rem);
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.highlight-revenue {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.stat-lbl-sub {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* ─── Features Section (Original) ─── */
