@@ -61,7 +61,21 @@
         </router-link>
       </nav>
       
-      <div class="nav-actions">
+        <!-- Notification Bell Button -->
+        <button 
+          type="button" 
+          class="nav-notif-btn" 
+          @click="toggleNotifModal" 
+          aria-label="Notificações"
+          title="Notificações"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span v-if="unreadNotifsCount > 0" class="notif-badge-pill">{{ unreadNotifsCount }}</span>
+        </button>
+
         <!-- Theme Toggle Button -->
         <button class="theme-toggle-btn" @click="toggleTheme" aria-label="Alterar tema" :title="theme === 'light' ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'">
           <svg v-if="theme === 'light'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -109,11 +123,49 @@
         </a>
       </div>
     </div>
+
+    <!-- Notifications Pop-up Modal Overlay (Matches user reference screenshot) -->
+    <Transition name="fade">
+      <div v-if="showNotifModal" class="notif-overlay" @click.self="showNotifModal = false">
+        <div class="notif-modal-card animate-scale-in">
+          <div class="notif-modal-header">
+            <h3 class="notif-title">Notificações</h3>
+            <div class="notif-header-actions">
+              <button @click="markAllAsRead" type="button" class="btn-mark-all-read">Marcar todas como lidas</button>
+              <button @click="showNotifModal = false" type="button" class="btn-close-notif" aria-label="Fechar">✕</button>
+            </div>
+          </div>
+
+          <div class="notif-list-body">
+            <div v-if="notifications.length === 0" class="notif-empty-state">
+              <span class="empty-icon">🔔</span>
+              <p>Não tem notificações de momento.</p>
+            </div>
+            
+            <div 
+              v-for="notif in notifications" 
+              :key="notif.id" 
+              class="notif-item"
+              :class="{ unread: !notif.read }"
+              @click="markAsReadAndNavigate(notif)"
+            >
+              <div class="notif-item-left">
+                <span v-if="!notif.read" class="unread-dot-red">🔴</span>
+                <div class="notif-text-wrap">
+                  <p class="notif-msg">{{ notif.message }}</p>
+                  <span class="notif-date">{{ notif.date }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </header>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 import { useToastStore } from '../stores/toastStore';
@@ -123,6 +175,56 @@ const router = useRouter();
 const toastStore = useToastStore();
 const isScrolled = ref(false);
 const isMobileMenuOpen = ref(false);
+
+// Notifications System
+const showNotifModal = ref(false);
+
+const notifications = ref([
+  {
+    id: 1,
+    message: 'Pagamento M-Pesa de 50.000,00 MZN recebido e confirmado com sucesso! 📲',
+    date: '23/07/2026',
+    read: false,
+    link: '/profile'
+  },
+  {
+    id: 2,
+    message: 'Uma oferta exclusiva para utilizadores da Prime Auction 🎁',
+    date: '22/07/2026',
+    read: false,
+    link: '/auctions'
+  },
+  {
+    id: 3,
+    message: 'Bem-vindo à maior plataforma de leilões online de Moçambique! 🔨',
+    date: '21/07/2026',
+    read: true,
+    link: '/'
+  }
+]);
+
+const unreadNotifsCount = computed(() => {
+  return notifications.value.filter(n => !n.read).length;
+});
+
+const toggleNotifModal = () => {
+  showNotifModal.value = !showNotifModal.value;
+};
+
+const markAllAsRead = () => {
+  notifications.value.forEach(n => n.read = true);
+  toastStore.add('Todas as notificações marcadas como lidas.', 'info');
+};
+
+const markAsReadAndNavigate = (notif) => {
+  notif.read = true;
+  if (notif.link) {
+    showNotifModal.value = false;
+    router.push(notif.link);
+  }
+};
+
+
 
 const theme = ref('light');
 
@@ -562,5 +664,216 @@ onUnmounted(() => {
     border-color: #30363d;
     color: #f3f4f6 !important;
   }
+}
+
+/* ─── Notification Bell & Modal Styles (Matches user's screenshot reference) ─── */
+.nav-notif-btn {
+  position: relative;
+  background: white;
+  border: 1px solid var(--border-color, #e2e8f0);
+  color: var(--text-primary, #334155);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.nav-notif-btn:hover {
+  background-color: #f8fafc;
+  transform: scale(1.05);
+}
+
+.dark .nav-notif-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.notif-badge-pill {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 900;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+}
+
+/* Notification Pop-up Modal Overlay */
+.notif-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.notif-modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 460px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .notif-modal-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: white;
+}
+
+.notif-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dark .notif-modal-header {
+  border-bottom-color: #1e293b;
+}
+
+.notif-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.dark .notif-title {
+  color: #ffffff;
+}
+
+.notif-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-mark-all-read {
+  background: none;
+  border: none;
+  color: #ec4899;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-mark-all-read:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.btn-close-notif {
+  background: #f1f5f9;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close-notif:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.dark .btn-close-notif {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.notif-list-body {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.notif-item {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f8fafc;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.dark .notif-item {
+  border-bottom-color: #1e293b;
+}
+
+.notif-item:hover {
+  background: #f8fafc;
+}
+
+.dark .notif-item:hover {
+  background: #1e293b;
+}
+
+.notif-item.unread {
+  background: #fff5f7;
+}
+
+.dark .notif-item.unread {
+  background: rgba(236, 72, 153, 0.1);
+}
+
+.notif-item-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.unread-dot-red {
+  font-size: 0.6rem;
+  margin-top: 4px;
+}
+
+.notif-msg {
+  font-size: 0.88rem;
+  color: #334155;
+  margin: 0 0 0.25rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.dark .notif-msg {
+  color: #e2e8f0;
+}
+
+.notif-date {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
 }
 </style>

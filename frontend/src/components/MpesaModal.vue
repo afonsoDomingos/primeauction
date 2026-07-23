@@ -5,13 +5,22 @@
         <!-- Close Button -->
         <button class="mpesa-close-btn" @click="closeModal" aria-label="Fechar">✕</button>
 
-        <!-- Brand Header (Prime Auction Checkout Multimeios) -->
-        <div class="mpesa-brand-header">
+        <!-- Brand Header (Dynamic Brand Theme for M-Pesa, eMola & Visa) -->
+        <div 
+          class="mpesa-brand-header" 
+          :class="{
+            'header-mpesa': selectedMethod === 'mpesa',
+            'header-emola': selectedMethod === 'emola',
+            'header-visa': selectedMethod === 'visa'
+          }"
+        >
           <div class="mpesa-logo-wrap">
-            <img src="/logo prime.png" alt="Prime Auction" class="checkout-brand-logo" />
-            <span class="mpesa-sub-tag">Checkout Seguro</span>
+            <img v-if="selectedMethod === 'mpesa'" src="/mpesa-logo.png" alt="Vodacom M-Pesa" class="checkout-brand-logo-img" />
+            <img v-else-if="selectedMethod === 'emola'" src="/emola-logo.png" alt="Movitel eMola" class="checkout-brand-logo-img" />
+            <img v-else-if="selectedMethod === 'visa'" src="/visa-logo.png" alt="Visa" class="checkout-brand-logo-img" />
+            <span class="mpesa-sub-tag">{{ selectedMethod === 'mpesa' ? 'Vodacom C2B' : selectedMethod === 'emola' ? 'Movitel eMola' : 'Visa Secure' }}</span>
           </div>
-          <p class="mpesa-merchant">Pagamento seguro de leilão para <strong>Prime Auction</strong></p>
+          <p class="mpesa-merchant">Pagamento seguro para <strong>Prime Auction</strong></p>
         </div>
 
         <!-- STEP 1: Phone / Payment Entry -->
@@ -651,6 +660,29 @@ const closeModal = () => {
   color: white;
   padding: 1rem 1.25rem;
   text-align: center;
+  transition: background 0.4s ease;
+}
+
+.mpesa-brand-header.header-mpesa {
+  background: linear-gradient(135deg, #e60000 0%, #b30000 100%);
+}
+
+.mpesa-brand-header.header-emola {
+  background: linear-gradient(135deg, #ea580c 0%, #9a3412 100%);
+}
+
+.mpesa-brand-header.header-visa {
+  background: linear-gradient(135deg, #1d4ed8 0%, #172554 100%);
+}
+
+.checkout-brand-logo-img {
+  height: 30px;
+  max-width: 140px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 3px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .mpesa-logo-wrap {
