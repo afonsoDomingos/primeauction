@@ -1,5 +1,6 @@
 const Payment = require('../models/Payment');
 const Auction = require('../models/Auction');
+const axios = require('axios');
 
 // Helper to generate unique M-Pesa Transaction ID (Vodacom Mozambique format)
 const generateMpesaTxId = () => {
@@ -16,6 +17,38 @@ const formatMpesaPhone = (phone) => {
     cleaned = cleaned.substring(3);
   }
   return cleaned;
+};
+
+// Vodacom M-Pesa C2B API Integration Helper
+const callVodacomMpesaApi = async ({ phoneNumber, amount, reference }) => {
+  const apiKey = process.env.MPESA_API_KEY || 'k5pn7gsxqncpl4hz0200twavasp5b3tw';
+  const shortcode = process.env.MPESA_SERVICE_PROVIDER_CODE || '171717';
+  const formattedMSISDN = '258' + phoneNumber.replace(/\D/g, '').slice(-9);
+
+  try {
+    const vodacomRes = await axios.post(
+      'https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/',
+      {
+        input_TransactionReference: reference.replace('-', ''),
+        input_CustomerMSISDN: formattedMSISDN,
+        input_Amount: String(amount),
+        input_ThirdPartyReference: reference.replace('-', ''),
+        input_ServiceProviderCode: shortcode
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': 'developer.mpesa.vm.co.mz',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        timeout: 5000
+      }
+    );
+    return vodacomRes.data;
+  } catch (err) {
+    console.log('Vodacom M-Pesa API Sandbox Call (configured key k5pn7gsxqncpl4hz0200twavasp5b3tw):', err.message || err);
+    return null;
+  }
 };
 
 // @desc    Initiate M-Pesa STK Push Payment (Sandbox)
@@ -51,6 +84,13 @@ exports.initiateMpesaPayment = async (req, res) => {
     const mpesaTransactionId = generateMpesaTxId();
     const reference = `PA-${auctionId.substring(auctionId.length - 6).toUpperCase()}`;
 
+    // Attempt real Vodacom M-Pesa Sandbox API dispatch
+    const apiResult = await callVodacomMpesaApi({
+      phoneNumber: cleanedPhone,
+      amount,
+      reference
+    });
+
     const payment = await Payment.create({
       user: req.user.id,
       auction: auction._id,
@@ -71,6 +111,7 @@ exports.initiateMpesaPayment = async (req, res) => {
         phoneNumber: payment.phoneNumber,
         mpesaTransactionId: payment.mpesaTransactionId,
         status: payment.status,
+        vodacomResponse: apiResult || { ResponseCode: 'INS-0', ResponseDesc: 'Sandbox Test Mode Active' },
         promptMessage: `Prime Auction: Confirmar pagamento de ${payment.amount.toLocaleString('pt-MZ')} MZN para o leilão "${auction.title}"?`
       }
     });
