@@ -1215,4 +1215,58 @@ const closeModal = () => {
 .mpesa-fade-leave-to {
   opacity: 0;
 }
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 480px) {
+  .mpesa-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .mpesa-modal-card {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 20px 20px 0 0;
+    border: none;
+  }
+
+  .method-tabs-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .method-tab-btn {
+    padding: 0.5rem 0.3rem;
+  }
+
+  .method-tab-label {
+    font-size: 0.65rem;
+  }
+
+  .method-badge {
+    width: 36px;
+    height: 30px;
+  }
+
+  .method-logo-img {
+    height: 22px;
+  }
+
+  .phone-input-group {
+    font-size: 0.9rem;
+  }
+
+  .phone-input {
+    font-size: 0.9rem;
+  }
+
+  .btn-vibrant-pay {
+    font-size: 0.88rem;
+    padding: 0.8rem;
+  }
+
+  .checkout-summary-box {
+    padding: 0.7rem 0.85rem;
+  }
+}
 </style>
