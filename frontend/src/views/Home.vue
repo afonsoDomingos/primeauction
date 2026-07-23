@@ -1,37 +1,20 @@
 <template>
   <div class="home-container">
-    <!-- Welcome Pop-up Card -->
+    <!-- Welcome Pop-up Card (Minimalist Luxury Design) -->
     <Transition name="fade">
       <div v-if="showWelcomeCard" class="welcome-overlay" @click.self="closeWelcomeCard">
         <div class="welcome-popup-card animate-scale-in">
           <button class="welcome-close-btn" @click="closeWelcomeCard" aria-label="Fechar">✕</button>
-          <div class="welcome-header">
-            <div class="welcome-badge">🎉 Novo por aqui?</div>
-            <div class="welcome-emoji">👋</div>
+          
+          <div class="welcome-brand-badge">
+            <img src="/logo prime.png" alt="Prime Auction" class="welcome-logo-img" />
           </div>
-          <h2 class="welcome-popup-title">Bem-vindo à Prime Auctions!</h2>
-          <p class="welcome-popup-text">A maior e melhor plataforma de leilões online em Moçambique.</p>
-          <div class="welcome-features">
-            <div class="welcome-feature">
-              <span class="feature-icon">🚗</span>
-              <span class="feature-text">Veículos</span>
-            </div>
-            <div class="welcome-feature">
-              <span class="feature-icon">🏠</span>
-              <span class="feature-text">Imóveis</span>
-            </div>
-            <div class="welcome-feature">
-              <span class="feature-icon">💻</span>
-              <span class="feature-text">Eletrónicos</span>
-            </div>
-            <div class="welcome-feature">
-              <span class="feature-icon">🪑</span>
-              <span class="feature-text">Mobiliário</span>
-            </div>
-          </div>
-          <p class="welcome-popup-sub">Leilões em tempo real. Licite rápido ou proponha os seus artigos!</p>
+
+          <h2 class="welcome-popup-title">Bem-vindo à Prime Auction</h2>
+          <p class="welcome-popup-text">A maior plataforma de leilões online de Moçambique. Licite em tempo real com liquidação instantânea em segurança.</p>
+
           <div class="welcome-footer-row">
-            <button @click="closeWelcomeCard" class="btn btn-primary btn-pill btn-welcome-action">Começar a Explorar</button>
+            <button @click="closeWelcomeCard" class="btn btn-primary-royal btn-welcome-action">Explorar Leilões</button>
           </div>
         </div>
       </div>
@@ -2575,37 +2558,42 @@ onUnmounted(() => {
 
 .welcome-popup-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   width: 100%;
-  max-width: 440px;
-  padding: 2.5rem 2rem 2rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  padding: 2.2rem 2rem 1.8rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   position: relative;
   text-align: center;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-.welcome-popup-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  border-radius: 16px 16px 0 0;
-  background: linear-gradient(90deg, #1a56db, #7c3aed);
+.dark .welcome-popup-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.welcome-brand-badge {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.welcome-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
 }
 
 .welcome-close-btn {
   position: absolute;
-  right: 1.25rem;
-  top: 1.25rem;
-  background: none;
+  right: 1rem;
+  top: 1rem;
+  background: #f1f5f9;
   border: none;
-  font-size: 1.1rem;
-  color: var(--text-light);
+  font-size: 0.85rem;
+  color: #64748b;
   cursor: pointer;
-  padding: 4px;
   border-radius: 50%;
   transition: all 0.2s;
   display: flex;
@@ -2616,51 +2604,55 @@ onUnmounted(() => {
 }
 
 .welcome-close-btn:hover {
-  background-color: #f3f4f6;
-  color: var(--text-primary);
+  background-color: #e2e8f0;
+  color: #0f172a;
 }
 
-.welcome-emoji {
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
-  display: inline-block;
-  animation: wave 1.5s infinite;
-  transform-origin: 70% 70%;
-}
-
-@keyframes wave {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(15deg); }
-  50% { transform: rotate(-10deg); }
-  75% { transform: rotate(10deg); }
+.dark .welcome-close-btn {
+  background: #1e293b;
+  color: #cbd5e1;
 }
 
 .welcome-popup-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.75rem;
-  line-height: 1.2;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.dark .welcome-popup-title {
+  color: #ffffff;
 }
 
 .welcome-popup-text {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #1a56db;
-  margin-bottom: 0.75rem;
-}
-
-.welcome-popup-sub {
   font-size: 0.88rem;
-  color: var(--text-secondary);
+  color: #64748b;
   line-height: 1.5;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
 }
 
-.btn-welcome-action {
+.dark .welcome-popup-text {
+  color: #94a3b8;
+}
+
+.btn-primary-royal {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 800;
   width: 100%;
-  padding: 0.8rem 1.5rem;
-  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-primary-royal:hover {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(29, 78, 216, 0.35);
 }
 
 /* Animations */
