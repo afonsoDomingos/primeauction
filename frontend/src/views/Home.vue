@@ -51,20 +51,47 @@
       </div>
 
       <div class="hero-content animate-fade-in" style="z-index: 2; position: relative;">
-        <p class="hero-eyebrow">👋 Bem-vindo à Prime Auctions &bull; Plataforma #1 em Moçambique</p>
-        <h1 class="hero-title">{{ heroTitle }}</h1>
+        <!-- Glowing Live Badge with M-Pesa Logo -->
+        <div class="hero-live-pill animate-fade-in">
+          <span class="pulse-green-dot"></span>
+          <img src="/mpesa-logo.png" alt="Vodacom M-Pesa" class="hero-mpesa-mini-logo" />
+          <span>Leilões ao Vivo &bull; Pagamentos via Vodacom M-Pesa</span>
+        </div>
+
+        <h1 class="hero-title hero-title-glowing">{{ heroTitle }}</h1>
         <p class="hero-subtitle">{{ heroSubtitle }}</p>
       </div>
       
       <div class="hero-actions animate-fade-in" style="animation-delay: 0.3s; z-index: 2; position: relative;">
-        <a @click.prevent="scrollDown" href="#search-section" class="btn btn-primary btn-pill hero-btn">Começar Pesquisa</a>
-        <router-link to="/register" class="btn btn-secondary btn-pill hero-btn">Criar Conta</router-link>
+        <a @click.prevent="scrollDown" href="#search-section" class="btn btn-primary btn-pill hero-btn">Explore os Leilões</a>
+        <router-link to="/register" class="btn btn-secondary btn-pill hero-btn">Criar Conta Grátis</router-link>
       </div>
 
-      <div class="down-arrow" @click="scrollDown" style="z-index: 2; position: relative;">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+      <!-- Floating Ribbon Bar at the bottom of Hero -->
+      <div class="hero-floating-ribbon animate-fade-in">
+        <div class="ribbon-item">
+          <span class="ribbon-icon">⚡</span>
+          <div class="ribbon-text">
+            <strong>Liquidação Instantânea</strong>
+            <span>Pagamento direto via Vodacom M-Pesa</span>
+          </div>
+        </div>
+        <div class="ribbon-divider"></div>
+        <div class="ribbon-item">
+          <span class="ribbon-icon">🛡️</span>
+          <div class="ribbon-text">
+            <strong>100% Verificado</strong>
+            <span>Plataforma e artigos auditados</span>
+          </div>
+        </div>
+        <div class="ribbon-divider"></div>
+        <div class="ribbon-item">
+          <span class="ribbon-icon">💎</span>
+          <div class="ribbon-text">
+            <strong>Leilões de Luxo</strong>
+            <span>Oportunidades únicas em Moçambique</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -336,6 +363,12 @@
             <div class="sales-card-img-wrapper">
               <img :src="auction.imageUrl" :alt="auction.title" class="sales-card-img" />
               
+              <!-- M-Pesa Badge Tag Overlay -->
+              <div class="card-mpesa-tag">
+                <img src="/mpesa-logo.png" alt="M-Pesa" class="card-mpesa-icon" />
+                <span>M-Pesa</span>
+              </div>
+
               <!-- Badges Overlay -->
               <div class="badge-overlay-container">
                 <span class="badge-item date-badge">
@@ -976,26 +1009,142 @@ onUnmounted(() => {
   margin-bottom: 1rem;
 }
 
+.hero-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.4rem 1rem;
+  border-radius: 99px;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.pulse-green-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: pulse-green 1.8s infinite;
+}
+
+@keyframes pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.hero-mpesa-mini-logo {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 3px;
+  background: white;
+  padding: 1px 4px;
+}
+
 .hero-content {
   text-align: center;
 }
 
 .hero-title {
   font-size: clamp(2.5rem, 8vw, 5.5rem);
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 1rem;
-  letter-spacing: -1px;
+  letter-spacing: -1.5px;
   color: #ffffff;
-  line-height: 1.1;
+  line-height: 1.08;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.hero-title-glowing {
+  background: linear-gradient(135deg, #ffffff 30%, #fecaca 70%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
-  font-size: clamp(0.9rem, 2.5vw, 1.15rem);
-  color: rgba(255, 255, 255, 0.85);
+  font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
-  max-width: 480px;
-  margin: 0 auto;
+  max-width: 540px;
+  margin: 0 auto 1.5rem;
   line-height: 1.6;
+}
+
+/* Floating Ribbon Bar */
+.hero-floating-ribbon {
+  position: absolute;
+  bottom: 20px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.85rem 1.75rem;
+  border-radius: 99px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  max-width: 92%;
+  width: auto;
+}
+
+@media (max-width: 768px) {
+  .hero-floating-ribbon {
+    display: none;
+  }
+}
+
+.ribbon-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ribbon-icon {
+  font-size: 1.25rem;
+}
+
+.ribbon-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.ribbon-text strong {
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ribbon-text span {
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.ribbon-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .hero-actions {
@@ -1549,6 +1698,39 @@ onUnmounted(() => {
 }
 
 /* Badges on image overlay */
+.card-mpesa-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.25rem 0.55rem;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.card-mpesa-icon {
+  height: 14px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 2px;
+  background: white;
+  padding: 1px 3px;
+}
+
+.card-mpesa-tag span {
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
 .badge-overlay-container {
   position: absolute;
   top: 10px;
