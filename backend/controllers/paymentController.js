@@ -1,6 +1,7 @@
 const Payment = require('../models/Payment');
 const Auction = require('../models/Auction');
 const axios = require('axios');
+const crypto = require('crypto');
 
 // Helper to generate unique M-Pesa Transaction ID (Vodacom Mozambique format)
 const generateMpesaTxId = () => {
@@ -19,15 +20,39 @@ const formatMpesaPhone = (phone) => {
   return cleaned;
 };
 
+// Encrypt API Key using RSA Public Key (Vodacom Mozambique Standard)
+const getMpesaBearerToken = (apiKey, publicKeyPem) => {
+  if (!publicKeyPem) return apiKey;
+  try {
+    const formattedKey = publicKeyPem.replace(/\\n/g, '\n');
+    const buffer = Buffer.from(apiKey, 'utf8');
+    const encrypted = crypto.publicEncrypt(
+      {
+        key: formattedKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING
+      },
+      buffer
+    );
+    return encrypted.toString('base64');
+  } catch (err) {
+    console.error('RSA Token Encryption Notice:', err.message);
+    return apiKey;
+  }
+};
+
 // Vodacom M-Pesa C2B API Integration Helper
 const callVodacomMpesaApi = async ({ phoneNumber, amount, reference }) => {
   const apiKey = process.env.MPESA_API_KEY || 'k5pn7gsxqncpl4hz0200twavasp5b3tw';
+  const publicKey = process.env.MPESA_PUBLIC_KEY;
+  const c2bUrl = process.env.MPESA_C2B_URL || 'https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/';
   const shortcode = process.env.MPESA_SERVICE_PROVIDER_CODE || '171717';
   const formattedMSISDN = '258' + phoneNumber.replace(/\D/g, '').slice(-9);
 
+  const bearerToken = getMpesaBearerToken(apiKey, publicKey);
+
   try {
     const vodacomRes = await axios.post(
-      'https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/',
+      c2bUrl,
       {
         input_TransactionReference: reference.replace('-', ''),
         input_CustomerMSISDN: formattedMSISDN,
@@ -39,15 +64,15 @@ const callVodacomMpesaApi = async ({ phoneNumber, amount, reference }) => {
         headers: {
           'Content-Type': 'application/json',
           'Origin': 'developer.mpesa.vm.co.mz',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${bearerToken}`
         },
-        timeout: 5000
+        timeout: 8000
       }
     );
     return vodacomRes.data;
   } catch (err) {
-    console.log('Vodacom M-Pesa API Sandbox Call (configured key k5pn7gsxqncpl4hz0200twavasp5b3tw):', err.message || err);
-    return null;
+    console.log('Vodacom M-Pesa Sandbox API Response/Notice:', err.response?.data || err.message);
+    return err.response?.data || null;
   }
 };
 
