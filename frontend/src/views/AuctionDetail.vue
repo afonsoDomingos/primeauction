@@ -155,12 +155,13 @@
           <!-- M-Pesa Payment Box -->
           <div v-if="auction" class="mpesa-pay-card animate-fade-in" style="margin-top: 1.5rem; background: linear-gradient(135deg, #fff5f5, #ffffff); border: 1.5px solid #fca5a5; padding: 1.25rem; border-radius: 16px; text-align: center; box-shadow: 0 4px 12px rgba(230, 0, 0, 0.05);">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.5rem;">
-              <span style="background: #e60000; color: white; font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 99px; text-transform: lowercase;">m-pesa</span>
+              <img src="/mpesa-logo.png" alt="Vodacom M-Pesa" style="height: 26px; width: auto; object-fit: contain; border-radius: 4px; background: white; padding: 2px 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);" />
               <strong style="color: #990000; font-size: 1rem;">Pagamento Direto via M-Pesa</strong>
             </div>
             <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; line-height: 1.4;">Efetue a liquidação deste artigo instantaneamente via Vodacom M-Pesa no seu telemóvel.</p>
-            <button @click="openMpesaModal" type="button" class="btn" style="background: #e60000; color: white; width: 100%; font-weight: 700; border-radius: 12px; padding: 0.85rem; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;">
-              📲 Pagar {{ formatCurrency(auction.currentPrice) }} com M-Pesa
+            <button @click="openMpesaModal" type="button" class="btn" style="background: #e60000; color: white; width: 100%; font-weight: 700; border-radius: 12px; padding: 0.85rem; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(230, 0, 0, 0.25);">
+              <img src="/mpesa-logo.png" alt="M-Pesa" style="height: 22px; width: auto; object-fit: contain; border-radius: 4px; background: white; padding: 2px 5px;" />
+              <span>Pagar {{ formatCurrency(auction.currentPrice) }} com M-Pesa</span>
             </button>
           </div>
 
