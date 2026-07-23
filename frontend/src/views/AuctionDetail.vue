@@ -6,10 +6,27 @@
         <!-- Main Image -->
         <div class="main-image-display" :style="{ backgroundImage: `url(${activeImage || auction.imageUrl})` }">
           <div class="image-overlay">
-            <button class="back-btn" @click="$router.back()">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-              Voltar
-            </button>
+            <div class="top-overlay-bar">
+              <button class="back-btn" @click="$router.back()">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                Voltar
+              </button>
+
+              <!-- Image Counter Badge -->
+              <div v-if="allImages.length > 1" class="image-counter-badge">
+                🖼️ {{ currentImageIndex + 1 }} / {{ allImages.length }}
+              </div>
+            </div>
+
+            <!-- Gallery Image Navigation Arrows (Left & Right) -->
+            <div v-if="allImages.length > 1" class="gallery-nav-arrows">
+              <button type="button" class="gallery-arrow-btn prev-arrow" @click.stop="prevImage" title="Imagem anterior" aria-label="Imagem anterior">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button type="button" class="gallery-arrow-btn next-arrow" @click.stop="nextImage" title="Próxima imagem" aria-label="Próxima imagem">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         
@@ -475,6 +492,36 @@ const bidAmount = ref(0);
 const displayBidAmount = ref('');
 const activeImage = ref('');
 let socket = null;
+
+// Image Gallery Helper Methods
+const allImages = computed(() => {
+  if (!auction.value) return [];
+  if (auction.value.images && auction.value.images.length > 0) {
+    return auction.value.images;
+  }
+  return auction.value.imageUrl ? [auction.value.imageUrl] : [];
+});
+
+const currentImageIndex = computed(() => {
+  if (!auction.value || allImages.value.length === 0) return 0;
+  const current = activeImage.value || auction.value.imageUrl;
+  const idx = allImages.value.indexOf(current);
+  return idx >= 0 ? idx : 0;
+});
+
+const prevImage = () => {
+  if (allImages.value.length <= 1) return;
+  let newIdx = currentImageIndex.value - 1;
+  if (newIdx < 0) newIdx = allImages.value.length - 1;
+  activeImage.value = allImages.value[newIdx];
+};
+
+const nextImage = () => {
+  if (allImages.value.length <= 1) return;
+  let newIdx = currentImageIndex.value + 1;
+  if (newIdx >= allImages.value.length) newIdx = 0;
+  activeImage.value = allImages.value[newIdx];
+};
 
 const isMpesaModalOpen = ref(false);
 const openMpesaModal = () => {
@@ -1048,33 +1095,98 @@ onUnmounted(() => {
 }
 
 .image-overlay {
+  position: relative;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 40%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 35%, rgba(0,0,0,0.2) 100%);
   display: flex;
-  align-items: flex-start;
-  padding: 90px 2rem 2rem;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 90px 1.5rem 1.5rem;
+}
+
+.top-overlay-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .back-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.18);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: white;
   border-radius: 20px;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .back-btn:hover {
-  background: rgba(255,255,255,0.28);
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-1px);
+}
+
+.image-counter-badge {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.gallery-nav-arrows {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1rem;
+  pointer-events: none;
+}
+
+.gallery-arrow-btn {
+  pointer-events: auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-arrow-btn:hover {
+  background: var(--btn-primary-bg, #0284c7);
+  border-color: var(--btn-primary-bg, #0284c7);
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.gallery-arrow-btn:active {
+  transform: scale(0.95);
 }
 
 /* ─── Content Side ─── */

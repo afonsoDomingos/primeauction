@@ -8,8 +8,8 @@
         <!-- Brand Header -->
         <div class="mpesa-brand-header">
           <div class="mpesa-logo-wrap">
-            <span class="mpesa-brand-badge">m-pesa</span>
-            <span class="mpesa-sub-tag">Sandbox C2B</span>
+            <img src="/mpesa-logo.png" alt="Vodacom M-Pesa" class="mpesa-official-logo" />
+            <span class="mpesa-sub-tag">Vodacom C2B</span>
           </div>
           <p class="mpesa-merchant">Pagamento seguro para <strong>Prime Auction</strong></p>
         </div>
@@ -84,7 +84,9 @@
               <span class="time">Agora</span>
             </div>
             <div class="ussd-alert-box">
-              <div class="ussd-icon">📲</div>
+              <div class="ussd-icon">
+                <img src="/mpesa-logo.png" alt="M-Pesa" class="mpesa-ussd-logo" />
+              </div>
               <h5 class="ussd-title">Confirmação M-Pesa</h5>
               <p class="ussd-prompt">
                 Deseja confirmar o pagamento de <strong>{{ formatCurrency(customAmount) }}</strong> para <strong>Prime Auction</strong> (Ref: {{ paymentData?.reference }})?
