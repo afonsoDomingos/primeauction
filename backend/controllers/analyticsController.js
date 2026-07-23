@@ -333,3 +333,32 @@ exports.getProposalAnalytics = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+// @desc    Get public platform statistics for homepage banner
+// @route   GET /api/analytics/public-stats
+// @access  Public
+exports.getPublicStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalAuctions = await Auction.countDocuments();
+    const totalBids = await Bid.countDocuments();
+
+    const auctions = await Auction.find().select('currentPrice startingPrice status');
+    let totalVolume = 0;
+    for (const a of auctions) {
+      totalVolume += (a.currentPrice || a.startingPrice || 0);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalAuctions: totalAuctions,
+        totalUsers: Math.max(totalUsers, 1),
+        totalBids: totalBids,
+        totalRevenue: totalVolume
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};

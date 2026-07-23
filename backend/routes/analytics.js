@@ -5,10 +5,12 @@ const {
   getAuctionAnalytics,
   getUserAnalytics,
   getBidAnalytics,
-  getProposalAnalytics
+  getProposalAnalytics,
+  getPublicStats
 } = require('../controllers/analyticsController');
 const { protect, authorize } = require('../middlewares/auth');
 
+router.get('/public-stats', getPublicStats);
 router.get('/overview', protect, authorize('admin'), getOverview);
 router.get('/auctions', protect, authorize('admin'), getAuctionAnalytics);
 router.get('/users', protect, authorize('admin'), getUserAnalytics);

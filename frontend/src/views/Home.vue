@@ -696,24 +696,17 @@ const stats = ref({
 const fetchStats = async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const res = await axios.get(`${apiUrl}/api/analytics/overview`);
+    const res = await axios.get(`${apiUrl}/api/analytics/public-stats`);
     if (res.data && res.data.data) {
       stats.value = {
-        totalAuctions: res.data.data.totals.auctions || 0,
-        totalUsers: res.data.data.totals.users || 0,
-        totalBids: res.data.data.totals.bids || 0,
-        totalRevenue: res.data.data.revenue.total || 0
+        totalAuctions: res.data.data.totalAuctions || 0,
+        totalUsers: res.data.data.totalUsers || 0,
+        totalBids: res.data.data.totalBids || 0,
+        totalRevenue: res.data.data.totalRevenue || 0
       };
     }
   } catch (err) {
     console.error('Failed to fetch stats:', err);
-    // Set to 0 if API fails, to ensure only real data is shown
-    stats.value = {
-      totalAuctions: 0,
-      totalUsers: 0,
-      totalBids: 0,
-      totalRevenue: 0
-    };
   }
 };
 

@@ -528,9 +528,9 @@ const closeModal = () => {
 }
 
 .method-tab-btn.active {
-  border-color: #e60000;
-  box-shadow: 0 0 0 3px rgba(230, 0, 0, 0.15);
-  background: #fff5f5;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+  background: #eff6ff;
 }
 
 .method-badge {
@@ -656,7 +656,7 @@ const closeModal = () => {
 
 /* Brand Header */
 .mpesa-brand-header {
-  background: linear-gradient(135deg, #e60000 0%, #b30000 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
   color: white;
   padding: 1rem 1.25rem;
   text-align: center;
@@ -664,7 +664,7 @@ const closeModal = () => {
 }
 
 .mpesa-brand-header.header-mpesa {
-  background: linear-gradient(135deg, #e60000 0%, #b30000 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
 }
 
 .mpesa-brand-header.header-emola {
