@@ -20,9 +20,32 @@
             <span class="summary-label">Artigo / Leilão:</span>
             <strong class="summary-val title-ellipsis">{{ auctionTitle }}</strong>
           </div>
-          <div class="summary-row">
-            <span class="summary-label">Valor Total:</span>
-            <span class="summary-amount">{{ formatCurrency(amount) }}</span>
+
+          <div class="summary-amount-edit-wrap">
+            <label class="summary-label-bold">💰 Valor a Pagar via M-Pesa:</label>
+            <div class="amount-input-group">
+              <span class="amount-currency-tag">MZN</span>
+              <input
+                type="number"
+                v-model.number="customAmount"
+                class="custom-amount-input"
+                :min="1"
+                step="100"
+                placeholder="Insira o valor..."
+                :disabled="loading || step !== 'phone'"
+              />
+            </div>
+
+            <!-- Quick Increments -->
+            <div v-if="step === 'phone'" class="mpesa-quick-increments">
+              <span class="quick-inc-label">Atalhos de incremento:</span>
+              <div class="quick-inc-btns">
+                <button type="button" @click="addAmount(1000)" class="btn-quick-inc">+1.000</button>
+                <button type="button" @click="addAmount(5000)" class="btn-quick-inc">+5.000</button>
+                <button type="button" @click="addAmount(10000)" class="btn-quick-inc">+10.000</button>
+                <button type="button" @click="addAmount(25000)" class="btn-quick-inc">+25.000</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -46,9 +69,9 @@
             </div>
             <p v-if="phoneError" class="input-error-msg">{{ phoneError }}</p>
 
-            <button type="submit" class="btn btn-mpesa-submit" :disabled="loading || !phoneNumber">
+            <button type="submit" class="btn btn-mpesa-submit" :disabled="loading || !phoneNumber || !customAmount || customAmount <= 0">
               <span v-if="loading" class="spinner-inline"></span>
-              <span>{{ loading ? 'A enviar pedido STK Push...' : '📲 Continuar no Telemóvel' }}</span>
+              <span>{{ loading ? 'A enviar pedido STK Push...' : `📲 Pagar ${formatCurrency(customAmount)} com M-Pesa` }}</span>
             </button>
           </form>
         </div>
@@ -64,7 +87,7 @@
               <div class="ussd-icon">📲</div>
               <h5 class="ussd-title">Confirmação M-Pesa</h5>
               <p class="ussd-prompt">
-                Deseja confirmar o pagamento de <strong>{{ formatCurrency(amount) }}</strong> para <strong>Prime Auction</strong> (Ref: {{ paymentData?.reference }})?
+                Deseja confirmar o pagamento de <strong>{{ formatCurrency(customAmount) }}</strong> para <strong>Prime Auction</strong> (Ref: {{ paymentData?.reference }})?
               </p>
               
               <div class="pin-entry-wrap">
@@ -172,14 +195,20 @@ const step = ref('phone'); // 'phone' | 'ussd' | 'success'
 const phoneNumber = ref('');
 const phoneError = ref('');
 const loading = ref(false);
+const customAmount = ref(props.amount);
 
 const paymentData = ref(null);
 const pinInput = ref('');
 const receiptData = ref(null);
 const pinInputRef = ref(null);
 
+watch(() => props.amount, (newVal) => {
+  if (newVal) customAmount.value = newVal;
+});
+
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
+    customAmount.value = props.amount || 0;
     step.value = 'phone';
     phoneError.value = '';
     pinInput.value = '';
@@ -195,6 +224,10 @@ watch(() => props.isOpen, (newVal) => {
     }
   }
 });
+
+const addAmount = (inc) => {
+  customAmount.value = (Number(customAmount.value) || 0) + inc;
+};
 
 const formatCurrency = (val) => {
   if (!val) return '0,00 MZN';
@@ -214,12 +247,17 @@ const handleInitiatePayment = async () => {
     return;
   }
 
+  if (!customAmount.value || customAmount.value <= 0) {
+    phoneError.value = 'Por favor, insira um valor válido a pagar.';
+    return;
+  }
+
   loading.value = true;
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const res = await axios.post(`${apiUrl}/api/payments/mpesa/initiate`, {
       auctionId: props.auctionId,
-      amount: props.amount,
+      amount: customAmount.value,
       phoneNumber: cleaned
     }, {
       headers: { Authorization: `Bearer ${authStore.token}` }
@@ -752,6 +790,92 @@ const closeModal = () => {
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+}
+
+/* Custom amount & quick increments styles */
+.summary-amount-edit-wrap {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.summary-label-bold {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.amount-input-group {
+  display: flex;
+  align-items: center;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.amount-input-group:focus-within {
+  border-color: #e60000;
+}
+
+.amount-currency-tag {
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.65rem 0.85rem;
+  border-right: 1px solid #fecaca;
+}
+
+.custom-amount-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.65rem 0.85rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  background: transparent;
+}
+
+.mpesa-quick-increments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.quick-inc-label {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.quick-inc-btns {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.btn-quick-inc {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-quick-inc:hover {
+  background: #e60000;
+  color: white;
+  border-color: #e60000;
+  transform: translateY(-1px);
 }
 
 .mpesa-fade-enter-active,
