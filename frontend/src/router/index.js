@@ -9,11 +9,15 @@ import UserDashboard from '../views/UserDashboard.vue'
 import SellWithUs from '../views/SellWithUs.vue'
 import Calendar from '../views/Calendar.vue'
 import AnalyticsDashboard from '../views/AnalyticsDashboard.vue'
+import ForgotPassword from '../views/ForgotPassword.vue'
+import ResetPassword from '../views/ResetPassword.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/login', name: 'Login', component: Login, meta: { guestOnly: true } },
   { path: '/register', name: 'Register', component: Register, meta: { guestOnly: true } },
+  { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword, meta: { guestOnly: true } },
+  { path: '/reset-password', name: 'ResetPassword', component: ResetPassword, meta: { guestOnly: true } },
   { path: '/auctions', name: 'Auctions', component: Auctions },
   { path: '/auction/:id', name: 'AuctionDetail', component: AuctionDetail },
   { path: '/calendario', name: 'Calendar', component: Calendar },

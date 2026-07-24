@@ -36,7 +36,10 @@
               />
             </div>
             <div class="form-group">
-              <label class="form-label" for="password">Senha</label>
+              <div class="label-row">
+                <label class="form-label" for="password">Senha</label>
+                <router-link to="/forgot-password" class="forgot-link">Esqueceu a senha?</router-link>
+              </div>
               <div class="input-wrapper">
                 <input
                   :type="showPass ? 'text' : 'password'"
@@ -53,6 +56,7 @@
                 </button>
               </div>
             </div>
+
 
             <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="authStore.loading">
               <span v-if="authStore.loading" class="btn-spinner"></span>
@@ -241,6 +245,21 @@ const handleLogin = async () => {
   background-color: #fdecea;
   border-radius: var(--radius-md);
 }
+
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forgot-link {
+  font-size: 0.8rem;
+  color: #1a56db;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.forgot-link:hover { opacity: 0.75; text-decoration: underline; }
 
 /* ── Submit Button ── */
 .submit-btn {

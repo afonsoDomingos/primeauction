@@ -63,6 +63,14 @@ const userSchema = new mongoose.Schema({
       ref: 'Auction'
     }],
     default: []
+  },
+  passwordResetToken: {
+    type: String,
+    default: null
+  },
+  passwordResetExpires: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
