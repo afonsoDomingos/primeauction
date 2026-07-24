@@ -180,46 +180,71 @@ const isMobileMenuOpen = ref(false);
 
 // Notifications System
 const showNotifModal = ref(false);
+const notifications = ref([]);
+const loadingNotifications = ref(false);
 
-const notifications = ref([
-  {
-    id: 1,
-    message: 'Pagamento M-Pesa de 50.000,00 MZN recebido e confirmado com sucesso! 📲',
-    date: '23/07/2026',
-    read: false,
-    link: '/profile'
-  },
-  {
-    id: 2,
-    message: 'Uma oferta exclusiva para utilizadores da Prime Auction 🎁',
-    date: '22/07/2026',
-    read: false,
-    link: '/auctions'
-  },
-  {
-    id: 3,
-    message: 'Bem-vindo à maior plataforma de leilões de Moçambique! 🔨',
-    date: '21/07/2026',
-    read: true,
-    link: '/'
+const fetchNotifications = async () => {
+  if (!authStore.isAuthenticated) {
+    notifications.value = [];
+    return;
   }
-]);
+  loadingNotifications.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/notifications`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data && res.data.success && Array.isArray(res.data.data)) {
+      notifications.value = res.data.data.map(n => ({
+        id: n._id,
+        message: n.message,
+        title: n.title,
+        date: new Date(n.createdAt).toLocaleDateString('pt-MZ'),
+        read: n.read,
+        link: n.link || '/'
+      }));
+    }
+  } catch (err) {
+    console.error('Failed to fetch notifications:', err);
+  } finally {
+    loadingNotifications.value = false;
+  }
+};
 
 const unreadNotifsCount = computed(() => {
   return notifications.value.filter(n => !n.read).length;
 });
 
-const toggleNotifModal = () => {
+const toggleNotifModal = async () => {
   showNotifModal.value = !showNotifModal.value;
+  if (showNotifModal.value) {
+    await fetchNotifications();
+  }
 };
 
-const markAllAsRead = () => {
+const markAllAsRead = async () => {
   notifications.value.forEach(n => n.read = true);
-  toastStore.add('Todas as notificações marcadas como lidas.', 'info');
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    await axios.put(`${apiUrl}/api/notifications/read-all`, {}, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    toastStore.add('Todas as notificações marcadas como lidas.', 'info');
+  } catch (err) {
+    console.error('Failed to mark all notifications as read:', err);
+  }
 };
 
-const markAsReadAndNavigate = (notif) => {
+const markAsReadAndNavigate = async (notif) => {
   notif.read = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    await axios.put(`${apiUrl}/api/notifications/${notif.id}/read`, {}, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+  } catch (err) {
+    console.error('Error marking notification read:', err);
+  }
   if (notif.link) {
     showNotifModal.value = false;
     router.push(notif.link);
@@ -279,6 +304,7 @@ onMounted(() => {
   applyThemeClass(); // Apply without writing to localStorage
 
   window.addEventListener('scroll', handleScroll, { passive: true });
+  fetchNotifications();
 });
 
 onUnmounted(() => {

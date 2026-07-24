@@ -197,6 +197,20 @@ exports.confirmMpesaPayment = async (req, res) => {
     payment.completedAt = new Date();
     await payment.save();
 
+    // Create real payment notification
+    try {
+      const { createNotification } = require('./notificationController');
+      await createNotification({
+        userId: payment.user._id,
+        title: 'Pagamento Confirmado',
+        message: `Pagamento M-Pesa de ${payment.amount.toLocaleString('pt-MZ')} MZN recebido e confirmado com sucesso! 🏦`,
+        type: 'payment',
+        link: '/profile'
+      });
+    } catch (notifErr) {
+      console.error('Error creating payment notification:', notifErr);
+    }
+
     res.status(200).json({
       success: true,
       message: 'Pagamento M-Pesa confirmado com sucesso! ✓',

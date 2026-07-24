@@ -81,6 +81,31 @@ exports.placeBid = async (req, res) => {
       bid
     });
 
+    // Generate real notifications
+    try {
+      const { createNotification } = require('./notificationController');
+      await createNotification({
+        userId: req.user.id,
+        title: 'Lance Registado',
+        message: `Lance de ${amount.toLocaleString('pt-MZ')} MZN colocado com sucesso no leilão "${auction.title}"! 🔨`,
+        type: 'bid',
+        link: `/auction/${auctionId}`
+      });
+
+      const previousHighest = await Bid.findOne({ auction: auctionId, _id: { $ne: bid._id } }).sort('-amount');
+      if (previousHighest && previousHighest.user.toString() !== req.user.id.toString()) {
+        await createNotification({
+          userId: previousHighest.user,
+          title: 'Lance Ultrapassado',
+          message: `Alerta: O seu lance no leilão "${auction.title}" foi ultrapassado por outro licitante! ⚠️`,
+          type: 'outbid',
+          link: `/auction/${auctionId}`
+        });
+      }
+    } catch (notifErr) {
+      console.error('Error creating bid notification:', notifErr);
+    }
+
     res.status(201).json({ success: true, data: bid });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
