@@ -163,7 +163,7 @@
               <strong class="pay-card-title">Pagamento Direto do Artigo</strong>
             </div>
             <p class="pay-card-subtitle">Efetue a liquidação em segurança usando M-Pesa, eMola ou Cartão de Crédito.</p>
-            <button @click="openMpesaModal" type="button" class="btn btn-pay-royal">
+            <button @click="handleDirectPayClick" type="button" class="btn btn-pay-royal">
               <span>Pagar {{ formatCurrency(auction.currentPrice) }}</span>
             </button>
           </div>
@@ -528,12 +528,31 @@ const nextImage = () => {
 };
 
 const isMpesaModalOpen = ref(false);
+const isDirectPaymentAttempt = ref(false);
+
 const openMpesaModal = () => {
   if (!authStore.isAuthenticated) {
     toastStore.add('Por favor, faça login para efetuar o pagamento M-Pesa.', 'warning');
     return;
   }
   isMpesaModalOpen.value = true;
+};
+
+const handleDirectPayClick = () => {
+  if (!authStore.isAuthenticated) {
+    toastStore.add('Por favor, faça login para efetuar o pagamento.', 'warning');
+    return;
+  }
+  isDirectPaymentAttempt.value = true;
+  const user = authStore.user || {};
+  profileForm.value = {
+    name: user.name || '',
+    phone: user.phone || '',
+    province: user.province || '',
+    gender: user.gender || '',
+    age: user.age || null
+  };
+  showProfileModal.value = true;
 };
 const handleMpesaSuccess = (receipt) => {
   toastStore.add('Pagamento M-Pesa registado com sucesso! ✓', 'success');
@@ -938,7 +957,13 @@ const submitProfileDetails = async () => {
       toastStore.success('Perfil actualizado com sucesso! ✓');
       showProfileModal.value = false;
       profileStep.value = 1;
-      await executePlaceBid();
+
+      if (isDirectPaymentAttempt.value) {
+        isDirectPaymentAttempt.value = false;
+        openMpesaModal();
+      } else {
+        await executePlaceBid();
+      }
     } else {
       toastStore.error(res.error || 'Erro ao actualizar o perfil.');
     }
@@ -957,6 +982,7 @@ const placeBid = async () => {
     return;
   }
 
+  isDirectPaymentAttempt.value = false;
   const user = authStore.user || {};
   profileForm.value = {
     name: user.name || '',
