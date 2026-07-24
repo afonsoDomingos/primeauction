@@ -488,6 +488,11 @@
                   <td>
                     <div class="action-btns">
                       <button
+                        @click="openEditModal(auction)"
+                        class="btn btn-sm btn-primary"
+                        title="Editar leilão"
+                      >✏️ Editar</button>
+                      <button
                         v-if="auction.status === 'active'"
                         @click="openExtendModal(auction)"
                         class="btn btn-sm btn-extend"
@@ -894,6 +899,116 @@
               {{ extendingAuction ? 'A guardar...' : '✓ Confirmar Extensão' }}
             </button>
           </div>
+    <!-- Edit Auction Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showEditModal" class="custom-modal-overlay" @click.self="closeEditModal">
+        <div class="custom-modal-card extend-modal-card animate-scale-in" style="max-width: 680px; width: 90%;">
+          <div class="modal-header-row">
+            <span class="modal-title-icon">✏️</span>
+            <h4>Editar Leilão</h4>
+            <button type="button" class="wizard-close-btn" @click="closeEditModal" aria-label="Fechar">✕</button>
+          </div>
+          
+          <form @submit.prevent="submitEditAuction" class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; max-height: 75vh; overflow-y: auto; padding-right: 0.5rem; text-align: left;">
+            <!-- Title & Category -->
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Título</label>
+                <input type="text" v-model="editForm.title" class="form-input" required />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Categoria</label>
+                <select v-model="editForm.category" class="form-input" required>
+                  <option v-for="cat in categories" :key="cat._id" :value="cat.name">
+                    {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Prices -->
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Preço Inicial (MZN)</label>
+                <input type="number" v-model.number="editForm.startingPrice" class="form-input" min="0" required />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Preço Actual (MZN)</label>
+                <input type="number" v-model.number="editForm.currentPrice" class="form-input" min="0" required />
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Descrição</label>
+              <textarea v-model="editForm.description" class="form-input" rows="3" required></textarea>
+            </div>
+
+            <!-- Images Upload -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Imagens do Produto (Capa e Galeria)</label>
+              <div class="image-upload-wrapper">
+                <div class="upload-dropzone" @click="triggerEditImageUpload" title="Clique para carregar novas imagens">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 0.25rem; color: var(--text-light)">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span>{{ uploadingEditImages ? 'A enviar...' : 'Clique para carregar/adicionar imagens' }}</span>
+                  <input type="file" ref="editFileInput" multiple accept="image/*" style="display: none" @change="handleEditImagesUpload" />
+                </div>
+              </div>
+
+              <div style="margin-top: 0.5rem;">
+                <label class="form-label-secondary" style="font-size:0.75rem; color:var(--text-light); display:block; margin-bottom:0.25rem;">URL da imagem principal (Capa):</label>
+                <input type="url" v-model="editForm.imageUrl" class="form-input" placeholder="https://..." />
+              </div>
+
+              <!-- Uploaded Thumbnails list -->
+              <div v-if="editForm.images && editForm.images.length > 0" class="uploaded-thumbnails-grid" style="margin-top: 0.5rem;">
+                <div 
+                  v-for="(imgUrl, idx) in editForm.images" 
+                  :key="idx" 
+                  class="thumb-wrapper"
+                  :class="{ 'is-cover': editForm.imageUrl === imgUrl }"
+                >
+                  <img :src="imgUrl" class="thumb-img" alt="Miniatura" />
+                  <button type="button" class="btn-remove-thumb" @click="removeEditImage(idx)" title="Remover imagem">×</button>
+                  <button type="button" class="btn-set-cover" @click="setEditCoverImage(imgUrl)" title="Definir como imagem de capa">
+                    {{ editForm.imageUrl === imgUrl ? '★ Principal' : 'Definir Capa' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dates & Status -->
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Início</label>
+                <input type="datetime-local" v-model="editForm.startTime" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Fim</label>
+                <input type="datetime-local" v-model="editForm.endTime" class="form-input" required />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Estado</label>
+                <select v-model="editForm.status" class="form-input">
+                  <option value="active">Activo</option>
+                  <option value="upcoming">Agendado</option>
+                  <option value="ended">Terminado</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="modal-footer" style="padding-top: 0.75rem; border-top: 1px solid #e5e7eb; margin-top: 0.5rem;">
+              <button type="button" @click="closeEditModal" class="btn btn-secondary btn-pill btn-sm">Cancelar</button>
+              <button type="submit" class="btn btn-primary btn-pill btn-sm" :disabled="updatingAuction">
+                <span v-if="updatingAuction" class="btn-spinner"></span>
+                {{ updatingAuction ? 'A guardar...' : '💾 Guardar Alterações' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </Transition>
@@ -1382,6 +1497,147 @@ const submitExtendAuction = async () => {
     showAlert('Erro ao estender leilão: ' + (err.response?.data?.error || err.message), 'error');
   } finally {
     extendingAuction.value = false;
+  }
+};
+
+// ── Edit Auction ──
+const showEditModal = ref(false);
+const editTargetAuction = ref(null);
+const updatingAuction = ref(false);
+const editFileInput = ref(null);
+const uploadingEditImages = ref(false);
+const editForm = ref({
+  title: '',
+  description: '',
+  category: '',
+  startingPrice: 0,
+  currentPrice: 0,
+  imageUrl: '',
+  images: [],
+  startTime: '',
+  endTime: '',
+  status: 'active'
+});
+
+const formatDateForInput = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+};
+
+const openEditModal = (auction) => {
+  editTargetAuction.value = auction;
+  const imgs = Array.isArray(auction.images) && auction.images.length > 0
+    ? [...auction.images]
+    : (auction.imageUrl ? [auction.imageUrl] : []);
+  
+  editForm.value = {
+    title: auction.title || '',
+    description: auction.description || '',
+    category: auction.category || '',
+    startingPrice: auction.startingPrice || 0,
+    currentPrice: auction.currentPrice || 0,
+    imageUrl: auction.imageUrl || (imgs.length > 0 ? imgs[0] : ''),
+    images: imgs,
+    startTime: formatDateForInput(auction.startTime),
+    endTime: formatDateForInput(auction.endTime),
+    status: auction.status || 'active'
+  };
+  showEditModal.value = true;
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+  editTargetAuction.value = null;
+};
+
+const triggerEditImageUpload = () => {
+  if (editFileInput.value) editFileInput.value.click();
+};
+
+const handleEditImagesUpload = async (e) => {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+
+  const formData = new FormData();
+  files.forEach(file => formData.append('images', file));
+
+  uploadingEditImages.value = true;
+  try {
+    const res = await axios.post(`${apiUrl}/api/auctions/upload-images`, formData, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (res.data.success) {
+      const urls = res.data.imageUrls;
+      editForm.value.images = [...editForm.value.images, ...urls];
+      if (!editForm.value.imageUrl && editForm.value.images.length > 0) {
+        editForm.value.imageUrl = editForm.value.images[0];
+      }
+      showAlert('Imagens carregadas com sucesso! ✓');
+    }
+  } catch (err) {
+    showAlert('Erro ao carregar imagens: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    uploadingEditImages.value = false;
+    if (editFileInput.value) editFileInput.value.value = '';
+  }
+};
+
+const removeEditImage = (index) => {
+  const removedUrl = editForm.value.images[index];
+  editForm.value.images.splice(index, 1);
+  if (editForm.value.imageUrl === removedUrl) {
+    editForm.value.imageUrl = editForm.value.images.length > 0 ? editForm.value.images[0] : '';
+  }
+};
+
+const setEditCoverImage = (url) => {
+  editForm.value.imageUrl = url;
+};
+
+const submitEditAuction = async () => {
+  if (!editTargetAuction.value) return;
+  updatingAuction.value = true;
+  try {
+    const payload = {
+      title: editForm.value.title,
+      description: editForm.value.description,
+      category: editForm.value.category,
+      startingPrice: Number(editForm.value.startingPrice),
+      currentPrice: Number(editForm.value.currentPrice),
+      imageUrl: editForm.value.imageUrl,
+      images: editForm.value.images,
+      status: editForm.value.status,
+      endTime: editForm.value.endTime ? new Date(editForm.value.endTime).toISOString() : editTargetAuction.value.endTime
+    };
+    if (editForm.value.startTime) {
+      payload.startTime = new Date(editForm.value.startTime).toISOString();
+    }
+
+    if (payload.images.length > 0 && !payload.imageUrl) {
+      payload.imageUrl = payload.images[0];
+    } else if (payload.imageUrl && !payload.images.includes(payload.imageUrl)) {
+      payload.images.unshift(payload.imageUrl);
+    }
+
+    const res = await axios.put(`${apiUrl}/api/auctions/${editTargetAuction.value._id}`, payload, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+
+    if (res.data.success) {
+      showAlert(`Leilão "${payload.title}" actualizado com sucesso! ✓`);
+      closeEditModal();
+      fetchData();
+    }
+  } catch (err) {
+    showAlert('Erro ao actualizar leilão: ' + (err.response?.data?.error || err.message), 'error');
+  } finally {
+    updatingAuction.value = false;
   }
 };
 const confirmBtnText = ref('Confirmar');
