@@ -195,7 +195,7 @@ const notifications = ref([
   },
   {
     id: 3,
-    message: 'Bem-vindo à maior plataforma de leilões online de Moçambique! 🔨',
+    message: 'Bem-vindo à maior plataforma de leilões de Moçambique! 🔨',
     date: '21/07/2026',
     read: true,
     link: '/'

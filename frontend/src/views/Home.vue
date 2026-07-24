@@ -11,7 +11,7 @@
           </div>
 
           <h2 class="welcome-popup-title">Bem-vindo à Prime Auction</h2>
-          <p class="welcome-popup-text">A maior plataforma de leilões online de Moçambique. Licite em tempo real com liquidação instantânea em segurança.</p>
+          <p class="welcome-popup-text">A maior plataforma de leilões de Moçambique. Licite em tempo real com liquidação instantânea em segurança.</p>
 
           <div class="welcome-footer-row">
             <button @click="closeWelcomeCard" class="btn btn-primary-royal btn-welcome-action">Explorar Leilões</button>
