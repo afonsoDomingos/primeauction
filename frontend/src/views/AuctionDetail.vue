@@ -219,7 +219,8 @@
                 :class="{ active: activeTab === 'details' }"
                 @click="activeTab = 'details'"
               >
-                📋 Detalhes & Ficha Técnica
+                <span class="tab-icon">📋</span>
+                <span class="tab-text">Detalhes & Specs</span>
               </button>
               <button 
                 type="button"
@@ -227,7 +228,9 @@
                 :class="{ active: activeTab === 'history' }"
                 @click="activeTab = 'history'"
               >
-                📊 Histórico de Lances <span class="tab-badge">{{ bids.length }}</span>
+                <span class="tab-icon">📊</span>
+                <span class="tab-text">Histórico</span>
+                <span class="tab-badge">{{ bids.length }}</span>
               </button>
               <button 
                 type="button"
@@ -235,7 +238,9 @@
                 :class="{ active: activeTab === 'comments' }"
                 @click="activeTab = 'comments'"
               >
-                💬 Perguntas & Comentários <span class="tab-badge">{{ comments.length }}</span>
+                <span class="tab-icon">💬</span>
+                <span class="tab-text">Comentários</span>
+                <span class="tab-badge">{{ comments.length }}</span>
               </button>
               <button 
                 type="button"
@@ -243,7 +248,8 @@
                 :class="{ active: activeTab === 'payment' }"
                 @click="activeTab = 'payment'"
               >
-                🛡️ Pagamento & Garantia
+                <span class="tab-icon">🛡️</span>
+                <span class="tab-text">Pagamento & Garantia</span>
               </button>
             </div>
 
@@ -2744,33 +2750,34 @@ onUnmounted(() => {
 }
 
 .details-tab-header {
-  display: flex;
-  background-color: #f8fafc;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  background-color: #f1f5f9;
+  padding: 0.4rem;
   border-bottom: 1px solid #e2e8f0;
-  overflow-x: auto;
 }
 
 .dark .details-tab-header {
-  background-color: #1e293b;
-  border-bottom-color: #334155;
+  background-color: #0f172a;
+  border-bottom-color: #1e293b;
 }
 
 .tab-btn {
-  flex: 1;
-  min-width: 140px;
-  padding: 0.9rem 1rem;
-  font-size: 0.875rem;
+  width: 100%;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #64748b;
-  background: none;
-  border: none;
-  border-bottom: 3px solid transparent;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   white-space: nowrap;
 }
 
@@ -2779,25 +2786,39 @@ onUnmounted(() => {
 }
 
 .tab-btn:hover {
-  color: #1e3a8a;
-  background-color: rgba(241, 245, 249, 0.8);
+  color: #1e293b;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .dark .tab-btn:hover {
-  color: #60a5fa;
-  background-color: rgba(30, 41, 59, 0.8);
+  color: #f8fafc;
+  background-color: rgba(30, 41, 59, 0.7);
 }
 
 .tab-btn.active {
   color: #1d4ed8;
-  border-bottom-color: #1d4ed8;
   background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  font-weight: 700;
 }
 
 .dark .tab-btn.active {
   color: #60a5fa;
-  border-bottom-color: #60a5fa;
-  background-color: #0f172a;
+  background-color: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.tab-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.tab-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tab-badge {
@@ -2807,6 +2828,24 @@ onUnmounted(() => {
   padding: 0.1rem 0.45rem;
   border-radius: 12px;
   font-weight: 700;
+  flex-shrink: 0;
+}
+
+@media (max-width: 850px) {
+  .details-tab-header {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .details-tab-header::-webkit-scrollbar {
+    display: none;
+  }
+  .tab-btn {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding: 0.65rem 0.85rem;
+  }
 }
 
 .details-tab-content {
