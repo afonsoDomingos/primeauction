@@ -118,7 +118,7 @@
                   placeholder="Introduza o valor"
                   required 
                 />
-                <button type="submit" class="btn btn-primary btn-pill bid-submit">Lance!</button>
+                <button type="submit" class="btn btn-primary btn-pill bid-submit">Licitar Agora</button>
               </div>
 
               <!-- Quick bid buttons -->
@@ -881,11 +881,12 @@ const formatNumber = (val) => {
   return new Intl.NumberFormat('pt-MZ').format(val);
 };
 
-const setBidIncrement = (increment) => {
+const setBidIncrement = async (increment) => {
   if (auction.value) {
     const newAmount = auction.value.currentPrice + increment;
     bidAmount.value = newAmount;
     displayBidAmount.value = formatInputString(newAmount.toString());
+    await placeBid();
   }
 };
 
