@@ -153,6 +153,57 @@
 
 
 
+    <!-- Horizontal Interactive Day Calendar Bar (Matches user reference) -->
+    <section class="horizontal-calendar-section" id="day-calendar">
+      <div class="container">
+        <div class="calendar-bar-header">
+          <div class="calendar-bar-title-group">
+            <span class="calendar-bar-badge">📅 PESQUISA POR DIA DE LEILÃO</span>
+            <h3 class="calendar-bar-title">Calendário Semanal & Mensal</h3>
+          </div>
+          <div class="calendar-bar-actions">
+            <button 
+              v-if="selectedCalendarDate" 
+              @click="selectedCalendarDate = null" 
+              class="btn-reset-day-filter"
+            >
+              ✕ Ver Todos os Dias
+            </button>
+            <span class="month-label">{{ currentMonthYearLabel }}</span>
+          </div>
+        </div>
+
+        <div class="calendar-strip-wrapper">
+          <button @click="scrollCalendarLeft" class="cal-nav-arrow cal-nav-left" aria-label="Anterior">
+            ◀
+          </button>
+          
+          <div class="calendar-strip" ref="calendarStripRef">
+            <div 
+              v-for="day in calendarDays" 
+              :key="day.dateKey" 
+              class="cal-day-card" 
+              :class="{ 
+                'is-active': selectedCalendarDate === day.dateKey, 
+                'is-today': day.isToday, 
+                'has-auctions': day.count > 0 
+              }"
+              @click="selectCalendarDate(day.dateKey)"
+              :title="`Filtrar leilões do dia ${day.dayNumber}`"
+            >
+              <div class="cal-day-num">{{ day.dayNumber }}</div>
+              <div class="cal-day-name">{{ day.dayName }}</div>
+              <div v-if="day.count > 0" class="cal-day-badge">{{ day.count }}</div>
+            </div>
+          </div>
+
+          <button @click="scrollCalendarRight" class="cal-nav-arrow cal-nav-right" aria-label="Seguinte">
+            ▶
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- Live Auctions Section (Leilões ao Vivo) -->
     <section class="live-events-section">
       <div class="container">
@@ -185,7 +236,7 @@
         <div v-else class="live-events-scroll-container">
           <div class="live-events-scroll">
             <div 
-              v-for="event in liveEvents" 
+              v-for="event in filteredLiveEvents" 
               :key="event.id" 
               class="event-card"
             >
@@ -690,6 +741,82 @@ const fetchStats = async () => {
     }
   } catch (err) {
     console.error('Failed to fetch stats, using default baseline:', err);
+  }
+};
+
+// --- Horizontal Day Calendar Strip Logic (Matches user reference) ---
+const selectedCalendarDate = ref(null);
+const calendarStripRef = ref(null);
+
+const currentMonthYearLabel = computed(() => {
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  const today = new Date();
+  return `${monthNames[today.getMonth()]} ${today.getFullYear()}`;
+});
+
+const calendarDays = computed(() => {
+  const days = [];
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dayNamesShort = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+
+  const allAuctions = [...featuredAuctions.value, ...upcomingAuctions.value];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateObj = new Date(year, month, d);
+    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayName = dayNamesShort[dateObj.getDay()];
+    const dayNumber = String(d).padStart(2, '0');
+    const isToday = dateObj.toDateString() === today.toDateString();
+
+    const count = allAuctions.filter(a => {
+      const start = a.startTime ? new Date(a.startTime).toISOString().slice(0, 10) : null;
+      const end = a.endTime ? new Date(a.endTime).toISOString().slice(0, 10) : null;
+      return start === dateKey || end === dateKey;
+    }).length;
+
+    days.push({
+      dateKey,
+      dayNumber,
+      dayName,
+      isToday,
+      count
+    });
+  }
+  return days;
+});
+
+const filteredLiveEvents = computed(() => {
+  if (!selectedCalendarDate.value) return liveEvents.value;
+  return liveEvents.value.filter(e => {
+    if (!e.dateObj) return true;
+    return e.dateObj.toISOString().slice(0, 10) === selectedCalendarDate.value;
+  });
+});
+
+const selectCalendarDate = (dateKey) => {
+  if (selectedCalendarDate.value === dateKey) {
+    selectedCalendarDate.value = null;
+  } else {
+    selectedCalendarDate.value = dateKey;
+  }
+};
+
+const scrollCalendarLeft = () => {
+  if (calendarStripRef.value) {
+    calendarStripRef.value.scrollBy({ left: -240, behavior: 'smooth' });
+  }
+};
+
+const scrollCalendarRight = () => {
+  if (calendarStripRef.value) {
+    calendarStripRef.value.scrollBy({ left: 240, behavior: 'smooth' });
   }
 };
 
@@ -3202,5 +3329,230 @@ onUnmounted(() => {
 
 .finished-price {
   color: #4b5563 !important;
+}
+
+/* ─── Horizontal Interactive Day Calendar Bar (Matches user screenshot) ─── */
+.horizontal-calendar-section {
+  padding: 1.75rem 0 2rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .horizontal-calendar-section {
+  background-color: #0f172a;
+  border-bottom-color: #1e293b;
+}
+
+.calendar-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.calendar-bar-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #1a56db;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.calendar-bar-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.dark .calendar-bar-title {
+  color: #ffffff;
+}
+
+.calendar-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.month-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #475569;
+  background: white;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .month-label {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.btn-reset-day-filter {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-day-filter:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.calendar-strip-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.calendar-strip {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0.5rem 0.25rem 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: #1a56db #e2e8f0;
+}
+
+.calendar-strip::-webkit-scrollbar {
+  height: 6px;
+}
+
+.calendar-strip::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+.calendar-strip::-webkit-scrollbar-thumb {
+  background: #1a56db;
+  border-radius: 4px;
+}
+
+.cal-nav-arrow {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: #1a56db;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.cal-nav-arrow:hover {
+  background: #1a56db;
+  color: white;
+  border-color: #1a56db;
+  transform: scale(1.08);
+}
+
+.dark .cal-nav-arrow {
+  background: #1e293b;
+  border-color: #334155;
+  color: #60a5fa;
+}
+
+/* Day card matching user screenshot exactly */
+.cal-day-card {
+  min-width: 52px;
+  height: 82px;
+  background: #f1f5f9;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.25rem 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.dark .cal-day-card {
+  background: #1e293b;
+}
+
+.cal-day-card:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.dark .cal-day-card:hover {
+  background: #334155;
+}
+
+.cal-day-card.is-today {
+  border-color: #93c5fd;
+}
+
+.cal-day-card.is-active {
+  background: white;
+  border-color: #1a56db;
+  box-shadow: 0 4px 14px rgba(26, 86, 219, 0.2);
+}
+
+.dark .cal-day-card.is-active {
+  background: #0f172a;
+  border-color: #3b82f6;
+}
+
+.cal-day-num {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.dark .cal-day-num {
+  color: #ffffff;
+}
+
+.cal-day-card.is-active .cal-day-num {
+  color: #1a56db;
+}
+
+.cal-day-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: lowercase;
+}
+
+.cal-day-badge {
+  background: #0284c7;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+}
+
+.cal-day-card.is-active .cal-day-badge {
+  background: #1a56db;
 }
 </style>
