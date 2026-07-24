@@ -201,6 +201,17 @@
             ▶
           </button>
         </div>
+
+        <!-- Active Filter Indicator Banner -->
+        <div v-if="selectedCalendarDate" class="selected-day-banner animate-fade-in" style="margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; padding: 0.65rem 1.25rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600;">
+          <span>
+            📌 A filtrar leilões para o dia <strong>{{ formatSelectedDayLabel(selectedCalendarDate) }}</strong> 
+            ({{ filteredLiveEvents.length + filteredFeaturedAuctions.length + filteredUpcomingAuctions.length }} encontrado(s))
+          </span>
+          <button @click="selectedCalendarDate = null" style="background: #0284c7; color: white; border: none; padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+            Limpar Filtro
+          </button>
+        </div>
       </div>
     </section>
 
@@ -320,7 +331,7 @@
 
         <div v-else class="sales-grid">
           <div 
-            v-for="auction in featuredAuctions" 
+            v-for="auction in filteredFeaturedAuctions" 
             :key="auction._id"
             class="sales-card"
             @click="goToAuction(auction._id)"
@@ -396,7 +407,7 @@
         <div v-else class="upcoming-scroll-container">
           <div class="upcoming-scroll">
             <div 
-              v-for="auction in upcomingAuctions" 
+              v-for="auction in filteredUpcomingAuctions" 
               :key="auction._id"
               class="upcoming-card"
               @click="goToAuction(auction._id)"
@@ -747,6 +758,17 @@ const fetchStats = async () => {
 // --- Horizontal Day Calendar Strip Logic (Matches user reference) ---
 const selectedCalendarDate = ref(null);
 const calendarStripRef = ref(null);
+const allActiveAuctionsRaw = ref([]);
+
+const getLocalDateKey = (d) => {
+  if (!d) return null;
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return null;
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
 
 const currentMonthYearLabel = computed(() => {
   const monthNames = [
@@ -757,6 +779,12 @@ const currentMonthYearLabel = computed(() => {
   return `${monthNames[today.getMonth()]} ${today.getFullYear()}`;
 });
 
+const formatSelectedDayLabel = (dateKey) => {
+  if (!dateKey) return '';
+  const parts = dateKey.split('-');
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+};
+
 const calendarDays = computed(() => {
   const days = [];
   const today = new Date();
@@ -766,19 +794,20 @@ const calendarDays = computed(() => {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const dayNamesShort = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
-  const allAuctions = [...featuredAuctions.value, ...upcomingAuctions.value];
+  // Combine ALL active and upcoming auctions for 100% accurate day counts
+  const allAuctions = [...allActiveAuctionsRaw.value, ...upcomingAuctions.value];
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dateObj = new Date(year, month, d);
-    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dateKey = getLocalDateKey(dateObj);
     const dayName = dayNamesShort[dateObj.getDay()];
     const dayNumber = String(d).padStart(2, '0');
     const isToday = dateObj.toDateString() === today.toDateString();
 
     const count = allAuctions.filter(a => {
-      const start = a.startTime ? new Date(a.startTime).toISOString().slice(0, 10) : null;
-      const end = a.endTime ? new Date(a.endTime).toISOString().slice(0, 10) : null;
-      return start === dateKey || end === dateKey;
+      const startKey = getLocalDateKey(a.startTime);
+      const endKey = getLocalDateKey(a.endTime);
+      return startKey === dateKey || endKey === dateKey;
     }).length;
 
     days.push({
@@ -795,8 +824,27 @@ const calendarDays = computed(() => {
 const filteredLiveEvents = computed(() => {
   if (!selectedCalendarDate.value) return liveEvents.value;
   return liveEvents.value.filter(e => {
-    if (!e.dateObj) return true;
-    return e.dateObj.toISOString().slice(0, 10) === selectedCalendarDate.value;
+    const endKey = getLocalDateKey(e.endTime || e.dateObj);
+    const startKey = getLocalDateKey(e.startTime);
+    return endKey === selectedCalendarDate.value || startKey === selectedCalendarDate.value;
+  });
+});
+
+const filteredFeaturedAuctions = computed(() => {
+  if (!selectedCalendarDate.value) return featuredAuctions.value;
+  return featuredAuctions.value.filter(a => {
+    const endKey = getLocalDateKey(a.endTime);
+    const startKey = getLocalDateKey(a.startTime);
+    return endKey === selectedCalendarDate.value || startKey === selectedCalendarDate.value;
+  });
+});
+
+const filteredUpcomingAuctions = computed(() => {
+  if (!selectedCalendarDate.value) return upcomingAuctions.value;
+  return upcomingAuctions.value.filter(a => {
+    const endKey = getLocalDateKey(a.endTime);
+    const startKey = getLocalDateKey(a.startTime);
+    return endKey === selectedCalendarDate.value || startKey === selectedCalendarDate.value;
   });
 });
 
@@ -943,6 +991,7 @@ const fetchActiveAuctions = async () => {
     const res = await axios.get(`${apiUrl}/api/auctions?status=active`);
     if (res.data && res.data.success) {
       const activeData = res.data.data;
+      allActiveAuctionsRaw.value = activeData;
 
       // 1. Vendas em Destaque: Slice top 4
       featuredAuctions.value = activeData.slice(0, 4);
@@ -958,6 +1007,9 @@ const fetchActiveAuctions = async () => {
           id: auction._id,
           title: auction.title,
           dateText: dateText,
+          dateObj: date,
+          startTime: auction.startTime,
+          endTime: auction.endTime,
           image: auction.imageUrl,
           lots: auction.images?.length || 1,
           location: 'Nacional',
