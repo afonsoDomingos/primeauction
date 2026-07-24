@@ -45,19 +45,27 @@ exports.placeBid = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Auction not found' });
     }
 
+    // Check if user is the creator of the auction
+    if (auction.createdBy && auction.createdBy.toString() === req.user.id.toString()) {
+      return res.status(400).json({ success: false, error: 'Não pode fazer lances no seu próprio leilão.' });
+    }
+
     // Check if auction has started
     if (auction.status === 'upcoming' || (auction.startTime && Date.now() < new Date(auction.startTime).getTime())) {
       return res.status(400).json({ success: false, error: 'Este leilão ainda não começou' });
     }
 
     // Check if auction is active
-    if (auction.isEnded || auction.status !== 'active') {
-      return res.status(400).json({ success: false, error: 'This auction has ended' });
+    if (auction.isEnded || auction.status !== 'active' || Date.now() > new Date(auction.endTime).getTime()) {
+      return res.status(400).json({ success: false, error: 'Este leilão já foi encerrado.' });
     }
 
     // Validate bid amount
     if (amount <= auction.currentPrice) {
-      return res.status(400).json({ success: false, error: 'Bid must be higher than current price' });
+      return res.status(400).json({ 
+        success: false, 
+        error: `O valor do lance (${amount.toLocaleString('pt-MZ')} MZN) deve ser estritamente superior ao lance atual (${auction.currentPrice.toLocaleString('pt-MZ')} MZN).` 
+      });
     }
 
     // Create bid

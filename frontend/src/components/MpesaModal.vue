@@ -891,53 +891,83 @@ const closeModal = () => {
   cursor: not-allowed;
 }
 
-/* Step 2: USSD Phone Mockup */
+/* Step 2: USSD Phone Mockup (Clean White & Modern Theme) */
 .ussd-step {
-  background: #f8fafc;
+  background: #ffffff;
 }
 
 .mobile-phone-mockup {
-  background: #000000;
-  border-radius: 16px;
-  padding: 1rem;
-  color: white;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.25rem;
+  color: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .phone-header {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ussd-alert-box {
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 12px;
-  padding: 1.25rem;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem 1.25rem;
   text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .ussd-icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.mpesa-ussd-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 4px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
 }
 
 .ussd-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.6rem;
 }
 
 .ussd-prompt {
-  font-size: 0.85rem;
-  color: #cbd5e1;
-  line-height: 1.4;
-  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.ussd-prompt strong {
+  color: #e60000;
+  font-weight: 800;
 }
 
 .pin-entry-wrap {
@@ -946,23 +976,35 @@ const closeModal = () => {
 
 .pin-label {
   display: block;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 0.6rem;
 }
 
 .pin-input {
-  width: 140px;
+  width: 150px;
   text-align: center;
-  font-size: 1.5rem;
-  letter-spacing: 12px;
-  padding: 0.5rem;
-  border-radius: 8px;
+  font-size: 1.75rem;
+  letter-spacing: 14px;
+  padding: 0.65rem 0.5rem;
+  border-radius: 12px;
   border: 2px solid #e60000;
   outline: none;
-  background: #0f172a;
-  color: white;
-  font-weight: 700;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 800;
+  box-shadow: 0 0 0 4px rgba(230, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.pin-input:focus {
+  border-color: #e60000;
+  box-shadow: 0 0 0 5px rgba(230, 0, 0, 0.15);
+}
+
+.pin-input::placeholder {
+  color: #cbd5e1;
 }
 
 .ussd-actions {
@@ -972,36 +1014,63 @@ const closeModal = () => {
 
 .btn-ussd-cancel {
   flex: 1;
-  background: transparent;
-  border: 1px solid #475569;
-  color: #94a3b8;
-  padding: 0.65rem;
-  border-radius: 8px;
-  font-weight: 600;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ussd-cancel:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
 }
 
 .btn-ussd-confirm {
   flex: 1;
-  background: #e60000;
+  background: linear-gradient(135deg, #e60000 0%, #cc0000 100%);
   border: none;
-  color: white;
-  padding: 0.65rem;
-  border-radius: 8px;
-  font-weight: 700;
+  color: #ffffff;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.9rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(230, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-ussd-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #cc0000 0%, #b30000 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(230, 0, 0, 0.35);
 }
 
 .btn-ussd-confirm:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .sandbox-tip {
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.82rem;
+  color: #1e40af;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
   text-align: center;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  line-height: 1.4;
 }
 
 /* Step 3: Success Receipt */

@@ -53,7 +53,7 @@
             {{ isEnded ? 'Terminado' : (isUpcoming ? 'Agendado' : 'Activo') }}
           </span>
 
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 0.75rem;">
             <h1 class="title" style="margin-bottom: 0;">{{ auction.title }}</h1>
             <button 
               v-if="authStore.isAuthenticated && !authStore.isAdmin"
@@ -68,6 +68,39 @@
               <span class="heart-count" v-if="auction.likesCount > 0">{{ auction.likesCount }}</span>
             </button>
           </div>
+
+          <!-- Quick Info Metadata Grid -->
+          <div class="quick-meta-grid">
+            <div class="meta-item">
+              <span class="meta-icon">🏷️</span>
+              <div class="meta-content">
+                <span class="meta-label">Categoria</span>
+                <span class="meta-value">{{ auction.category || 'Geral' }}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">🔨</span>
+              <div class="meta-content">
+                <span class="meta-label">Total Lances</span>
+                <span class="meta-value">{{ bids.length }} {{ bids.length === 1 ? 'lance' : 'lances' }}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">👤</span>
+              <div class="meta-content">
+                <span class="meta-label">Vendedor</span>
+                <span class="meta-value">{{ auction.createdBy?.name || 'Prime Auction' }}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">🛡️</span>
+              <div class="meta-content">
+                <span class="meta-label">Garantia</span>
+                <span class="meta-value">Verificado & Protegido</span>
+              </div>
+            </div>
+          </div>
+
           <p class="description">{{ auction.description }}</p>
           
           <!-- Price & Timer -->
@@ -87,6 +120,7 @@
           <!-- Bid Form -->
           <div class="bidding-section" v-if="!isEnded">
             <h3 class="section-title">Fazer Lance</h3>
+            
             <div v-if="isUpcoming" class="auth-warning" style="background-color: rgba(255, 152, 0, 0.05); border: 1px solid rgba(255, 152, 0, 0.2); color: #f57c00;">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #f57c00; margin-right: 8px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"></polyline></svg>
               Este leilão está agendado e ainda não começou. Começa em: <strong>{{ getCountdownText(auction.startTime) }} ({{ new Date(auction.startTime).toLocaleString('pt-MZ') }})</strong>.
@@ -98,6 +132,10 @@
             <div v-else-if="authStore.isAdmin" class="auth-warning">
               Administradores não podem participar nos leilões.
             </div>
+            <div v-else-if="isOwner" class="auth-warning owner-warning">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Você é o vendedor deste leilão. Não pode licitar no seu próprio artigo.
+            </div>
             <form v-else @submit.prevent="placeBid" class="bid-form">
               <!-- Smart bid incentive message -->
               <div v-if="bids.length > 0" class="bid-incentive-msg" :class="{ leader: isLeader }">
@@ -108,6 +146,19 @@
                 <span>💡 Dica: Seja o primeiro a licitar! Comece com o valor mínimo de <strong>{{ formatCurrency(auction.currentPrice + 1) }}</strong>.</span>
               </div>
 
+              <!-- Real-time Intelligent Bid Validation Warning -->
+              <div v-if="isBidInvalid" class="bid-validation-alert animate-fade-in">
+                <span class="val-alert-icon">⚠️</span>
+                <div class="val-alert-body">
+                  <strong>Lance Inválido:</strong> O valor introduzido ({{ formatCurrency(bidAmount) }}) é menor ou igual ao lance atual ({{ formatCurrency(auction.currentPrice) }}).
+                  O próximo lance deve ser no mínimo <strong>{{ formatCurrency(auction.currentPrice + 1) }}</strong>.
+                </div>
+              </div>
+              <div v-else-if="bidAmount > auction.currentPrice" class="bid-validation-success animate-fade-in">
+                <span class="val-success-icon">✅</span>
+                <span>Lance Válido! Proposta de <strong>+{{ formatCurrency(bidAmount - auction.currentPrice) }}</strong> acima do valor atual.</span>
+              </div>
+
               <div class="input-with-button">
                 <span class="currency-prefix">MZN</span>
                 <input 
@@ -115,15 +166,22 @@
                   v-model="displayBidAmount" 
                   @input="handleBidInput"
                   class="form-input bid-input" 
+                  :class="{ 'bid-input-error': isBidInvalid }"
                   placeholder="Introduza o valor"
                   required 
                 />
-                <button type="submit" class="btn btn-primary btn-pill bid-submit">Licitar Agora</button>
+                <button 
+                  type="submit" 
+                  class="btn btn-primary btn-pill bid-submit"
+                  :disabled="isBidInvalid || isOwner"
+                >
+                  Licitar Agora
+                </button>
               </div>
 
               <!-- Quick bid buttons -->
               <div class="quick-bid-suggestions">
-                <span class="suggestion-label">Sugestões de incremento:</span>
+                <span class="suggestion-label">Sugestões de incremento a partir do lance atual:</span>
                 <div class="suggestion-btns">
                   <button 
                     type="button" 
@@ -132,7 +190,7 @@
                     class="btn-suggestion"
                     @click="setBidIncrement(inc)"
                   >
-                    +{{ formatNumber(inc) }}
+                    +{{ formatNumber(inc) }} MZN
                   </button>
                 </div>
               </div>
@@ -152,186 +210,383 @@
             </div>
           </div>
 
-          <!-- Multimeios Payment Box (M-Pesa, eMola, Visa) -->
-          <div v-if="auction" class="multimeios-pay-card animate-fade-in">
-            <div class="pay-card-header">
-              <div class="pay-logos-group">
-                <img src="/mpesa-logo.png" alt="M-Pesa" class="pay-mini-logo" />
-                <img src="/emola-logo.png" alt="eMola" class="pay-mini-logo" />
-                <img src="/visa-logo.png" alt="Visa" class="pay-mini-logo" />
-              </div>
-              <strong class="pay-card-title">Pagamento Direto do Artigo</strong>
+          <!-- Structured Information Tabs Container -->
+          <div class="details-tab-container">
+            <div class="details-tab-header">
+              <button 
+                type="button"
+                class="tab-btn" 
+                :class="{ active: activeTab === 'details' }"
+                @click="activeTab = 'details'"
+              >
+                📋 Detalhes & Ficha Técnica
+              </button>
+              <button 
+                type="button"
+                class="tab-btn" 
+                :class="{ active: activeTab === 'history' }"
+                @click="activeTab = 'history'"
+              >
+                📊 Histórico de Lances <span class="tab-badge">{{ bids.length }}</span>
+              </button>
+              <button 
+                type="button"
+                class="tab-btn" 
+                :class="{ active: activeTab === 'comments' }"
+                @click="activeTab = 'comments'"
+              >
+                💬 Perguntas & Comentários <span class="tab-badge">{{ comments.length }}</span>
+              </button>
+              <button 
+                type="button"
+                class="tab-btn" 
+                :class="{ active: activeTab === 'payment' }"
+                @click="activeTab = 'payment'"
+              >
+                🛡️ Pagamento & Garantia
+              </button>
             </div>
-            <p class="pay-card-subtitle">Efetue a liquidação em segurança usando M-Pesa, eMola ou Cartão de Crédito.</p>
-            <button @click="handleDirectPayClick" type="button" class="btn btn-pay-royal">
-              <span>Pagar {{ formatCurrency(auction.currentPrice) }}</span>
-            </button>
-          </div>
 
-          <!-- Bids History -->
-          <div class="history-section">
-            <h3 class="section-title">Histórico de Lances <span class="bid-count">{{ bids.length }}</span></h3>
-            
-            <!-- Graphic Chart of Bids -->
-            <div v-if="chartData.length > 1" class="bid-chart-card animate-fade-in">
-              <h4 class="chart-card-title">Evolução do Preço</h4>
-              <div class="chart-wrapper">
-                <div class="chart-container-relative">
-                  <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" width="100%" height="100%" class="price-chart-svg">
-                    <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#1a56db" stop-opacity="0.25" />
-                        <stop offset="100%" stop-color="#1a56db" stop-opacity="0.00" />
-                      </linearGradient>
-                      <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#3b82f6" />
-                        <stop offset="50%" stop-color="#1a56db" />
-                        <stop offset="100%" stop-color="#7c3aed" />
-                      </linearGradient>
-                    </defs>
-                    
-                    <!-- Horizontal Gridlines -->
-                    <g class="grid-lines">
-                      <line 
-                        v-for="tick in yTicks" 
-                        :key="'grid-' + tick.y"
-                        :x1="padding.left" 
-                        :y1="tick.y" 
-                        :x2="chartWidth - padding.right" 
-                        :y2="tick.y" 
-                        stroke="#f3f4f6" 
-                        stroke-width="1"
-                      />
-                    </g>
-                    
-                    <!-- Y Axis Labels -->
-                    <g class="y-axis-labels">
-                      <text 
-                        v-for="tick in yTicks" 
-                        :key="'label-' + tick.y"
-                        :x="padding.left - 10" 
-                        :y="tick.y + 4" 
-                        text-anchor="end" 
-                        class="axis-text"
-                      >
-                        {{ tick.label }}
-                      </text>
-                    </g>
-                    
-                    <!-- X Axis Line -->
-                    <line 
-                      :x1="padding.left" 
-                      :y1="chartHeight - padding.bottom" 
-                      :x2="chartWidth - padding.right" 
-                      :y2="chartHeight - padding.bottom" 
-                      stroke="#e5e7eb" 
-                      stroke-width="1.5"
-                    />
+            <div class="details-tab-content">
+              <!-- TAB 1: Detalhes & Especificações -->
+              <div v-if="activeTab === 'details'" class="tab-pane animate-fade-in">
+                <h3 class="pane-title">Descrição Completa</h3>
+                <div class="description-card">
+                  <p>{{ auction.description }}</p>
+                </div>
 
-                    <!-- X Axis Labels (Bid order / dates) -->
-                    <g class="x-axis-labels">
-                      <text 
-                        v-for="tick in xTicks" 
-                        :key="'x-label-' + tick.index"
-                        :x="tick.x" 
-                        :y="chartHeight - padding.bottom + 20" 
-                        text-anchor="middle" 
-                        class="axis-text x-axis-text"
-                      >
-                        {{ tick.index === 0 ? 'Início' : `#${tick.index}` }}
-                      </text>
-                    </g>
-                    
-                    <!-- Hover Guideline -->
-                    <line 
-                      v-if="hoveredPoint" 
-                      :x1="hoveredPoint.x" 
-                      :y1="padding.top" 
-                      :x2="hoveredPoint.x" 
-                      :y2="chartHeight - padding.bottom" 
-                      stroke="#d1d5db" 
-                      stroke-width="1" 
-                      stroke-dasharray="3 3"
-                    />
-                    
-                    <!-- Area Under Line -->
-                    <path :d="areaPath" fill="url(#areaGrad)" />
-                    
-                    <!-- Line Chart Path -->
-                    <path 
-                      :d="linePath" 
-                      fill="none" 
-                      stroke="url(#lineGrad)" 
-                      stroke-width="2.5" 
-                      stroke-linecap="round" 
-                      stroke-linejoin="round"
-                    />
-                    
-                    <!-- Interactive Dots -->
-                    <g class="chart-dots">
-                      <g 
-                        v-for="p in chartPoints" 
-                        :key="'dot-' + p.index"
-                        @mouseover="hoveredPoint = p"
-                        @mouseleave="hoveredPoint = null"
-                      >
-                        <!-- Visual Circle -->
-                        <circle 
-                          :cx="p.x" 
-                          :cy="p.y" 
-                          :r="hoveredPoint && hoveredPoint.index === p.index ? 6 : 4" 
-                          :fill="hoveredPoint && hoveredPoint.index === p.index ? '#1a56db' : '#3b82f6'" 
-                          stroke="white" 
-                          :stroke-width="hoveredPoint && hoveredPoint.index === p.index ? 2.5 : 1.5"
-                          class="chart-circle"
-                        />
-                        <!-- Large Hover hit area -->
-                        <circle 
-                          :cx="p.x" 
-                          :cy="p.y" 
-                          r="16" 
-                          fill="transparent" 
-                          style="cursor: pointer;"
-                        />
-                      </g>
-                    </g>
-                  </svg>
+                <h3 class="pane-title" style="margin-top: 1.5rem;">Ficha Técnica & Informações do Leilão</h3>
+                <div class="specs-grid">
+                  <div class="spec-card">
+                    <span class="spec-label">Categoria</span>
+                    <span class="spec-val">{{ auction.category || 'Geral' }}</span>
+                  </div>
+                  <div class="spec-card">
+                    <span class="spec-label">Estado do Item</span>
+                    <span class="spec-val text-green">Excelente / Verificado</span>
+                  </div>
+                  <div class="spec-card">
+                    <span class="spec-label">Preço Inicial</span>
+                    <span class="spec-val">{{ formatCurrency(auction.startingPrice) }}</span>
+                  </div>
+                  <div class="spec-card">
+                    <span class="spec-label">Total de Lances</span>
+                    <span class="spec-val">{{ bids.length }} lances</span>
+                  </div>
+                  <div class="spec-card">
+                    <span class="spec-label">Data de Início</span>
+                    <span class="spec-val">{{ new Date(auction.startTime || auction.createdAt).toLocaleString('pt-MZ') }}</span>
+                  </div>
+                  <div class="spec-card">
+                    <span class="spec-label">Data de Término</span>
+                    <span class="spec-val">{{ new Date(auction.endTime).toLocaleString('pt-MZ') }}</span>
+                  </div>
+                  <div class="spec-card">
+                    <span class="spec-label">Vendedor / Leiloeiro</span>
+                    <span class="spec-val">{{ auction.createdBy?.name || 'Prime Auction' }}</span>
+                  </div>
+                  <div class="spec-card">
+                    <span class="spec-label">Estado de Reserva</span>
+                    <span class="spec-val text-blue">Preço de Reserva Cumprido</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 2: Histórico & Gráfico de Lances -->
+              <div v-else-if="activeTab === 'history'" class="tab-pane animate-fade-in">
+                <div class="history-section">
+                  <!-- Graphic Chart of Bids -->
+                  <div v-if="chartData.length > 1" class="bid-chart-card animate-fade-in">
+                    <h4 class="chart-card-title">Evolução do Preço em Tempo Real</h4>
+                    <div class="chart-wrapper">
+                      <div class="chart-container-relative">
+                        <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" width="100%" height="100%" class="price-chart-svg">
+                          <defs>
+                            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stop-color="#1a56db" stop-opacity="0.25" />
+                              <stop offset="100%" stop-color="#1a56db" stop-opacity="0.00" />
+                            </linearGradient>
+                            <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stop-color="#3b82f6" />
+                              <stop offset="50%" stop-color="#1a56db" />
+                              <stop offset="100%" stop-color="#7c3aed" />
+                            </linearGradient>
+                          </defs>
+                          
+                          <!-- Horizontal Gridlines -->
+                          <g class="grid-lines">
+                            <line 
+                              v-for="tick in yTicks" 
+                              :key="'grid-' + tick.y"
+                              :x1="padding.left" 
+                              :y1="tick.y" 
+                              :x2="chartWidth - padding.right" 
+                              :y2="tick.y" 
+                              stroke="#f3f4f6" 
+                              stroke-width="1"
+                            />
+                          </g>
+                          
+                          <!-- Y Axis Labels -->
+                          <g class="y-axis-labels">
+                            <text 
+                              v-for="tick in yTicks" 
+                              :key="'label-' + tick.y"
+                              :x="padding.left - 10" 
+                              :y="tick.y + 4" 
+                              text-anchor="end" 
+                              class="axis-text"
+                            >
+                              {{ tick.label }}
+                            </text>
+                          </g>
+                          
+                          <!-- X Axis Line -->
+                          <line 
+                            :x1="padding.left" 
+                            :y1="chartHeight - padding.bottom" 
+                            :x2="chartWidth - padding.right" 
+                            :y2="chartHeight - padding.bottom" 
+                            stroke="#e5e7eb" 
+                            stroke-width="1.5"
+                          />
+
+                          <!-- X Axis Labels (Bid order / dates) -->
+                          <g class="x-axis-labels">
+                            <text 
+                              v-for="tick in xTicks" 
+                              :key="'x-label-' + tick.index"
+                              :x="tick.x" 
+                              :y="chartHeight - padding.bottom + 20" 
+                              text-anchor="middle" 
+                              class="axis-text x-axis-text"
+                            >
+                              {{ tick.index === 0 ? 'Início' : `#${tick.index}` }}
+                            </text>
+                          </g>
+                          
+                          <!-- Hover Guideline -->
+                          <line 
+                            v-if="hoveredPoint" 
+                            :x1="hoveredPoint.x" 
+                            :y1="padding.top" 
+                            :x2="hoveredPoint.x" 
+                            :y2="chartHeight - padding.bottom" 
+                            stroke="#d1d5db" 
+                            stroke-width="1" 
+                            stroke-dasharray="3 3"
+                          />
+                          
+                          <!-- Area Under Line -->
+                          <path :d="areaPath" fill="url(#areaGrad)" />
+                          
+                          <!-- Line Chart Path -->
+                          <path 
+                            :d="linePath" 
+                            fill="none" 
+                            stroke="url(#lineGrad)" 
+                            stroke-width="2.5" 
+                            stroke-linecap="round" 
+                            stroke-linejoin="round"
+                          />
+                          
+                          <!-- Interactive Dots -->
+                          <g class="chart-dots">
+                            <g 
+                              v-for="p in chartPoints" 
+                              :key="'dot-' + p.index"
+                              @mouseover="hoveredPoint = p"
+                              @mouseleave="hoveredPoint = null"
+                            >
+                              <!-- Visual Circle -->
+                              <circle 
+                                :cx="p.x" 
+                                :cy="p.y" 
+                                :r="hoveredPoint && hoveredPoint.index === p.index ? 6 : 4" 
+                                :fill="hoveredPoint && hoveredPoint.index === p.index ? '#1a56db' : '#3b82f6'" 
+                                stroke="white" 
+                                :stroke-width="hoveredPoint && hoveredPoint.index === p.index ? 2.5 : 1.5"
+                                class="chart-circle"
+                              />
+                              <!-- Large Hover hit area -->
+                              <circle 
+                                :cx="p.x" 
+                                :cy="p.y" 
+                                r="16" 
+                                fill="transparent" 
+                                style="cursor: pointer;"
+                              />
+                            </g>
+                          </g>
+                        </svg>
+                        
+                        <!-- Tooltip -->
+                        <div 
+                          v-if="hoveredPoint" 
+                          class="chart-tooltip"
+                          :style="{ 
+                            left: `${(hoveredPoint.x / chartWidth) * 100}%`, 
+                            top: `${(hoveredPoint.y / chartHeight) * 100 - 8}%` 
+                          }"
+                        >
+                          <div class="tooltip-amount">{{ hoveredPoint.label }}</div>
+                          <div class="tooltip-meta">
+                            <span class="tooltip-user">{{ hoveredPoint.user }}</span>
+                            <span class="tooltip-date">{{ hoveredPoint.date }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ul class="bid-list">
+                    <li v-for="(bid, index) in bids" :key="bid._id" class="bid-item" :class="{ 'top-bid': index === 0 }">
+                      <div class="bid-left">
+                        <div class="bid-avatar">
+                          <img v-if="bid.user?.profilePhoto" :src="bid.user.profilePhoto" alt="Avatar" class="bid-avatar-img" />
+                          <span v-else>{{ bid.user?.name?.charAt(0)?.toUpperCase() }}</span>
+                        </div>
+                        <span class="bid-user">{{ bid.user?.name }}</span>
+                        <span v-if="index === 0" class="leader-badge">Líder</span>
+                      </div>
+                      <span class="bid-amount">{{ formatCurrency(bid.amount) }}</span>
+                    </li>
+                    <li v-if="bids.length === 0" class="no-bids">
+                      Sem lances ainda. Seja o primeiro!
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- TAB 3: Perguntas & Comentários -->
+              <div v-else-if="activeTab === 'comments'" class="tab-pane animate-fade-in">
+                <div class="comments-section">
+                  <h3 class="pane-title">Perguntas & Comentários do Leilão</h3>
                   
-                  <!-- Tooltip -->
-                  <div 
-                    v-if="hoveredPoint" 
-                    class="chart-tooltip"
-                    :style="{ 
-                      left: `${(hoveredPoint.x / chartWidth) * 100}%`, 
-                      top: `${(hoveredPoint.y / chartHeight) * 100 - 8}%` 
-                    }"
-                  >
-                    <div class="tooltip-amount">{{ hoveredPoint.label }}</div>
-                    <div class="tooltip-meta">
-                      <span class="tooltip-user">{{ hoveredPoint.user }}</span>
-                      <span class="tooltip-date">{{ hoveredPoint.date }}</span>
+                  <!-- Comment Box Form -->
+                  <div v-if="authStore.isAuthenticated" class="comment-input-box">
+                    <textarea
+                      v-model="newCommentText"
+                      class="form-input comment-textarea"
+                      placeholder="Faça uma pergunta ao vendedor ou deixe o seu comentário sobre este leilão..."
+                      rows="3"
+                      maxlength="500"
+                    ></textarea>
+                    <div class="comment-form-footer">
+                      <span class="char-counter">{{ newCommentText.length }}/500</span>
+                      <button 
+                        @click="submitComment" 
+                        type="button" 
+                        class="btn btn-primary btn-pill btn-sm"
+                        :disabled="submittingComment || !newCommentText.trim()"
+                      >
+                        <span v-if="submittingComment" class="spinner-inline"></span>
+                        {{ submittingComment ? 'A publicar...' : '💬 Publicar Comentário' }}
+                      </button>
+                    </div>
+                  </div>
+                  <div v-else class="auth-warning" style="margin-bottom: 1.5rem;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <router-link to="/login">Faça login</router-link> para publicar um comentário ou fazer perguntas.
+                  </div>
+
+                  <!-- Comments List -->
+                  <div class="comments-list">
+                    <div 
+                      v-for="comment in comments" 
+                      :key="comment._id" 
+                      class="comment-card animate-fade-in"
+                    >
+                      <div class="comment-header">
+                        <div class="comment-user-info">
+                          <div class="comment-avatar">
+                            <img v-if="comment.user?.profilePhoto" :src="comment.user.profilePhoto" alt="Avatar" />
+                            <span v-else>{{ comment.user?.name?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                          </div>
+                          <div>
+                            <div class="comment-author-row">
+                              <span class="comment-author-name">{{ comment.user?.name || 'Utilizador' }}</span>
+                              <span v-if="isCommentAuthorOwner(comment)" class="author-badge badge-seller">Vendedor</span>
+                              <span v-else-if="comment.user?.role === 'admin'" class="author-badge badge-admin">Admin</span>
+                            </div>
+                            <span class="comment-time">{{ formatRelativeTime(comment.createdAt) }}</span>
+                          </div>
+                        </div>
+
+                        <!-- Delete option if owner or admin -->
+                        <button 
+                          v-if="canDeleteComment(comment)" 
+                          @click="handleDeleteComment(comment._id)" 
+                          class="btn-delete-comment"
+                          title="Eliminar comentário"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+
+                      <p class="comment-text-content">{{ comment.text }}</p>
+
+                      <div class="comment-footer">
+                        <button 
+                          @click="handleToggleCommentLike(comment)" 
+                          class="btn-comment-like"
+                          :class="{ liked: isCommentLikedByCurrentUser(comment) }"
+                          :disabled="!authStore.isAuthenticated"
+                          title="Gostar deste comentário"
+                        >
+                          <span class="like-icon">❤️</span>
+                          <span class="like-count">{{ comment.likes?.length || 0 }}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div v-if="comments.length === 0" class="no-comments-state">
+                      <span class="no-comments-icon">💬</span>
+                      <h4>Sem comentários ainda</h4>
+                      <p>Seja o primeiro a fazer uma pergunta ou iniciar uma conversa sobre este artigo!</p>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <ul class="bid-list">
-              <li v-for="(bid, index) in bids" :key="bid._id" class="bid-item" :class="{ 'top-bid': index === 0 }">
-                <div class="bid-left">
-                  <div class="bid-avatar">
-                    <img v-if="bid.user?.profilePhoto" :src="bid.user.profilePhoto" alt="Avatar" class="bid-avatar-img" />
-                    <span v-else>{{ bid.user?.name?.charAt(0)?.toUpperCase() }}</span>
+              <!-- TAB 4: Pagamento & Garantia -->
+              <div v-else-if="activeTab === 'payment'" class="tab-pane animate-fade-in">
+                <!-- Multimeios Payment Box (M-Pesa, eMola, Visa) -->
+                <div v-if="auction" class="multimeios-pay-card animate-fade-in">
+                  <div class="pay-card-header">
+                    <div class="pay-logos-group">
+                      <img src="/mpesa-logo.png" alt="M-Pesa" class="pay-mini-logo" />
+                      <img src="/emola-logo.png" alt="eMola" class="pay-mini-logo" />
+                      <img src="/visa-logo.png" alt="Visa" class="pay-mini-logo" />
+                    </div>
+                    <strong class="pay-card-title">Pagamento Direto do Artigo</strong>
                   </div>
-                  <span class="bid-user">{{ bid.user?.name }}</span>
-                  <span v-if="index === 0" class="leader-badge">Líder</span>
+                  <p class="pay-card-subtitle">Efetue a liquidação em segurança usando M-Pesa, eMola ou Cartão de Crédito.</p>
+                  <button @click="handleDirectPayClick" type="button" class="btn btn-pay-royal">
+                    <span>Pagar {{ formatCurrency(auction.currentPrice) }}</span>
+                  </button>
                 </div>
-                <span class="bid-amount">{{ formatCurrency(bid.amount) }}</span>
-              </li>
-              <li v-if="bids.length === 0" class="no-bids">
-                Sem lances ainda. Seja o primeiro!
-              </li>
-            </ul>
+
+                <!-- Guarantee & Shipping Cards Grid -->
+                <div class="guarantee-grid">
+                  <div class="g-card">
+                    <span class="g-icon">🛡️</span>
+                    <h4>Compra 100% Protegida</h4>
+                    <p>Seu valor fica retido em sistema de custódia seguro até a entrega e confirmação do produto em perfeitas condições.</p>
+                  </div>
+                  <div class="g-card">
+                    <span class="g-icon">🚚</span>
+                    <h4>Entrega Nacional</h4>
+                    <p>Logística integrada com envio para todas as províncias de Moçambique com rastreio ativo.</p>
+                  </div>
+                  <div class="g-card">
+                    <span class="g-icon">💬</span>
+                    <h4>Suporte Técnico 24/7</h4>
+                    <p>Equipa dedicada para apoiar em todas as etapas da licitação e expedição do artigo.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -869,12 +1124,28 @@ const xTicks = computed(() => {
   return uniqueIndices.map(idx => points[idx]);
 });
 
+const activeTab = ref('details');
+
 // Smart Bidding Logic
+const isOwner = computed(() => {
+  if (!auction.value || !authStore.user) return false;
+  const owner = auction.value.createdBy;
+  const ownerId = typeof owner === 'object' ? (owner?._id || owner?.id) : owner;
+  const currentUserId = authStore.user?.id || authStore.user?._id;
+  return ownerId && currentUserId && (ownerId.toString() === currentUserId.toString());
+});
+
 const isLeader = computed(() => {
   if (!bids.value.length || !authStore.user) return false;
-  const topBidderId = bids.value[0].user?._id || bids.value[0].user?.id;
+  const topBidder = bids.value[0]?.user;
+  const topBidderId = typeof topBidder === 'object' ? (topBidder?._id || topBidder?.id) : topBidder;
   const currentUserId = authStore.user?.id || authStore.user?._id;
-  return topBidderId === currentUserId;
+  return topBidderId && currentUserId && (topBidderId.toString() === currentUserId.toString());
+});
+
+const isBidInvalid = computed(() => {
+  if (!auction.value) return false;
+  return bidAmount.value <= auction.value.currentPrice;
 });
 
 const minIncrement = computed(() => {
@@ -900,12 +1171,11 @@ const formatNumber = (val) => {
   return new Intl.NumberFormat('pt-MZ').format(val);
 };
 
-const setBidIncrement = async (increment) => {
+const setBidIncrement = (increment) => {
   if (auction.value) {
     const newAmount = auction.value.currentPrice + increment;
     bidAmount.value = newAmount;
     displayBidAmount.value = formatInputString(newAmount.toString());
-    await placeBid();
   }
 };
 
@@ -975,23 +1245,35 @@ const submitProfileDetails = async () => {
 };
 
 const placeBid = async () => {
-  // Validate bid amount is greater than currentPrice
+  if (isOwner.value) {
+    toastStore.error('Você é o vendedor deste leilão e não pode licitar no seu próprio artigo.');
+    return;
+  }
+
+  // Validate bid amount is strictly greater than currentPrice
   const minBid = auction.value ? auction.value.currentPrice + 1 : 1;
   if (bidAmount.value < minBid) {
-    toastStore.error(`O valor do lance deve ser no mínimo ${formatCurrency(minBid)}`);
+    toastStore.error(`O valor do lance (${formatCurrency(bidAmount.value)}) deve ser estritamente superior ao valor atual (${formatCurrency(auction.value.currentPrice)}).`);
     return;
   }
 
   isDirectPaymentAttempt.value = false;
   const user = authStore.user || {};
-  profileForm.value = {
-    name: user.name || '',
-    phone: user.phone || '',
-    province: user.province || '',
-    gender: user.gender || '',
-    age: user.age || null
-  };
-  showProfileModal.value = true;
+  
+  // If user profile is already fully complete, proceed straight to bid execution
+  const isProfileComplete = Boolean(user.name && user.phone && user.province && user.gender && user.age);
+  if (isProfileComplete) {
+    await executePlaceBid();
+  } else {
+    profileForm.value = {
+      name: user.name || '',
+      phone: user.phone || '',
+      province: user.province || '',
+      gender: user.gender || '',
+      age: user.age || null
+    };
+    showProfileModal.value = true;
+  }
 };
 
 const executePlaceBid = async () => {
@@ -1025,9 +1307,116 @@ const executePlaceBid = async () => {
   }
 };
 
+// --- Comments System State & Logic ---
+const comments = ref([]);
+const newCommentText = ref('');
+const submittingComment = ref(false);
+
+const fetchComments = async () => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/comments/${route.params.id}`);
+    comments.value = res.data.data;
+  } catch (err) {
+    console.error('Error fetching comments:', err);
+  }
+};
+
+const submitComment = async () => {
+  if (!newCommentText.value.trim()) return;
+  submittingComment.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(
+      `${apiUrl}/api/comments/${route.params.id}`,
+      { text: newCommentText.value.trim() },
+      { headers: { Authorization: `Bearer ${authStore.token}` } }
+    );
+    if (res.data && res.data.success) {
+      toastStore.success('Comentário publicado com sucesso! 💬');
+      newCommentText.value = '';
+    }
+  } catch (err) {
+    toastStore.error(err.response?.data?.error || 'Erro ao publicar comentário');
+  } finally {
+    submittingComment.value = false;
+  }
+};
+
+const handleDeleteComment = async (commentId) => {
+  if (!confirm('Tem a certeza que deseja eliminar este comentário?')) return;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    await axios.delete(`${apiUrl}/api/comments/item/${commentId}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    toastStore.success('Comentário eliminado');
+  } catch (err) {
+    toastStore.error(err.response?.data?.error || 'Erro ao eliminar comentário');
+  }
+};
+
+const handleToggleCommentLike = async (comment) => {
+  if (!authStore.isAuthenticated) {
+    toastStore.warning('Faça login para gostar de comentários');
+    return;
+  }
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(
+      `${apiUrl}/api/comments/item/${comment._id}/like`,
+      {},
+      { headers: { Authorization: `Bearer ${authStore.token}` } }
+    );
+    if (res.data && res.data.success) {
+      comment.likes = res.data.data.likes;
+    }
+  } catch (err) {
+    toastStore.error('Erro ao actualizar gosto do comentário');
+  }
+};
+
+const isCommentLikedByCurrentUser = (comment) => {
+  if (!authStore.user || !comment.likes) return false;
+  const currentUserId = authStore.user?.id || authStore.user?._id;
+  return comment.likes.some(id => (typeof id === 'object' ? (id._id || id.id) : id).toString() === currentUserId.toString());
+};
+
+const isCommentAuthorOwner = (comment) => {
+  if (!auction.value || !comment.user) return false;
+  const owner = auction.value.createdBy;
+  const ownerId = typeof owner === 'object' ? (owner?._id || owner?.id) : owner;
+  const author = comment.user;
+  const authorId = typeof author === 'object' ? (author?._id || author?.id) : author;
+  return ownerId && authorId && ownerId.toString() === authorId.toString();
+};
+
+const canDeleteComment = (comment) => {
+  if (!authStore.user || !comment.user) return false;
+  const currentUserId = authStore.user?.id || authStore.user?._id;
+  const author = comment.user;
+  const authorId = typeof author === 'object' ? (author?._id || author?.id) : author;
+  return authStore.isAdmin || (authorId && currentUserId && authorId.toString() === currentUserId.toString());
+};
+
+const formatRelativeTime = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const diffSec = Math.floor((new Date() - date) / 1000);
+  if (diffSec < 60) return 'Agora mesmo';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `há ${diffMin} min`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `há ${diffHour} h`;
+  const diffDays = Math.floor(diffHour / 24);
+  if (diffDays < 7) return `há ${diffDays} d`;
+  return date.toLocaleDateString('pt-MZ');
+};
+
 onMounted(() => {
   fetchAuctionData();
   fetchUserWatchlist();
+  fetchComments();
   
   countdownInterval = setInterval(() => {
     now.value = new Date();
@@ -1047,6 +1436,21 @@ onMounted(() => {
       }
     }
     bids.value.unshift(data.bid);
+  });
+
+  socket.on('new_comment', (comment) => {
+    if (!comments.value.some(c => c._id === comment._id)) {
+      comments.value.unshift(comment);
+    }
+  });
+
+  socket.on('comment_deleted', ({ commentId }) => {
+    comments.value = comments.value.filter(c => c._id !== commentId);
+  });
+
+  socket.on('comment_like_updated', ({ commentId, likes }) => {
+    const c = comments.value.find(item => item._id === commentId);
+    if (c) c.likes = likes;
   });
 
   socket.on('auction_ended', (data) => {
@@ -2204,5 +2608,600 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 6px;
   }
+}
+
+/* ─── Quick Info Metadata Grid ─── */
+.quick-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.dark .meta-item {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.meta-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.meta-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.meta-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.dark .meta-label {
+  color: #94a3b8;
+}
+
+.meta-value {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .meta-value {
+  color: #f8fafc;
+}
+
+/* ─── Intelligent Bid Validation Banners ─── */
+.bid-validation-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  background-color: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  border-radius: 12px;
+  color: #991b1b;
+  margin-bottom: 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.dark .bid-validation-alert {
+  background-color: rgba(153, 27, 27, 0.2);
+  border-color: #b91c1c;
+  color: #fca5a5;
+}
+
+.val-alert-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.bid-validation-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background-color: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 10px;
+  color: #166534;
+  margin-bottom: 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.dark .bid-validation-success {
+  background-color: rgba(22, 101, 52, 0.2);
+  border-color: #15803d;
+  color: #86efac;
+}
+
+.bid-input-error {
+  border-color: #ef4444 !important;
+  background-color: #fff5f5 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.owner-warning {
+  background-color: #eff6ff !important;
+  border-color: #93c5fd !important;
+  color: #1e40af !important;
+}
+
+/* ─── Structured Information Tabs ─── */
+.details-tab-container {
+  margin-top: 2rem;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.dark .details-tab-container {
+  background-color: #0f172a;
+  border-color: #1e293b;
+}
+
+.details-tab-header {
+  display: flex;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.dark .details-tab-header {
+  background-color: #1e293b;
+  border-bottom-color: #334155;
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.9rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.dark .tab-btn {
+  color: #94a3b8;
+}
+
+.tab-btn:hover {
+  color: #1e3a8a;
+  background-color: rgba(241, 245, 249, 0.8);
+}
+
+.dark .tab-btn:hover {
+  color: #60a5fa;
+  background-color: rgba(30, 41, 59, 0.8);
+}
+
+.tab-btn.active {
+  color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
+  background-color: #ffffff;
+}
+
+.dark .tab-btn.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+  background-color: #0f172a;
+}
+
+.tab-badge {
+  background-color: #1d4ed8;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.details-tab-content {
+  padding: 1.5rem;
+}
+
+.pane-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.85rem;
+}
+
+.dark .pane-title {
+  color: #f8fafc;
+}
+
+.description-card {
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  color: #334155;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.dark .description-card {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.85rem;
+}
+
+.spec-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dark .spec-card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.spec-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.dark .spec-label {
+  color: #94a3b8;
+}
+
+.spec-val {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dark .spec-val {
+  color: #f8fafc;
+}
+
+.spec-val.text-green {
+  color: #16a34a;
+}
+
+.spec-val.text-blue {
+  color: #2563eb;
+}
+
+.guarantee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.g-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.1rem;
+  text-align: center;
+}
+
+.dark .g-card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.g-icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.g-card h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+
+.dark .g-card h4 {
+  color: #f8fafc;
+}
+
+.g-card p {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.dark .g-card p {
+  color: #94a3b8;
+}
+
+/* ─── Comments System Styles ─── */
+.comments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.comment-input-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dark .comment-input-box {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.comment-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+}
+
+.dark .comment-textarea {
+  background-color: #0f172a;
+  border-color: #475569;
+  color: #f8fafc;
+}
+
+.comment-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.char-counter {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.comment-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.dark .comment-card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.comment-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.comment-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.comment-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.comment-author-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comment-author-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.dark .comment-author-name {
+  color: #f8fafc;
+}
+
+.author-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-seller {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.badge-admin {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.comment-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  display: block;
+}
+
+.btn-delete-comment {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 4px;
+}
+
+.btn-delete-comment:hover {
+  opacity: 1;
+}
+
+.comment-text-content {
+  font-size: 0.92rem;
+  color: #334155;
+  line-height: 1.6;
+  margin-bottom: 0.85rem;
+}
+
+.dark .comment-text-content {
+  color: #cbd5e1;
+}
+
+.comment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-top: 1px dashed #f1f5f9;
+  padding-top: 0.6rem;
+}
+
+.dark .comment-footer {
+  border-top-color: #334155;
+}
+
+.btn-comment-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dark .btn-comment-like {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.btn-comment-like:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.btn-comment-like.liked {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.dark .btn-comment-like.liked {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: #b91c1c;
+  color: #fca5a5;
+}
+
+.no-comments-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+}
+
+.dark .no-comments-state {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.no-comments-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.no-comments-state h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+
+.dark .no-comments-state h4 {
+  color: #f8fafc;
+}
+
+.no-comments-state p {
+  font-size: 0.85rem;
+  color: #64748b;
 }
 </style>
