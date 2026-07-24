@@ -122,7 +122,6 @@
           Sair
         </a>
       </div>
-    </div>
 
     <!-- Notifications Pop-up Modal Overlay (Matches user reference screenshot) -->
     <Transition name="fade">
