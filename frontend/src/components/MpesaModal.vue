@@ -241,12 +241,19 @@
 
           <div class="mpesa-receipt-ticket">
             <div class="receipt-header">
-              <span class="ticket-brand">VODACOM M-PESA</span>
-              <span class="ticket-status-badge">COMPLETADO</span>
+              <div class="receipt-partner-logos-wrap">
+                <img src="/logo prime.png" alt="Prime Auction" class="cert-prime-logo" />
+                <div class="cert-partner-logos-row">
+                  <img src="/mpesa-logo.png" alt="M-Pesa" class="cert-partner-mini-img" title="Vodacom M-Pesa" />
+                  <img src="/emola-logo.png" alt="eMola" class="cert-partner-mini-img" title="Movitel eMola" />
+                  <img src="/visa-logo.png" alt="Visa" class="cert-partner-mini-img" title="Visa Secure" />
+                </div>
+              </div>
+              <span class="ticket-status-badge">CERTIFICADO AUTENTICADO ✓</span>
             </div>
             <div class="receipt-body">
               <div class="receipt-item">
-                <span class="item-lbl">Transação M-Pesa ID:</span>
+                <span class="item-lbl">Transação ID:</span>
                 <strong class="item-val code-val">{{ receiptData?.mpesaTransactionId }}</strong>
               </div>
               <div class="receipt-item">
@@ -267,7 +274,18 @@
               </div>
             </div>
             <div class="receipt-footer">
-              🔒 Autenticado digitalmente por Prime Auction & Vodacom
+              <div class="cert-partners-badge-list">
+                <span class="cert-partners-title">Parceiros de Liquidação & Apoio:</span>
+                <div class="cert-pills-row">
+                  <span class="cert-partner-pill">Vodacom M-Pesa</span>
+                  <span class="cert-partner-pill">Movitel eMola</span>
+                  <span class="cert-partner-pill">Visa</span>
+                  <span class="cert-partner-pill">BCI</span>
+                  <span class="cert-partner-pill">Millennium bim</span>
+                  <span class="cert-partner-pill">Standard Bank</span>
+                </div>
+              </div>
+              <p class="cert-legal-footer-text">🔒 Autenticado digitalmente pela Prime Auction e Rede de Parceiros Financeiros de Moçambique.</p>
             </div>
           </div>
 
@@ -1037,20 +1055,80 @@ const closeModal = () => {
   margin-bottom: 0.85rem;
 }
 
-.ticket-brand {
-  font-size: 0.85rem;
-  font-weight: 900;
-  color: #e60000;
-  letter-spacing: 0.5px;
+.receipt-partner-logos-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cert-prime-logo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.cert-partner-logos-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-left: 8px;
+  border-left: 1px solid #cbd5e1;
+}
+
+.cert-partner-mini-img {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 3px;
+  background: white;
+  padding: 1px 3px;
+  border: 1px solid #e2e8f0;
 }
 
 .ticket-status-badge {
   background: #dcfce7;
   color: #15803d;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+
+.cert-partners-badge-list {
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.cert-partners-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #475569;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.cert-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cert-partner-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 0.15rem 0.45rem;
   border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.cert-legal-footer-text {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 0.4rem;
+  line-height: 1.35;
 }
 
 .receipt-body {

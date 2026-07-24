@@ -310,6 +310,7 @@
                   <th>Valor</th>
                   <th>Estado</th>
                   <th>Data</th>
+                  <th>Acções</th>
                 </tr>
               </thead>
               <tbody>
@@ -327,6 +328,15 @@
                     </span>
                   </td>
                   <td>{{ new Date(pay.createdAt).toLocaleString('pt-MZ') }}</td>
+                  <td>
+                    <button 
+                      @click="openCertModal(pay)"
+                      class="btn btn-sm btn-pill"
+                      style="padding: 0.3rem 0.65rem; font-size: 0.75rem; font-weight: 700; background: var(--btn-primary-bg); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;"
+                    >
+                      📜 Ver Certificado
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -436,6 +446,103 @@
         <Chat />
       </div>
 
+    <!-- Certificado de Arrematação / Recibo Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showCertModal" class="custom-modal-overlay" @click.self="closeCertModal">
+        <div class="custom-modal-card animate-scale-in" style="max-width: 620px; width: 92%; padding: 0; overflow: hidden; border-radius: 16px;">
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img src="/logo prime.png" alt="Prime Auction" style="height: 28px; width: auto;" />
+              <span style="font-weight: 800; font-size: 1rem; color: #60a5fa; border-left: 1px solid #475569; padding-left: 10px;">
+                Certificado Oficial
+              </span>
+            </div>
+            <button type="button" @click="closeCertModal" style="background: transparent; border: none; color: #94a3b8; font-size: 1.25rem; cursor: pointer;">✕</button>
+          </div>
+
+          <div style="padding: 1.5rem; background: #ffffff; text-align: left;">
+            <!-- Top Partner Logos Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1.25rem;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #475569;">Parceiros de Liquidação:</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="/mpesa-logo.png" alt="M-Pesa" style="height: 20px; width: auto; border-radius: 4px; border: 1px solid #e2e8f0; padding: 1px 4px; background: white;" title="Vodacom M-Pesa" />
+                <img src="/emola-logo.png" alt="eMola" style="height: 20px; width: auto; border-radius: 4px; border: 1px solid #e2e8f0; padding: 1px 4px; background: white;" title="Movitel eMola" />
+                <img src="/visa-logo.png" alt="Visa" style="height: 20px; width: auto; border-radius: 4px; border: 1px solid #e2e8f0; padding: 1px 4px; background: white;" title="Visa Secure" />
+              </div>
+            </div>
+
+            <!-- Certificate Body -->
+            <div style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.25rem; background: #fdfdfd;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+                <div>
+                  <h4 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Certificado de Arrematação & Liquidação</h4>
+                  <span style="font-size: 0.75rem; color: #64748b;">Doc. Nº {{ selectedCertPay?.mpesaTransactionId }}</span>
+                </div>
+                <span style="background: #dcfce7; color: #15803d; font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 6px;">
+                  AUTENTICADO ✓
+                </span>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">Arrematante:</span>
+                  <strong style="color: #0f172a;">{{ authStore.user?.name }} ({{ authStore.user?.email }})</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">Leilão / Artigo:</span>
+                  <strong style="color: #0f172a;">{{ selectedCertPay?.auction?.title || 'Artigo Leiloado' }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">ID Transação M-Pesa:</span>
+                  <strong style="font-family: monospace; color: #e60000;">{{ selectedCertPay?.mpesaTransactionId }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">Referência:</span>
+                  <span style="color: #334155; font-weight: 600;">{{ selectedCertPay?.reference }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">Telemóvel:</span>
+                  <span style="color: #334155;">{{ selectedCertPay?.phoneNumber }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 0.5rem; margin-top: 0.25rem;">
+                  <span style="color: #64748b; font-weight: 700;">Valor Total Liquidado:</span>
+                  <strong style="color: #16a34a; font-size: 1.1rem; font-weight: 900;">{{ formatCurrency(selectedCertPay?.amount) }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #64748b;">Data de Emissão:</span>
+                  <span style="color: #334155;">{{ new Date(selectedCertPay?.createdAt).toLocaleString('pt-MZ') }}</span>
+                </div>
+              </div>
+
+              <!-- Bottom Financial Partner Logos & Legal Footer -->
+              <div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
+                <span style="font-size: 0.7rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.3rem;">Bancos & Parceiros Financeiros Associados:</span>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <span style="font-size: 0.68rem; font-weight: 700; background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">BCI</span>
+                  <span style="font-size: 0.68rem; font-weight: 700; background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Millennium bim</span>
+                  <span style="font-size: 0.68rem; font-weight: 700; background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Standard Bank</span>
+                  <span style="font-size: 0.68rem; font-weight: 700; background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">Santam</span>
+                  <span style="font-size: 0.68rem; font-weight: 700; background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">MFC</span>
+                </div>
+                <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.5rem; margin-bottom: 0; line-height: 1.35;">
+                  🔒 Documento e selo de arrematação emitidos e validados eletronicamente em conformidade com as instituições parceiras da Prime Auction em Moçambique.
+                </p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
+              <button type="button" @click="printCert" class="btn btn-outline" style="flex: 1; padding: 0.75rem; font-weight: 700; border-radius: 10px; border: 1px solid #cbd5e1; background: white; cursor: pointer;">
+                🖨️ Imprimir / Guardar PDF
+              </button>
+              <button type="button" @click="closeCertModal" class="btn btn-primary" style="flex: 1; padding: 0.75rem; font-weight: 700; border-radius: 10px; cursor: pointer;">
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
     </div>
   </div>
 </template>
@@ -461,6 +568,24 @@ const proposals = ref([]);
 const loadingProposals = ref(false);
 const payments = ref([]);
 const loadingPayments = ref(false);
+
+// Certificate Modal State
+const showCertModal = ref(false);
+const selectedCertPay = ref(null);
+
+const openCertModal = (pay) => {
+  selectedCertPay.value = pay;
+  showCertModal.value = true;
+};
+
+const closeCertModal = () => {
+  showCertModal.value = false;
+  selectedCertPay.value = null;
+};
+
+const printCert = () => {
+  window.print();
+};
 
 const changeTab = (tab) => {
   activeTab.value = tab;
