@@ -252,7 +252,7 @@ onMounted(() => {
 .analytics-dashboard {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 105px 2rem 3rem;
 }
 
 .dashboard-header {

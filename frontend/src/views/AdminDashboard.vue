@@ -1,6 +1,6 @@
 <template>
   <div class="admin-container">
-    <div class="container animate-fade-in" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="container animate-fade-in" style="padding-top: 105px; padding-bottom: 80px;">
       <div class="page-header">
         <h2 class="page-title">Painel de Administração</h2>
         <p class="page-subtitle">Gerencie leilões, utilizadores e toda a plataforma</p>

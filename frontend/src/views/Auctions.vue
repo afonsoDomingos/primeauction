@@ -1,6 +1,6 @@
 <template>
   <div class="auctions-container">
-    <div class="container animate-fade-in" style="padding-top: 100px; padding-bottom: 60px;">
+    <div class="container animate-fade-in" style="padding-top: 105px; padding-bottom: 60px;">
       <div class="page-header">
         <h2 class="page-title">
           {{ route.query.search ? `Resultados para: "${route.query.search}"` : 'Leilões Activos' }}

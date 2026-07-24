@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="container animate-fade-in" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="container animate-fade-in" style="padding-top: 105px; padding-bottom: 80px;">
 
       <!-- Profile Header -->
       <div class="profile-header">

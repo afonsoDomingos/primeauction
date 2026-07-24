@@ -1,6 +1,6 @@
 <template>
   <div class="calendar-page-container">
-    <div class="container animate-fade-in" style="padding-top: 100px; padding-bottom: 60px;">
+    <div class="container animate-fade-in" style="padding-top: 105px; padding-bottom: 60px;">
       <div class="page-header">
         <h2 class="page-title">Calendário de Leilões</h2>
         <p class="page-subtitle">Acompanhe as datas de início e encerramento para planear os seus lances</p>
