@@ -40,7 +40,13 @@
           <span>Leilões ao Vivo em Moçambique &bull; 100% Verificados</span>
         </div>
 
-        <h1 class="hero-title hero-title-glowing">{{ heroTitle }}</h1>
+        <h1 
+          ref="heroTitleRef" 
+          class="hero-title hero-title-glowing" 
+          :class="{ 'in-view': isHeroInView }"
+        >
+          {{ heroTitle }}
+        </h1>
         <p class="hero-subtitle">{{ heroSubtitle }}</p>
       </div>
       
@@ -730,7 +736,11 @@ const formatNumber = (value) => {
   return new Intl.NumberFormat('pt-MZ').format(value);
 };
 
-// Stats data
+// Hero Entrance Observer Logic
+const heroTitleRef = ref(null);
+const isHeroInView = ref(false);
+let heroObserver = null;
+
 const stats = ref({
   totalAuctions: 15,
   totalUsers: 2840,
@@ -1092,12 +1102,25 @@ onMounted(async () => {
   // Load active auctions
   await fetchActiveAuctions();
 
+  // Setup Hero Title Entrance Scroll Observer (animates on scroll down and returning to top)
+  if (heroTitleRef.value) {
+    heroObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        isHeroInView.value = entry.isIntersecting;
+      });
+    }, { threshold: 0.15 });
+    heroObserver.observe(heroTitleRef.value);
+  }
+
   // Start slideshow after settings are loaded
   restartSlideshow();
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', onResize);
+  if (heroObserver && heroTitleRef.value) {
+    heroObserver.unobserve(heroTitleRef.value);
+  }
   if (intervalId) clearInterval(intervalId);
   if (countdownInterval) clearInterval(countdownInterval);
 });
@@ -1221,9 +1244,37 @@ onUnmounted(() => {
 }
 
 .hero-title-glowing {
-  background: linear-gradient(135deg, #ffffff 30%, #fecaca 70%, #ffffff 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #93c5fd 25%, #ffffff 50%, #60a5fa 75%, #ffffff 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  opacity: 0;
+  transform: translateY(45px) scale(0.92);
+  filter: blur(12px);
+  transition: opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), 
+              filter 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, filter;
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.hero-title-glowing.in-view {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  animation: metallicShimmer 6s linear infinite;
+}
+
+@keyframes metallicShimmer {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
 }
 
 .hero-subtitle {
