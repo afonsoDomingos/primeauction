@@ -411,8 +411,10 @@ onUnmounted(() => {
 /* ─── Nav Action Buttons ─── */
 .nav-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.65rem;
   align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .nav-btn {

@@ -998,13 +998,28 @@ const executePlaceBid = async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const bidVal = bidAmount.value;
-    await axios.post(
+    const res = await axios.post(
       `${apiUrl}/api/bids/${route.params.id}`,
       { amount: bidVal },
       { headers: { Authorization: `Bearer ${authStore.token}` } }
     );
-    toastStore.success(`Lance de ${formatCurrency(bidVal)} registado! ✓`);
-    openMpesaModal();
+
+    if (res.data && res.data.success) {
+      toastStore.success(`Lance de ${formatCurrency(bidVal)} registado! ✓`);
+      
+      // Update local price and bid history immediately
+      if (auction.value) {
+        auction.value.currentPrice = bidVal;
+        const newSuggested = bidVal + minIncrement.value;
+        bidAmount.value = newSuggested;
+        displayBidAmount.value = formatInputString(newSuggested.toString());
+      }
+      
+      // Re-fetch auction data to ensure 100% sync with server populate
+      await fetchAuctionData();
+      
+      openMpesaModal();
+    }
   } catch (err) {
     toastStore.error(err.response?.data?.error || 'Erro ao registar lance');
   }
