@@ -983,6 +983,7 @@ const executePlaceBid = async () => {
       { headers: { Authorization: `Bearer ${authStore.token}` } }
     );
     toastStore.success(`Lance de ${formatCurrency(bidVal)} registado! ✓`);
+    openMpesaModal();
   } catch (err) {
     toastStore.error(err.response?.data?.error || 'Erro ao registar lance');
   }
