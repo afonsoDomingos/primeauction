@@ -899,6 +899,10 @@
               {{ extendingAuction ? 'A guardar...' : '✓ Confirmar Extensão' }}
             </button>
           </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Edit Auction Modal -->
     <Transition name="modal-fade">
       <div v-if="showEditModal" class="custom-modal-overlay" @click.self="closeEditModal">
