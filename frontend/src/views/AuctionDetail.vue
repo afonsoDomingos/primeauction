@@ -957,20 +957,15 @@ const placeBid = async () => {
     return;
   }
 
-  const user = authStore.user;
-  if (!user.name || !user.phone || !user.province || !user.gender || !user.age) {
-    profileForm.value = {
-      name: user.name || '',
-      phone: user.phone || '',
-      province: user.province || '',
-      gender: user.gender || '',
-      age: user.age || null
-    };
-    showProfileModal.value = true;
-    return;
-  }
-
-  await executePlaceBid();
+  const user = authStore.user || {};
+  profileForm.value = {
+    name: user.name || '',
+    phone: user.phone || '',
+    province: user.province || '',
+    gender: user.gender || '',
+    age: user.age || null
+  };
+  showProfileModal.value = true;
 };
 
 const executePlaceBid = async () => {
