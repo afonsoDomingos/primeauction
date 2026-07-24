@@ -316,7 +316,7 @@ onUnmounted(() => {
 <style scoped>
 /* ─── Base Navbar ─── */
 .tesla-nav {
-  padding: 0 3rem;
+  padding: 0 2rem;
   height: 72px;
   display: flex;
   justify-content: space-between;
@@ -326,16 +326,32 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   z-index: 1000;
-  background-color: transparent;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, height 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+:deep(.dark) .tesla-nav,
+.dark .tesla-nav,
+html.dark .tesla-nav {
+  background-color: rgba(15, 23, 42, 0.98) !important;
+  border-bottom-color: rgba(30, 41, 59, 0.9) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .tesla-nav.scrolled {
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+  background-color: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   height: 64px;
+}
+
+:deep(.dark) .tesla-nav.scrolled,
+.dark .tesla-nav.scrolled,
+html.dark .tesla-nav.scrolled {
+  background-color: rgba(15, 23, 42, 0.98) !important;
 }
 
 /* ─── Logo ─── */
@@ -365,12 +381,17 @@ onUnmounted(() => {
   display: none;
   background: none;
   border: none;
-  color: var(--text-primary);
+  color: #0f172a;
   cursor: pointer;
   z-index: 1100;
   padding: 0.5rem;
   border-radius: 8px;
   transition: background-color 0.2s;
+}
+
+.dark .mobile-menu-btn,
+html.dark .mobile-menu-btn {
+  color: #f8fafc;
 }
 
 .mobile-menu-btn:hover {
@@ -419,19 +440,44 @@ onUnmounted(() => {
   align-items: center;
   gap: 6px;
   text-decoration: none;
-  color: var(--text-primary);
-  transition: color 0.2s ease, background-color 0.2s ease;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-md);
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+}
+
+.dark .nav-links a,
+html.dark .nav-links a {
+  color: #f8fafc;
 }
 
 .nav-links a svg {
   display: none; /* hide icons on desktop */
 }
 
-.nav-links a:hover,
+.nav-links a:hover {
+  color: #1a56db;
+  background-color: rgba(26, 86, 219, 0.08);
+}
+
+.dark .nav-links a:hover,
+html.dark .nav-links a:hover {
+  color: #60a5fa;
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
 .nav-links a.router-link-active {
-  background-color: rgba(0, 0, 0, 0.06);
+  color: #1a56db;
+  background-color: rgba(26, 86, 219, 0.12);
+  font-weight: 700;
+}
+
+.dark .nav-links a.router-link-active,
+html.dark .nav-links a.router-link-active {
+  color: #60a5fa;
+  background-color: rgba(59, 130, 246, 0.2);
 }
 
 /* ─── Nav Action Buttons ─── */
