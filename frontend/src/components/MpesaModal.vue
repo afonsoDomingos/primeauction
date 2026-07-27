@@ -315,8 +315,9 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, onUnmounted } from 'vue';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 import { useToastStore } from '../stores/toastStore';
 import { useAuthStore } from '../stores/authStore';
 
@@ -344,6 +345,104 @@ const pinInput = ref('');
 const receiptData = ref(null);
 const pinInputRef = ref(null);
 
+let pollInterval = null;
+let socket = null;
+
+const stopStatusChecking = () => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+};
+
+const fetchReceiptData = async (paymentId) => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/payments/receipt/${paymentId}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data && res.data.success) {
+      receiptData.value = {
+        receiptNumber: res.data.data._id,
+        mpesaTransactionId: res.data.data.mpesaTransactionId,
+        reference: res.data.data.reference,
+        amount: res.data.data.amount,
+        phoneNumber: res.data.data.phoneNumber,
+        status: 'COMPLETADO',
+        auctionTitle: props.auctionTitle,
+        userName: authStore.user?.name,
+        date: res.data.data.completedAt || res.data.data.updatedAt,
+        paymentMethod: 'Vodacom M-Pesa (C2B Direct Push)'
+      };
+      step.value = 'success';
+      stopStatusChecking();
+      toastStore.success('Pagamento M-Pesa confirmado com sucesso! 🎉');
+      emit('success', receiptData.value);
+    }
+  } catch (err) {
+    console.error('Error fetching receipt data:', err);
+  }
+};
+
+const startStatusChecking = () => {
+  stopStatusChecking();
+  
+  // 1. Socket.io real-time listener
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    socket = io(apiUrl);
+    const userId = authStore.user?.id || authStore.user?._id;
+    if (userId) {
+      socket.emit('join_user', userId);
+    }
+    socket.on('payment_confirmed', async (data) => {
+      if (paymentData.value && (data.paymentId === paymentData.value.paymentId || data.reference === paymentData.value.reference)) {
+        await fetchReceiptData(data.paymentId);
+      }
+    });
+  } catch (err) {
+    console.error('Socket setup error in MpesaModal:', err);
+  }
+
+  // 2. Polling every 3 seconds as backup
+  pollInterval = setInterval(async () => {
+    if (step.value !== 'ussd' || !paymentData.value?.paymentId) {
+      stopStatusChecking();
+      return;
+    }
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const res = await axios.get(`${apiUrl}/api/payments/receipt/${paymentData.value.paymentId}`, {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      });
+      if (res.data && res.data.success && res.data.data.status === 'completed') {
+        receiptData.value = {
+          receiptNumber: res.data.data._id,
+          mpesaTransactionId: res.data.data.mpesaTransactionId,
+          reference: res.data.data.reference,
+          amount: res.data.data.amount,
+          phoneNumber: res.data.data.phoneNumber,
+          status: 'COMPLETADO',
+          auctionTitle: props.auctionTitle,
+          userName: authStore.user?.name,
+          date: res.data.data.completedAt || res.data.data.updatedAt,
+          paymentMethod: 'Vodacom M-Pesa (C2B Direct Push)'
+        };
+        step.value = 'success';
+        stopStatusChecking();
+        toastStore.success('Pagamento M-Pesa confirmado com sucesso! 🎉');
+        emit('success', receiptData.value);
+      }
+    } catch (err) {
+      // Ignore polling errors
+    }
+  }, 3000);
+};
+
 watch(() => props.amount, (newVal) => {
   if (newVal) customAmount.value = newVal;
 });
@@ -364,7 +463,13 @@ watch(() => props.isOpen, (newVal) => {
         phoneNumber.value = raw.slice(-9);
       }
     }
+  } else {
+    stopStatusChecking();
   }
+});
+
+onUnmounted(() => {
+  stopStatusChecking();
 });
 
 const addAmount = (inc) => {
@@ -409,9 +514,7 @@ const handleInitiatePayment = async () => {
       paymentData.value = res.data.data;
       step.value = 'ussd';
       toastStore.add('Notificação STK Push enviada para o seu telemóvel!', 'info');
-      nextTick(() => {
-        if (pinInputRef.value) pinInputRef.value.focus();
-      });
+      startStatusChecking();
     }
   } catch (err) {
     console.error('Failed to initiate M-Pesa payment:', err);
@@ -424,9 +527,37 @@ const handleInitiatePayment = async () => {
 };
 
 const handleSimulatedSuccess = async () => {
+  if (!paymentData.value?.paymentId) return;
   loading.value = true;
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    
+    // Check if status in DB is already completed from Vodacom Callback
+    const checkRes = await axios.get(`${apiUrl}/api/payments/receipt/${paymentData.value.paymentId}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    
+    if (checkRes.data && checkRes.data.success && checkRes.data.data.status === 'completed') {
+      receiptData.value = {
+        receiptNumber: checkRes.data.data._id,
+        mpesaTransactionId: checkRes.data.data.mpesaTransactionId,
+        reference: checkRes.data.data.reference,
+        amount: checkRes.data.data.amount,
+        phoneNumber: checkRes.data.data.phoneNumber,
+        status: 'COMPLETADO',
+        auctionTitle: props.auctionTitle,
+        userName: authStore.user?.name,
+        date: checkRes.data.data.completedAt || checkRes.data.data.updatedAt,
+        paymentMethod: 'Vodacom M-Pesa (C2B Direct Push)'
+      };
+      step.value = 'success';
+      stopStatusChecking();
+      toastStore.success('Pagamento M-Pesa confirmado com sucesso! 🎉');
+      emit('success', receiptData.value);
+      return;
+    }
+
+    // Confirm via backend (Sandbox confirmation)
     const res = await axios.post(`${apiUrl}/api/payments/mpesa/confirm`, {
       paymentId: paymentData.value.paymentId,
       pin: '1234'
@@ -437,6 +568,7 @@ const handleSimulatedSuccess = async () => {
     if (res.data && res.data.success) {
       receiptData.value = res.data.data.receipt;
       step.value = 'success';
+      stopStatusChecking();
       toastStore.add('Pagamento M-Pesa efetuado com sucesso! 🎉', 'success');
       emit('success', receiptData.value);
     }
@@ -454,6 +586,7 @@ const handleConfirmPayment = async () => {
 };
 
 const cancelPayment = () => {
+  stopStatusChecking();
   step.value = 'phone';
   pinInput.value = '';
   toastStore.add('Transação cancelada no telemóvel.', 'info');
