@@ -1426,33 +1426,33 @@ const closeModal = () => {
   }
 }
 
-/* Waiting Phone Card Styles */
+/* Waiting Phone Card Styles (Compact & Fits Screen Without Scrollbars) */
 .waiting-phone-card {
-  padding: 1.25rem 1rem;
+  padding: 0.75rem 0.85rem;
   text-align: center;
 }
 
 .phone-pulse-icon {
   position: relative;
-  width: 70px;
-  height: 70px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.25rem;
-  box-shadow: 0 4px 16px rgba(29, 78, 216, 0.15);
+  margin: 0 auto 0.5rem;
+  box-shadow: 0 3px 12px rgba(29, 78, 216, 0.12);
 }
 
 .phone-emoji {
-  font-size: 2.2rem;
+  font-size: 1.6rem;
   z-index: 2;
 }
 
 .pulse-ring {
   position: absolute;
-  inset: -6px;
+  inset: -4px;
   border-radius: 50%;
   border: 2px solid #3b82f6;
   animation: pulse-out 2s infinite ease-out;
@@ -1461,38 +1461,38 @@ const closeModal = () => {
 
 @keyframes pulse-out {
   0% { transform: scale(0.95); opacity: 0.8; }
-  100% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.3); opacity: 0; }
 }
 
 .waiting-title {
-  font-size: 1.15rem;
+  font-size: 1.02rem;
   font-weight: 800;
   color: #0f172a;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .waiting-info-box {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1.1rem;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.6rem;
   text-align: left;
 }
 
 .waiting-msg {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #334155;
-  margin-bottom: 0.75rem;
-  line-height: 1.5;
+  margin-bottom: 0.4rem;
+  line-height: 1.4;
 }
 
 .waiting-highlight-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
-  padding: 0.35rem 0;
+  font-size: 0.8rem;
+  padding: 0.25rem 0;
   border-top: 1px solid #f1f5f9;
 }
 
@@ -1500,48 +1500,48 @@ const closeModal = () => {
   background: #e0e7ff;
   color: #3730a3;
   font-weight: 700;
-  font-size: 0.75rem;
-  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  padding: 0.1rem 0.45rem;
   border-radius: 6px;
 }
 
 .instructions-steps-box {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
   text-align: left;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .instruction-lead {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #1e3a8a;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.25rem;
 }
 
 .instructions-list {
   margin: 0;
-  padding-left: 1.2rem;
-  font-size: 0.8rem;
+  padding-left: 1.1rem;
+  font-size: 0.75rem;
   color: #1e40af;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .waiting-status-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 0.82rem;
+  gap: 6px;
+  font-size: 0.76rem;
   font-weight: 600;
   color: #2563eb;
-  padding: 0.5rem;
+  padding: 0.25rem;
 }
 
 .spinner-small {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: 2px solid rgba(37, 99, 235, 0.2);
   border-top-color: #2563eb;
   border-radius: 50%;
@@ -1549,9 +1549,9 @@ const closeModal = () => {
 }
 
 .banking-security-footer {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #64748b;
-  margin-top: 1.25rem;
-  line-height: 1.45;
+  margin-top: 0.6rem;
+  line-height: 1.35;
 }
 </style>
