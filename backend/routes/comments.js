@@ -3,6 +3,8 @@ const router = express.Router();
 const { getComments, addComment, deleteComment, toggleCommentLike } = require('../controllers/commentController');
 const { protect } = require('../middlewares/auth');
 
+console.log('Comments route initialized successfully');
+
 router.route('/:auctionId')
   .get(getComments)
   .post(protect, addComment);
