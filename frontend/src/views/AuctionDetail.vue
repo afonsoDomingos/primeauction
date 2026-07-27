@@ -569,7 +569,7 @@
                   </div>
                   <p class="pay-card-subtitle">Efetue a liquidação em segurança usando M-Pesa, eMola ou Cartão de Crédito.</p>
                   <button @click="handleDirectPayClick" type="button" class="btn btn-pay-royal">
-                    <span>Pagar {{ formatCurrency(auction.currentPrice) }}</span>
+                    <span>Pagar {{ formatCurrency(bidAmount > (auction?.currentPrice || 0) ? bidAmount : auction?.currentPrice) }}</span>
                   </button>
                 </div>
 
@@ -801,19 +801,16 @@ const openMpesaModal = () => {
 
 const handleDirectPayClick = () => {
   if (!authStore.isAuthenticated) {
-    toastStore.add('Por favor, faça login para efetuar o pagamento.', 'warning');
+    toastStore.warning('Por favor, faça login para efetuar o pagamento.');
     return;
   }
   isDirectPaymentAttempt.value = true;
-  const user = authStore.user || {};
-  profileForm.value = {
-    name: user.name || '',
-    phone: user.phone || '',
-    province: user.province || '',
-    gender: user.gender || '',
-    age: user.age || null
-  };
-  showProfileModal.value = true;
+  if (!isProfileComplete.value) {
+    toastStore.info('Por favor, preencha os seus dados de perfil antes de prosseguir com o pagamento. 📋');
+    openProfileWizard();
+  } else {
+    openMpesaModal();
+  }
 };
 const handleMpesaSuccess = (receipt) => {
   toastStore.add('Pagamento M-Pesa registado com sucesso! ✓', 'success');
@@ -991,8 +988,9 @@ const isUpcoming = computed(() => {
 });
 
 const formatCurrency = (value) => {
-  if (value === undefined || value === null) return '0,00 MZN';
-  const formatted = new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  if (value === undefined || value === null || isNaN(value)) return '0 MZN';
+  const valNum = Number(value);
+  const formatted = valNum.toLocaleString('de-DE', { maximumFractionDigits: 2 });
   return `${formatted} MZN`;
 };
 
@@ -1250,6 +1248,32 @@ const submitProfileDetails = async () => {
   }
 };
 
+const isProfileComplete = computed(() => {
+  const user = authStore.user;
+  if (!user) return false;
+  return Boolean(
+    user.name && String(user.name).trim().length > 0 &&
+    user.phone && String(user.phone).trim().length > 0 &&
+    user.province && String(user.province).trim().length > 0 &&
+    user.gender && String(user.gender).trim().length > 0 &&
+    user.age && Number(user.age) > 0
+  );
+});
+
+const openProfileWizard = () => {
+  const user = authStore.user || {};
+  profileForm.value = {
+    name: user.name || '',
+    phone: user.phone || '',
+    province: user.province || '',
+    gender: user.gender || '',
+    age: user.age || null
+  };
+  profileStep.value = 1;
+  wizardError.value = '';
+  showProfileModal.value = true;
+};
+
 const placeBid = async () => {
   if (isOwner.value) {
     toastStore.error('Você é o vendedor deste leilão e não pode licitar no seu próprio artigo.');
@@ -1264,21 +1288,13 @@ const placeBid = async () => {
   }
 
   isDirectPaymentAttempt.value = false;
-  const user = authStore.user || {};
   
-  // If user profile is already fully complete, proceed straight to bid execution
-  const isProfileComplete = Boolean(user.name && user.phone && user.province && user.gender && user.age);
-  if (isProfileComplete) {
-    await executePlaceBid();
+  // If user profile is not fully complete (or missing phone, province, etc.), force completion modal
+  if (!isProfileComplete.value) {
+    toastStore.info('Por favor, preencha os seus dados de perfil completos (Telefone, Província, Sexo e Idade) antes de licitar. 📋');
+    openProfileWizard();
   } else {
-    profileForm.value = {
-      name: user.name || '',
-      phone: user.phone || '',
-      province: user.province || '',
-      gender: user.gender || '',
-      age: user.age || null
-    };
-    showProfileModal.value = true;
+    await executePlaceBid();
   }
 };
 
