@@ -137,13 +137,15 @@
               Você é o vendedor deste leilão. Não pode licitar no seu próprio artigo.
             </div>
             <form v-else @submit.prevent="placeBid" class="bid-form">
-              <!-- Smart bid incentive message -->
-              <div v-if="bids.length > 0" class="bid-incentive-msg" :class="{ leader: isLeader }">
-                <span v-if="isLeader">🎉 Você é o licitante mais alto de momento! (Líder)</span>
-                <span v-else>💡 Dica: Licite pelo menos <strong>{{ formatCurrency(suggestedBidAmount) }}</strong> para assumir a liderança!</span>
-              </div>
-              <div v-else class="bid-incentive-msg">
-                <span>💡 Dica: Seja o primeiro a licitar! Comece com o valor mínimo de <strong>{{ formatCurrency(auction.currentPrice + 1) }}</strong>.</span>
+              <!-- User Bids Quick Shortcut Banner -->
+              <div v-if="authStore.isAuthenticated && userBids.length > 0" class="user-bids-shortcut-banner animate-fade-in">
+                <div class="user-bids-shortcut-info">
+                  <span class="user-bids-icon">📊</span>
+                  <span>Você tem <strong>{{ userBids.length }} {{ userBids.length === 1 ? 'lance' : 'lances' }}</strong> neste leilão</span>
+                </div>
+                <button type="button" @click="scrollToHistoryTab" class="btn-user-bids-action">
+                  <span>Ver Meus Lances ({{ userBids.length }}) →</span>
+                </button>
               </div>
 
               <!-- Real-time Intelligent Bid Validation Warning -->
@@ -446,13 +448,14 @@
                   </div>
 
                   <ul class="bid-list">
-                    <li v-for="(bid, index) in bids" :key="bid._id" class="bid-item" :class="{ 'top-bid': index === 0 }">
+                    <li v-for="(bid, index) in bids" :key="bid._id" class="bid-item" :class="{ 'top-bid': index === 0, 'my-bid-row': isMyBid(bid) }">
                       <div class="bid-left">
                         <div class="bid-avatar">
                           <img v-if="bid.user?.profilePhoto" :src="bid.user.profilePhoto" alt="Avatar" class="bid-avatar-img" />
                           <span v-else>{{ bid.user?.name?.charAt(0)?.toUpperCase() }}</span>
                         </div>
                         <span class="bid-user">{{ bid.user?.name }}</span>
+                        <span v-if="isMyBid(bid)" class="my-bid-tag">Seu Lance</span>
                         <span v-if="index === 0" class="leader-badge">Líder</span>
                       </div>
                       <span class="bid-amount">{{ formatCurrency(bid.amount) }}</span>
@@ -754,9 +757,33 @@ const toastStore = useToastStore();
 const auction = ref(null);
 const bids = ref([]);
 const bidAmount = ref(0);
-const displayBidAmount = ref('');
-const activeImage = ref('');
-let socket = null;
+const activeTab = ref('details');
+
+const userBids = computed(() => {
+  if (!authStore.isAuthenticated || !authStore.user) return [];
+  const myId = authStore.user._id || authStore.user.id;
+  return bids.value.filter(b => {
+    const bUser = b.user?._id || b.user?.id || b.user;
+    return bUser === myId;
+  });
+});
+
+const isMyBid = (bid) => {
+  if (!authStore.isAuthenticated || !authStore.user) return false;
+  const myId = authStore.user._id || authStore.user.id;
+  const bUser = bid.user?._id || bid.user?.id || bid.user;
+  return bUser === myId;
+};
+
+const scrollToHistoryTab = () => {
+  activeTab.value = 'history';
+  nextTick(() => {
+    const el = document.querySelector('.details-tab-container');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+};
 
 // Image Gallery Helper Methods
 const allImages = computed(() => {
@@ -1122,8 +1149,6 @@ const xTicks = computed(() => {
   const uniqueIndices = [...new Set(indices)];
   return uniqueIndices.map(idx => points[idx]);
 });
-
-const activeTab = ref('details');
 
 // Smart Bidding Logic
 const isOwner = computed(() => {
@@ -3248,5 +3273,83 @@ onUnmounted(() => {
 .no-comments-state p {
   font-size: 0.85rem;
   color: #64748b;
+}
+
+/* User Bids Shortcut Banner & My-Bid Tags */
+.user-bids-shortcut-banner {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dark .user-bids-shortcut-banner {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(30, 64, 175, 0.3) 100%);
+  border-color: #1e40af;
+}
+
+.user-bids-shortcut-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #1e40af;
+}
+
+.dark .user-bids-shortcut-info {
+  color: #93c5fd;
+}
+
+.user-bids-icon {
+  font-size: 1.1rem;
+}
+
+.btn-user-bids-action {
+  background: #1d4ed8;
+  color: #ffffff;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.2);
+}
+
+.btn-user-bids-action:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+}
+
+.my-bid-row {
+  background-color: #f0fdf4 !important;
+  border-left: 3px solid #22c55e;
+}
+
+.dark .my-bid-row {
+  background-color: rgba(34, 197, 94, 0.12) !important;
+}
+
+.my-bid-tag {
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 800;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  margin-left: 6px;
+  text-transform: uppercase;
+}
+
+.dark .my-bid-tag {
+  background: rgba(34, 197, 94, 0.25);
+  color: #86efac;
 }
 </style>
