@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getComments, addComment, deleteComment, toggleCommentLike } = require('../controllers/commentController');
-const { protect } = require('../middleware/auth');
+const { protect } = require('../middlewares/auth');
 
 router.route('/:auctionId')
   .get(getComments)
