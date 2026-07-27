@@ -46,6 +46,7 @@ const callVodacomMpesaApi = async ({ phoneNumber, amount, reference }) => {
   const publicKey = process.env.MPESA_PUBLIC_KEY;
   const c2bUrl = process.env.MPESA_C2B_URL || 'https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/';
   const shortcode = process.env.MPESA_SERVICE_PROVIDER_CODE || '171717';
+  const callbackUrl = process.env.MPESA_CALLBACK_URL || 'https://primeauction.onrender.com/api/payments/mpesa/callback';
   const formattedMSISDN = '258' + phoneNumber.replace(/\D/g, '').slice(-9);
 
   const bearerToken = getMpesaBearerToken(apiKey, publicKey);
@@ -58,7 +59,8 @@ const callVodacomMpesaApi = async ({ phoneNumber, amount, reference }) => {
         input_CustomerMSISDN: formattedMSISDN,
         input_Amount: String(amount),
         input_ThirdPartyReference: reference.replace('-', ''),
-        input_ServiceProviderCode: shortcode
+        input_ServiceProviderCode: shortcode,
+        input_ThirdPartyCallbackURL: callbackUrl
       },
       {
         headers: {
