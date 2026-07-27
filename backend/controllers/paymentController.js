@@ -300,3 +300,40 @@ exports.getAllPayments = async (req, res) => {
   }
 };
 
+// @desc    Vodacom M-Pesa Webhook Callback Receiver
+// @route   POST /api/payments/mpesa/callback
+// @access  Public (Vodacom Servers)
+exports.handleMpesaCallback = async (req, res) => {
+  try {
+    const { input_ResultCode, input_ThirdPartyReference, input_TransactionID } = req.body;
+    console.log('Vodacom M-Pesa IPG Callback Event Received:', req.body);
+
+    if (input_ResultCode === 'INS-0' || input_ResultCode === '0') {
+      const payment = await Payment.findOne({ reference: input_ThirdPartyReference });
+      if (payment && payment.status !== 'completed') {
+        payment.status = 'completed';
+        if (input_TransactionID) {
+          payment.mpesaTransactionId = input_TransactionID;
+        }
+        payment.completedAt = new Date();
+        await payment.save();
+
+        // Emit real-time notification to user socket room
+        if (req.io) {
+          req.io.to(`user_${payment.user}`).emit('payment_confirmed', {
+            paymentId: payment._id,
+            reference: payment.reference,
+            amount: payment.amount,
+            status: 'completed'
+          });
+        }
+      }
+    }
+
+    res.status(200).json({ ResultCode: 'INS-0', ResultDesc: 'Callback processed successfully' });
+  } catch (err) {
+    console.error('Error in M-Pesa Callback:', err);
+    res.status(200).json({ ResultCode: 'INS-1', ResultDesc: 'Callback processing failed' });
+  }
+};
+

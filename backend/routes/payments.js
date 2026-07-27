@@ -2,6 +2,7 @@ const express = require('express');
 const {
   initiateMpesaPayment,
   confirmMpesaPayment,
+  handleMpesaCallback,
   getUserPayments,
   getPaymentReceipt,
   getAllPayments
@@ -10,7 +11,11 @@ const { protect, authorize } = require('../middlewares/auth');
 
 const router = express.Router();
 
-router.use(protect); // Protect all routes in this router
+// Public Webhook callback endpoint from Vodacom M-Pesa IPG servers
+router.post('/mpesa/callback', handleMpesaCallback);
+
+// Protected user routes below
+router.use(protect);
 
 router.post('/mpesa/initiate', initiateMpesaPayment);
 router.post('/mpesa/confirm', confirmMpesaPayment);
