@@ -168,6 +168,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 import { useToastStore } from '../stores/toastStore';

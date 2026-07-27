@@ -757,6 +757,9 @@ const toastStore = useToastStore();
 const auction = ref(null);
 const bids = ref([]);
 const bidAmount = ref(0);
+const displayBidAmount = ref('');
+const activeImage = ref('');
+let socket = null;
 const activeTab = ref('details');
 
 const userBids = computed(() => {
