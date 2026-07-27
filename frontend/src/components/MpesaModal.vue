@@ -126,6 +126,7 @@
                 :disabled="loading"
               />
             </div>
+            <p v-if="phoneError" class="input-error-msg">{{ phoneError }}</p>
 
             <!-- Order Summary -->
             <div class="checkout-summary-box">
@@ -489,9 +490,17 @@ const formatDate = (dateStr) => {
 const handleInitiatePayment = async () => {
   phoneError.value = '';
   const cleaned = phoneNumber.value.replace(/\D/g, '');
-  if (!/^(84|85)\d{7}$/.test(cleaned)) {
-    phoneError.value = 'Insira um número Vodacom M-Pesa válido de Moçambique (começando por 84 ou 85).';
-    return;
+
+  if (selectedMethod.value === 'mpesa') {
+    if (!/^(84|85)\d{7}$/.test(cleaned)) {
+      phoneError.value = 'Número M-Pesa inválido. Insira um número Vodacom (começando por 84 ou 85).';
+      return;
+    }
+  } else if (selectedMethod.value === 'emola') {
+    if (!/^(86|87)\d{7}$/.test(cleaned)) {
+      phoneError.value = 'Número eMola inválido. Insira um número Movitel (começando por 86 ou 87).';
+      return;
+    }
   }
 
   if (!customAmount.value || customAmount.value <= 0) {
