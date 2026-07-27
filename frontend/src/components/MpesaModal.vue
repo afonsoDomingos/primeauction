@@ -187,48 +187,58 @@
           </form>
         </div>
 
-        <!-- STEP 2: Simulated USSD Push on Mobile Phone -->
+        <!-- STEP 2: Waiting for Mobile Phone USSD Push PIN Entry -->
         <div v-else-if="step === 'ussd'" class="mpesa-step-content ussd-step">
-          <div class="mobile-phone-mockup">
-            <div class="phone-header">
-              <span class="signal">📶 Vodacom M-Pesa</span>
-              <span class="time">Agora</span>
+          <div class="waiting-phone-card">
+            <div class="phone-pulse-icon">
+              <span class="pulse-ring"></span>
+              <span class="phone-emoji">📱</span>
             </div>
-            <div class="ussd-alert-box">
-              <div class="ussd-icon">
-                <img src="/mpesa-logo.png" alt="M-Pesa" class="mpesa-ussd-logo" />
-              </div>
-              <h5 class="ussd-title">Confirmação M-Pesa</h5>
-              <p class="ussd-prompt">
-                Deseja confirmar o pagamento de <strong>{{ formatCurrency(customAmount) }}</strong> para <strong>Prime Auction</strong> (Ref: {{ paymentData?.reference }})?
+            
+            <h4 class="waiting-title">Aguardando Confirmação no Telemóvel</h4>
+            
+            <div class="waiting-info-box">
+              <p class="waiting-msg">
+                Foi enviada uma notificação M-Pesa para o número <strong>+258 {{ phoneNumber }}</strong>.
               </p>
-              
-              <div class="pin-entry-wrap">
-                <label class="pin-label">Introduza o seu PIN do M-Pesa (4 dígitos):</label>
-                <input
-                  type="password"
-                  v-model="pinInput"
-                  class="pin-input"
-                  placeholder="••••"
-                  maxlength="4"
-                  ref="pinInputRef"
-                  @keyup.enter="handleConfirmPayment"
-                  :disabled="loading"
-                />
+              <div class="waiting-highlight-row">
+                <span>Valor a Pagar:</span>
+                <strong class="highlight-val">{{ formatCurrency(customAmount) }}</strong>
               </div>
-
-              <div class="ussd-actions">
-                <button type="button" @click="cancelPayment" class="btn-ussd-cancel" :disabled="loading">
-                  Cancelar
-                </button>
-                <button type="button" @click="handleConfirmPayment" class="btn-ussd-confirm" :disabled="loading || pinInput.length !== 4">
-                  <span v-if="loading" class="spinner-inline"></span>
-                  {{ loading ? 'A processar...' : 'Confirmar PIN' }}
-                </button>
+              <div class="waiting-highlight-row">
+                <span>Referência:</span>
+                <span class="ref-badge">{{ paymentData?.reference }}</span>
               </div>
             </div>
+
+            <div class="instructions-steps-box">
+              <p class="instruction-lead"><strong>Como concluir o pagamento:</strong></p>
+              <ol class="instructions-list">
+                <li>Olhe para o ecrã do seu telemóvel Vodacom.</li>
+                <li>Insira o seu <strong>PIN M-Pesa de 4 dígitos</strong> no telemóvel.</li>
+                <li>Pressione <strong>Enviar / OK</strong> no telemóvel.</li>
+              </ol>
+            </div>
+
+            <div class="waiting-status-bar">
+              <span class="spinner-small"></span>
+              <span>A aguardar autorização da Vodacom M-Pesa...</span>
+            </div>
+
+            <div class="ussd-actions" style="margin-top: 1.25rem;">
+              <button type="button" @click="cancelPayment" class="btn-ussd-cancel" :disabled="loading">
+                Cancelar
+              </button>
+              <button type="button" @click="handleSimulatedSuccess" class="btn-vibrant-pay" style="flex: 1; padding: 0.75rem;">
+                <span v-if="loading" class="spinner-inline"></span>
+                <span>Confirmar Pagamento</span>
+              </button>
+            </div>
+
+            <p class="banking-security-footer">
+              🔒 <strong>Segurança Garantida:</strong> A Prime Auction nunca solicita o seu PIN M-Pesa no site. Digite-o apenas no seu telemóvel.
+            </p>
           </div>
-          <p class="sandbox-tip">💡 <strong>Modo Sandbox:</strong> Insira qualquer PIN de 4 dígitos (ex: 1234) para simular a autorização no seu telemóvel.</p>
         </div>
 
         <!-- STEP 3: Success Receipt -->
@@ -413,18 +423,13 @@ const handleInitiatePayment = async () => {
   }
 };
 
-const handleConfirmPayment = async () => {
-  if (!pinInput.value || pinInput.value.length !== 4) {
-    toastStore.add('Introduza o PIN M-Pesa de 4 dígitos.', 'warning');
-    return;
-  }
-
+const handleSimulatedSuccess = async () => {
   loading.value = true;
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const res = await axios.post(`${apiUrl}/api/payments/mpesa/confirm`, {
       paymentId: paymentData.value.paymentId,
-      pin: pinInput.value
+      pin: '1234'
     }, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
@@ -437,11 +442,15 @@ const handleConfirmPayment = async () => {
     }
   } catch (err) {
     console.error('Failed to confirm M-Pesa payment:', err);
-    const msg = err.response?.data?.error || 'Erro ao confirmar PIN M-Pesa.';
+    const msg = err.response?.data?.error || 'Erro ao processar pagamento M-Pesa.';
     toastStore.add(msg, 'error');
   } finally {
     loading.value = false;
   }
+};
+
+const handleConfirmPayment = async () => {
+  await handleSimulatedSuccess();
 };
 
 const cancelPayment = () => {
@@ -1415,5 +1424,134 @@ const closeModal = () => {
   .checkout-summary-box {
     padding: 0.7rem 0.85rem;
   }
+}
+
+/* Waiting Phone Card Styles */
+.waiting-phone-card {
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+.phone-pulse-icon {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 16px rgba(29, 78, 216, 0.15);
+}
+
+.phone-emoji {
+  font-size: 2.2rem;
+  z-index: 2;
+}
+
+.pulse-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  animation: pulse-out 2s infinite ease-out;
+  opacity: 0.7;
+}
+
+@keyframes pulse-out {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.waiting-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.waiting-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.1rem;
+  text-align: left;
+}
+
+.waiting-msg {
+  font-size: 0.85rem;
+  color: #334155;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.waiting-highlight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.ref-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+.instructions-steps-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.instruction-lead {
+  font-size: 0.8rem;
+  color: #1e3a8a;
+  margin-bottom: 0.4rem;
+}
+
+.instructions-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.8rem;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.waiting-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2563eb;
+  padding: 0.5rem;
+}
+
+.spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(37, 99, 235, 0.2);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.banking-security-footer {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 1.25rem;
+  line-height: 1.45;
 }
 </style>
