@@ -320,13 +320,28 @@ exports.handleMpesaCallback = async (req, res) => {
         payment.completedAt = new Date();
         await payment.save();
 
-        // Emit real-time notification to user socket room
+        // Emit real-time confirmation to user socket room
         if (req.io) {
           req.io.to(`user_${payment.user}`).emit('payment_confirmed', {
             paymentId: payment._id,
             reference: payment.reference,
             amount: payment.amount,
             status: 'completed'
+          });
+        }
+      }
+    } else {
+      // Payment failed or cancelled by user on mobile phone
+      const payment = await Payment.findOne({ reference: input_ThirdPartyReference });
+      if (payment && payment.status === 'pending') {
+        payment.status = 'failed';
+        await payment.save();
+
+        if (req.io) {
+          req.io.to(`user_${payment.user}`).emit('payment_failed', {
+            paymentId: payment._id,
+            reference: payment.reference,
+            reason: 'Transação cancelada ou recusada no telemóvel.'
           });
         }
       }

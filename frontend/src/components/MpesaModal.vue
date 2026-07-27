@@ -405,6 +405,13 @@ const startStatusChecking = () => {
         await fetchReceiptData(data.paymentId);
       }
     });
+    socket.on('payment_failed', (data) => {
+      if (paymentData.value && (data.paymentId === paymentData.value.paymentId || data.reference === paymentData.value.reference)) {
+        stopStatusChecking();
+        step.value = 'phone';
+        toastStore.add(data.reason || 'Transação cancelada no telemóvel.', 'warning');
+      }
+    });
   } catch (err) {
     console.error('Socket setup error in MpesaModal:', err);
   }
@@ -420,23 +427,29 @@ const startStatusChecking = () => {
       const res = await axios.get(`${apiUrl}/api/payments/receipt/${paymentData.value.paymentId}`, {
         headers: { Authorization: `Bearer ${authStore.token}` }
       });
-      if (res.data && res.data.success && res.data.data.status === 'completed') {
-        receiptData.value = {
-          receiptNumber: res.data.data._id,
-          mpesaTransactionId: res.data.data.mpesaTransactionId,
-          reference: res.data.data.reference,
-          amount: res.data.data.amount,
-          phoneNumber: res.data.data.phoneNumber,
-          status: 'COMPLETADO',
-          auctionTitle: props.auctionTitle,
-          userName: authStore.user?.name,
-          date: res.data.data.completedAt || res.data.data.updatedAt,
-          paymentMethod: 'Vodacom M-Pesa (C2B Direct Push)'
-        };
-        step.value = 'success';
-        stopStatusChecking();
-        toastStore.success('Pagamento M-Pesa confirmado com sucesso! 🎉');
-        emit('success', receiptData.value);
+      if (res.data && res.data.success) {
+        if (res.data.data.status === 'completed') {
+          receiptData.value = {
+            receiptNumber: res.data.data._id,
+            mpesaTransactionId: res.data.data.mpesaTransactionId,
+            reference: res.data.data.reference,
+            amount: res.data.data.amount,
+            phoneNumber: res.data.data.phoneNumber,
+            status: 'COMPLETADO',
+            auctionTitle: props.auctionTitle,
+            userName: authStore.user?.name,
+            date: res.data.data.completedAt || res.data.data.updatedAt,
+            paymentMethod: 'Vodacom M-Pesa (C2B Direct Push)'
+          };
+          step.value = 'success';
+          stopStatusChecking();
+          toastStore.success('Pagamento M-Pesa confirmado com sucesso! 🎉');
+          emit('success', receiptData.value);
+        } else if (res.data.data.status === 'failed') {
+          stopStatusChecking();
+          step.value = 'phone';
+          toastStore.add('Transação cancelada ou recusada no telemóvel.', 'warning');
+        }
       }
     } catch (err) {
       // Ignore polling errors
