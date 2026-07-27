@@ -805,12 +805,7 @@ const handleDirectPayClick = () => {
     return;
   }
   isDirectPaymentAttempt.value = true;
-  if (!isProfileComplete.value) {
-    toastStore.info('Por favor, preencha os seus dados de perfil antes de prosseguir com o pagamento. 📋');
-    openProfileWizard();
-  } else {
-    openMpesaModal();
-  }
+  openProfileWizard();
 };
 const handleMpesaSuccess = (receipt) => {
   toastStore.add('Pagamento M-Pesa registado com sucesso! ✓', 'success');
@@ -1289,13 +1284,8 @@ const placeBid = async () => {
 
   isDirectPaymentAttempt.value = false;
   
-  // If user profile is not fully complete (or missing phone, province, etc.), force completion modal
-  if (!isProfileComplete.value) {
-    toastStore.info('Por favor, preencha os seus dados de perfil completos (Telefone, Província, Sexo e Idade) antes de licitar. 📋');
-    openProfileWizard();
-  } else {
-    await executePlaceBid();
-  }
+  // ALWAYS open profile wizard modal first to fill/confirm details before placing bid
+  openProfileWizard();
 };
 
 const executePlaceBid = async () => {
