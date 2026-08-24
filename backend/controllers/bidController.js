@@ -68,6 +68,21 @@ exports.placeBid = async (req, res) => {
       });
     }
 
+    // Anti-sniping protection logic:
+    // If a bid is placed in the last 3 minutes (180,000 ms), extend auction end time by 3 minutes
+    const ANTI_SNIPE_THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes
+    const ANTI_SNIPE_EXTENSION_MS = 3 * 60 * 1000; // 3 minutes
+    
+    const nowMs = Date.now();
+    const currentEndTimeMs = new Date(auction.endTime).getTime();
+    const timeRemainingMs = currentEndTimeMs - nowMs;
+    
+    let wasExtended = false;
+    if (timeRemainingMs > 0 && timeRemainingMs <= ANTI_SNIPE_THRESHOLD_MS) {
+      auction.endTime = new Date(nowMs + ANTI_SNIPE_EXTENSION_MS);
+      wasExtended = true;
+    }
+
     // Create bid
     const bid = await Bid.create({
       auction: auctionId,
@@ -86,7 +101,10 @@ exports.placeBid = async (req, res) => {
     req.io.to(auctionId).emit('new_bid', {
       auctionId,
       currentPrice: amount,
-      bid
+      bid,
+      endTime: auction.endTime,
+      wasExtended,
+      extendedMinutes: 3
     });
 
     // Generate real notifications

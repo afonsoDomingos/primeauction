@@ -6,7 +6,7 @@ const Bid = require('../models/Bid');
 // @access  Public
 exports.getAuctions = async (req, res) => {
   try {
-    const { search, status, category } = req.query;
+    const { search, status, category, location } = req.query;
     let queryObj = {};
 
     if (status) {
@@ -17,10 +17,15 @@ exports.getAuctions = async (req, res) => {
       queryObj.category = category;
     }
 
+    if (location) {
+      queryObj.location = { $regex: location, $options: 'i' };
+    }
+
     if (search) {
       queryObj.$or = [
         { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } }
       ];
     }
 
@@ -75,7 +80,7 @@ exports.getAuction = async (req, res) => {
 
     await auction.populate({
       path: 'createdBy winner',
-      select: 'name email'
+      select: 'name email profilePhoto averageRating ratingsCount'
     });
 
     res.status(200).json({ success: true, data: auction });

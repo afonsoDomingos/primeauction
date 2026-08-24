@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const socketIo = require('socket.io');
 const connectDB = require('./config/db');
+const passport = require('./config/passport');
 
 // Load env vars
 dotenv.config();
@@ -15,6 +16,9 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
+
+// Initialize Passport
+app.use(passport.initialize());
 
 // Socket.io config
 const io = socketIo(server, {
@@ -53,6 +57,7 @@ app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/comments', require('./routes/comments'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 // Socket.io logic
 io.on('connection', (socket) => {

@@ -48,10 +48,15 @@
       <div class="content-side">
         <div class="content-wrapper animate-fade-in">
 
-          <!-- Status badge -->
-          <span class="status-badge" :class="isEnded ? 'ended' : (isUpcoming ? 'upcoming' : 'active')">
-            {{ isEnded ? 'Terminado' : (isUpcoming ? 'Agendado' : 'Activo') }}
-          </span>
+          <!-- Status badge & Anti-Snipe Badge -->
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+            <span class="status-badge" :class="isEnded ? 'ended' : (isUpcoming ? 'upcoming' : 'active')">
+              {{ isEnded ? 'Terminado' : (isUpcoming ? 'Agendado' : 'Activo') }}
+            </span>
+            <span v-if="!isEnded" class="anti-snipe-badge" title="Lances nos últimos 3 minutos prorrogam o encerramento em +3 minutos.">
+              🛡️ Anti-Sniping Ativo
+            </span>
+          </div>
 
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 0.75rem;">
             <h1 class="title" style="margin-bottom: 0;">{{ auction.title }}</h1>
@@ -90,6 +95,7 @@
               <div class="meta-content">
                 <span class="meta-label">Vendedor</span>
                 <span class="meta-value">{{ auction.createdBy?.name || 'Prime Auction' }}</span>
+                <StarRating v-if="auction.createdBy" :rating="auction.createdBy.averageRating || 0" :count="auction.createdBy.ratingsCount || 0" size="sm" />
               </div>
             </div>
             <div class="meta-item">
@@ -206,6 +212,25 @@
               <p class="winner-label">Arrematado por</p>
               <h4 class="winner-name">{{ auction.winner.name }}</h4>
               <p class="winner-price">Valor Final: <span>{{ formatCurrency(auction.currentPrice) }}</span></p>
+              
+              <!-- Review Action Box -->
+              <div v-if="canReview" class="review-action-box" style="margin-top: 1.25rem; padding: 1rem; background: rgba(234, 179, 8, 0.08); border: 1px dashed #eab308; border-radius: 12px; text-align: center;">
+                <div v-if="existingReview">
+                  <span style="font-weight: 600; color: #854d0e;">Sua Avaliação Registada:</span>
+                  <div style="margin-top: 0.25rem;">
+                    <StarRating :rating="existingReview.rating" size="md" />
+                  </div>
+                  <p v-if="existingReview.comment" style="font-style: italic; font-size: 0.9rem; color: #4b5563; margin-top: 0.35rem;">"{{ existingReview.comment }}"</p>
+                </div>
+                <div v-else>
+                  <p style="margin-bottom: 0.5rem; font-weight: 600; color: #854d0e;">
+                    {{ counterpartyRole === 'vendedor' ? '⭐ Avalie a sua experiência com o vendedor!' : '⭐ Avalie a sua experiência com o comprador!' }}
+                  </p>
+                  <button type="button" @click="showReviewModal = true" class="btn btn-warning btn-pill btn-sm" style="background: #eab308; color: #fff; font-weight: 600; border: none; padding: 0.5rem 1.25rem; cursor: pointer;">
+                    ⭐ Avaliar {{ counterpartyName }}
+                  </button>
+                </div>
+              </div>
             </div>
             <div class="winner-info" v-else>
               <p class="ended-text">Este leilão terminou sem lances.</p>
@@ -740,6 +765,56 @@
     @close="isMpesaModalOpen = false"
     @success="handleMpesaSuccess"
   />
+
+  <!-- Review / Rating Modal -->
+  <Transition name="modal-fade">
+    <div v-if="showReviewModal" class="custom-modal-overlay" @click.self="showReviewModal = false">
+      <div class="custom-modal-card animate-scale-in" style="max-width: 450px;">
+        <div class="modal-header-row">
+          <span class="modal-title-icon">⭐</span>
+          <h4>Avaliar {{ counterpartyName }}</h4>
+          <button type="button" class="wizard-close-btn" @click="showReviewModal = false">✕</button>
+        </div>
+
+        <div style="padding: 1.25rem 0; text-align: center;">
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+            Como avalia a transação referente ao leilão <strong>"{{ auction?.title }}"</strong>?
+          </p>
+          
+          <StarRating
+            :rating="reviewRating"
+            :isInteractive="true"
+            size="lg"
+            :showText="true"
+            @update:rating="val => reviewRating = val"
+          />
+
+          <div style="margin-top: 1.25rem; text-align: left;">
+            <label class="form-label">Comentário (opcional)</label>
+            <textarea
+              v-model="reviewComment"
+              class="form-input"
+              rows="3"
+              placeholder="Escreva sobre a comunicação, estado do artigo ou pontualidade..."
+              maxlength="500"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="wizard-footer" style="margin-top: 0.5rem;">
+          <button type="button" class="btn btn-secondary btn-pill btn-sm" @click="showReviewModal = false">Cancelar</button>
+          <button
+            type="button"
+            class="btn btn-primary btn-pill btn-sm"
+            :disabled="submittingReview"
+            @click="submitReview"
+          >
+            {{ submittingReview ? 'A enviar...' : '⭐ Submeter Avaliação' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -750,6 +825,7 @@ import { io } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
 import { useToastStore } from '../stores/toastStore';
 import MpesaModal from '../components/MpesaModal.vue';
+import StarRating from '../components/StarRating.vue';
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -761,6 +837,86 @@ const displayBidAmount = ref('');
 const activeImage = ref('');
 let socket = null;
 const activeTab = ref('details');
+
+// --- Review System Logic ---
+const showReviewModal = ref(false);
+const reviewRating = ref(5);
+const reviewComment = ref('');
+const submittingReview = ref(false);
+const existingReview = ref(null);
+
+const canReview = computed(() => {
+  if (!auction.value || !authStore.isAuthenticated || !authStore.user || !auction.value.winner) {
+    return false;
+  }
+  const ended = auction.value.status === 'finished' || Date.now() > new Date(auction.value.endTime).getTime();
+  if (!ended) return false;
+
+  const myId = String(authStore.user._id || authStore.user.id);
+  const winnerId = String(auction.value.winner._id || auction.value.winner.id || auction.value.winner);
+  const sellerId = String(auction.value.createdBy._id || auction.value.createdBy.id || auction.value.createdBy);
+  return (myId === winnerId || myId === sellerId);
+});
+
+const counterpartyName = computed(() => {
+  if (!auction.value || !authStore.user) return '';
+  const myId = String(authStore.user._id || authStore.user.id);
+  const winnerId = String(auction.value.winner?._id || auction.value.winner?.id || auction.value.winner || '');
+  if (myId === winnerId) {
+    return auction.value.createdBy?.name || 'Vendedor';
+  }
+  return auction.value.winner?.name || 'Vencedor';
+});
+
+const counterpartyRole = computed(() => {
+  if (!auction.value || !authStore.user) return '';
+  const myId = String(authStore.user._id || authStore.user.id);
+  const winnerId = String(auction.value.winner?._id || auction.value.winner?.id || auction.value.winner || '');
+  return myId === winnerId ? 'vendedor' : 'comprador';
+});
+
+const fetchExistingReview = async () => {
+  if (!canReview.value || !auction.value) return;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/reviews/auction/${auction.value._id}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    existingReview.value = res.data.data;
+  } catch (err) {
+    console.error('Error fetching auction review:', err);
+  }
+};
+
+const submitReview = async () => {
+  if (!reviewRating.value) {
+    toastStore.error('Por favor selecione uma nota de 1 a 5 estrelas.');
+    return;
+  }
+  submittingReview.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(`${apiUrl}/api/reviews`, {
+      auctionId: auction.value._id,
+      rating: reviewRating.value,
+      comment: reviewComment.value
+    }, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+
+    if (res.data && res.data.success) {
+      existingReview.value = res.data.data;
+      showReviewModal.value = false;
+      toastStore.success('Avaliação submetida com sucesso! ⭐');
+      fetchAuctionData();
+    }
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    toastStore.error(err.response?.data?.error || 'Erro ao submeter avaliação.');
+  } finally {
+    submittingReview.value = false;
+  }
+};
 
 const userBids = computed(() => {
   if (!authStore.isAuthenticated || !authStore.user) return [];
@@ -1219,6 +1375,7 @@ const fetchAuctionData = async () => {
     bidAmount.value = suggested;
     displayBidAmount.value = formatInputString(suggested.toString());
     activeImage.value = auction.value.imageUrl;
+    await fetchExistingReview();
   } catch (err) {
     console.error(err);
   }
@@ -1469,6 +1626,12 @@ onMounted(() => {
   socket.on('new_bid', (data) => {
     if (auction.value) {
       auction.value.currentPrice = data.currentPrice;
+      if (data.endTime) {
+        auction.value.endTime = data.endTime;
+      }
+      if (data.wasExtended) {
+        toastStore.add('⏱️ Leilão prorrogado por +3 minutos devido a um lance nos momentos finais!', 'info');
+      }
       if (bidAmount.value <= data.currentPrice) {
         const newAmount = data.currentPrice + minIncrement.value;
         bidAmount.value = newAmount;
@@ -3354,5 +3517,31 @@ onUnmounted(() => {
 .dark .my-bid-tag {
   background: rgba(34, 197, 94, 0.25);
   color: #86efac;
+}
+
+.anti-snipe-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 99px;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.anti-snipe-badge:hover {
+  background: rgba(16, 185, 129, 0.2);
+  transform: translateY(-1px);
+}
+
+.dark .anti-snipe-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
 }
 </style>

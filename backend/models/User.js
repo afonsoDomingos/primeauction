@@ -71,6 +71,25 @@ const userSchema = new mongoose.Schema({
   passwordResetExpires: {
     type: Date,
     default: null
+  },
+  averageRating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  ratingsCount: {
+    type: Number,
+    default: 0
+  },
+  googleId: {
+    type: String,
+    default: null
+  },
+  provider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local'
   }
 }, {
   timestamps: true

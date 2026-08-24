@@ -1,48 +1,37 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
-import Auctions from '../views/Auctions.vue'
-import AuctionDetail from '../views/AuctionDetail.vue'
-import AdminDashboard from '../views/AdminDashboard.vue'
-import UserDashboard from '../views/UserDashboard.vue'
-import SellWithUs from '../views/SellWithUs.vue'
-import Calendar from '../views/Calendar.vue'
-import AnalyticsDashboard from '../views/AnalyticsDashboard.vue'
-import ForgotPassword from '../views/ForgotPassword.vue'
-import ResetPassword from '../views/ResetPassword.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
-  { path: '/login', name: 'Login', component: Login, meta: { guestOnly: true } },
-  { path: '/register', name: 'Register', component: Register, meta: { guestOnly: true } },
-  { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword, meta: { guestOnly: true } },
-  { path: '/reset-password', name: 'ResetPassword', component: ResetPassword, meta: { guestOnly: true } },
-  { path: '/auctions', name: 'Auctions', component: Auctions },
-  { path: '/auction/:id', name: 'AuctionDetail', component: AuctionDetail },
-  { path: '/calendario', name: 'Calendar', component: Calendar },
+  { path: '/login', name: 'Login', component: () => import('../views/Login.vue'), meta: { guestOnly: true } },
+  { path: '/register', name: 'Register', component: () => import('../views/Register.vue'), meta: { guestOnly: true } },
+  { path: '/forgot-password', name: 'ForgotPassword', component: () => import('../views/ForgotPassword.vue'), meta: { guestOnly: true } },
+  { path: '/reset-password', name: 'ResetPassword', component: () => import('../views/ResetPassword.vue'), meta: { guestOnly: true } },
+  { path: '/auctions', name: 'Auctions', component: () => import('../views/Auctions.vue') },
+  { path: '/auction/:id', name: 'AuctionDetail', component: () => import('../views/AuctionDetail.vue') },
+  { path: '/calendario', name: 'Calendar', component: () => import('../views/Calendar.vue') },
   {
     path: '/vender',
     name: 'SellWithUs',
-    component: SellWithUs,
+    component: () => import('../views/SellWithUs.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/admin',
     name: 'AdminDashboard',
-    component: AdminDashboard,
+    component: () => import('../views/AdminDashboard.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/analytics',
     name: 'AnalyticsDashboard',
-    component: AnalyticsDashboard,
+    component: () => import('../views/AnalyticsDashboard.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/profile',
     name: 'UserDashboard',
-    component: UserDashboard,
+    component: () => import('../views/UserDashboard.vue'),
     meta: { requiresAuth: true }
   }
 ]

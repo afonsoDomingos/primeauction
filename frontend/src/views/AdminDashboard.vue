@@ -209,13 +209,12 @@
                 </select>
               </div>
               <div class="form-group half">
-                <label class="form-label">Nova Categoria (Opcional)</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                  <input type="text" v-model="newCategoryName" class="form-input" placeholder="Nova categoria..." style="margin-bottom: 0;" />
-                  <button type="button" class="btn btn-secondary" @click="handleAddCategory" :disabled="creatingCategory" style="padding: 0 1rem; height: 42px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; margin-bottom: 0; display: flex; align-items: center; justify-content: center;">
-                    + Adicionar
-                  </button>
-                </div>
+                <label class="form-label">Província / Localização 📍</label>
+                <select v-model="form.location" class="form-input" required>
+                  <option v-for="prov in provincesList" :key="prov" :value="prov">
+                    {{ prov }}
+                  </option>
+                </select>
               </div>
             </div>
 
@@ -457,56 +456,115 @@
         </div>
 
         <!-- ── Leilões ── -->
-        <div class="card admin-card">
+        <div class="card admin-card" style="grid-column: 1 / -1;">
           <div class="card-header-row">
             <span class="card-icon">🏷️</span>
-            <h3 class="section-title">Gerir Leilões</h3>
-            <span class="record-count">{{ auctions.length }}</span>
+            <h3 class="section-title">Gerir Todos os Leilões</h3>
+            <span class="record-count">{{ filteredAuctions.length }} / {{ auctions.length }}</span>
           </div>
+          
+          <!-- Filtros e Busca -->
+          <div class="auction-filters-bar">
+            <div class="filter-group">
+              <input 
+                type="text" 
+                v-model="auctionSearchQuery" 
+                placeholder="🔍 Buscar leilões..." 
+                class="filter-input"
+              />
+            </div>
+            <div class="filter-group">
+              <select v-model="auctionStatusFilter" class="filter-select">
+                <option value="">Todos os Estados</option>
+                <option value="active">Activos</option>
+                <option value="upcoming">Agendados</option>
+                <option value="finished">Terminados</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <select v-model="auctionCategoryFilter" class="filter-select">
+                <option value="">Todas as Categorias</option>
+                <option v-for="cat in categories" :key="cat._id" :value="cat.name">
+                  {{ cat.name }}
+                </option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <select v-model="auctionLocationFilter" class="filter-select">
+                <option value="">Todas as Localizações</option>
+                <option v-for="prov in provincesList" :key="prov" :value="prov">
+                  {{ prov }}
+                </option>
+              </select>
+            </div>
+            <button @click="clearAuctionFilters" class="btn btn-sm btn-secondary">Limpar Filtros</button>
+          </div>
+
           <div class="table-container">
-            <table class="admin-table">
+            <table class="admin-table auctions-table">
               <thead>
                 <tr>
+                  <th style="width: 40px;">Img</th>
                   <th>Título</th>
+                  <th>Categoria</th>
+                  <th>Localização</th>
                   <th>Estado</th>
+                  <th>Preço Inicial</th>
                   <th>Lance Actual</th>
+                  <th>Data Início</th>
+                  <th>Data Fim</th>
+                  <th>Lances</th>
                   <th>Acções</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="auctions.length === 0">
-                  <td colspan="4" class="empty-row">Nenhum leilão encontrado.</td>
+                <tr v-if="filteredAuctions.length === 0">
+                  <td colspan="11" class="empty-row">Nenhum leilão encontrado com os filtros actuais.</td>
                 </tr>
-                <tr v-for="auction in auctions" :key="auction._id">
-                  <td class="auction-title-cell">{{ auction.title }}</td>
+                <tr v-for="auction in filteredAuctions" :key="auction._id" class="auction-row">
+                  <td class="image-cell">
+                    <img :src="auction.imageUrl" :alt="auction.title" class="auction-thumb" />
+                  </td>
+                  <td class="auction-title-cell">
+                    <div class="auction-title-main">{{ auction.title }}</div>
+                    <div class="auction-id">ID: {{ auction._id.toString().slice(-6) }}</div>
+                  </td>
+                  <td class="category-cell">{{ auction.category }}</td>
+                  <td class="location-cell">{{ auction.location }}</td>
                   <td>
                     <span :class="['badge', auction.status === 'active' ? 'badge-active' : (auction.status === 'upcoming' ? 'badge-upcoming' : 'badge-ended')]">
                       {{ auction.status === 'active' ? 'Activo' : (auction.status === 'upcoming' ? 'Agendado' : 'Terminado') }}
                     </span>
                   </td>
+                  <td class="price-cell">{{ formatCurrency(auction.startingPrice) }}</td>
                   <td class="price-cell">{{ formatCurrency(auction.currentPrice) }}</td>
+                  <td class="date-cell">{{ formatDate(auction.startTime) }}</td>
+                  <td class="date-cell">{{ formatDate(auction.endTime) }}</td>
+                  <td class="bids-count">{{ auction.bids?.length || 0 }}</td>
                   <td>
                     <div class="action-btns">
                       <button
                         @click="openEditModal(auction)"
                         class="btn btn-sm btn-primary"
                         title="Editar leilão"
-                      >✏️ Editar</button>
+                      >✏️</button>
                       <button
                         v-if="auction.status === 'active'"
                         @click="openExtendModal(auction)"
                         class="btn btn-sm btn-extend"
                         title="Estender prazo do leilão"
-                      >⏱ Estender</button>
+                      >⏱</button>
                       <button
                         v-if="auction.status === 'active'"
                         @click="endAuction(auction._id)"
                         class="btn btn-sm btn-warning"
-                      >Terminar</button>
+                        title="Terminar leilão"
+                      >🛑</button>
                       <button
                         @click="deleteAuction(auction._id)"
                         class="btn btn-sm btn-danger"
-                      >Apagar</button>
+                        title="Apagar leilão"
+                      >🗑️</button>
                     </div>
                   </td>
                 </tr>
@@ -914,8 +972,8 @@
           </div>
           
           <form @submit.prevent="submitEditAuction" class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; max-height: 75vh; overflow-y: auto; padding-right: 0.5rem; text-align: left;">
-            <!-- Title & Category -->
-            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Title & Category & Location -->
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Título</label>
                 <input type="text" v-model="editForm.title" class="form-input" required />
@@ -925,6 +983,14 @@
                 <select v-model="editForm.category" class="form-input" required>
                   <option v-for="cat in categories" :key="cat._id" :value="cat.name">
                     {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Província 📍</label>
+                <select v-model="editForm.location" class="form-input" required>
+                  <option v-for="prov in provincesList" :key="prov" :value="prov">
+                    {{ prov }}
                   </option>
                 </select>
               </div>
@@ -1045,6 +1111,33 @@ const tickets = ref([]);
 const proposals = ref([]);
 const proposalBeingConverted = ref(null);
 
+// ── Auction Filters ──
+const auctionSearchQuery = ref('');
+const auctionStatusFilter = ref('');
+const auctionCategoryFilter = ref('');
+const auctionLocationFilter = ref('');
+
+const filteredAuctions = computed(() => {
+  return auctions.value.filter(auction => {
+    const matchesSearch = !auctionSearchQuery.value || 
+      auction.title.toLowerCase().includes(auctionSearchQuery.value.toLowerCase()) ||
+      auction.description.toLowerCase().includes(auctionSearchQuery.value.toLowerCase());
+    
+    const matchesStatus = !auctionStatusFilter.value || auction.status === auctionStatusFilter.value;
+    const matchesCategory = !auctionCategoryFilter.value || auction.category === auctionCategoryFilter.value;
+    const matchesLocation = !auctionLocationFilter.value || auction.location === auctionLocationFilter.value;
+    
+    return matchesSearch && matchesStatus && matchesCategory && matchesLocation;
+  });
+});
+
+const clearAuctionFilters = () => {
+  auctionSearchQuery.value = '';
+  auctionStatusFilter.value = '';
+  auctionCategoryFilter.value = '';
+  auctionLocationFilter.value = '';
+};
+
 // ── Homepage Settings ──
 const defaultHeroImage = 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
 const homepageForm = ref({ heroTitle: '', heroSubtitle: '', heroImageUrl: '', heroImageUrls: [], heroMobileImageUrls: [] });
@@ -1155,8 +1248,23 @@ const form = ref({
   startingPrice: 0,
   startTime: '',
   endTime: '',
-  category: ''
+  category: '',
+  location: 'Maputo'
 });
+
+const provincesList = [
+  'Maputo Cidade',
+  'Maputo Província',
+  'Gaza',
+  'Inhambane',
+  'Sofala (Beira)',
+  'Manica',
+  'Tete',
+  'Zambézia',
+  'Nampula',
+  'Niassa',
+  'Cabo Delgado (Pemba)'
+];
 
 const categories = ref([]);
 const newCategoryName = ref('');
@@ -1226,6 +1334,18 @@ const formatCurrency = (value) => {
   if (value === undefined || value === null) return '0,00 MZN';
   const formatted = new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   return `${formatted} MZN`;
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('pt-PT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
 };
 
 const mpesaPayments = ref([]);
@@ -1514,6 +1634,7 @@ const editForm = ref({
   title: '',
   description: '',
   category: '',
+  location: 'Maputo',
   startingPrice: 0,
   currentPrice: 0,
   imageUrl: '',
@@ -1540,6 +1661,7 @@ const openEditModal = (auction) => {
     title: auction.title || '',
     description: auction.description || '',
     category: auction.category || '',
+    location: auction.location || 'Maputo',
     startingPrice: auction.startingPrice || 0,
     currentPrice: auction.currentPrice || 0,
     imageUrl: auction.imageUrl || (imgs.length > 0 ? imgs[0] : ''),
@@ -2919,5 +3041,157 @@ const formatTicketDate = (dateString) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* ── Auction Filters Bar ── */
+.auction-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--btn-primary-bg);
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+}
+
+/* ── Enhanced Auctions Table ── */
+.auctions-table {
+  font-size: 0.85rem;
+}
+
+.auctions-table th {
+  padding: 0.75rem 0.5rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.auction-row {
+  transition: background-color 0.2s;
+}
+
+.auction-row:hover {
+  background-color: #f8fafc;
+}
+
+.image-cell {
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.auction-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.auction-title-cell {
+  padding: 0.75rem 0.5rem;
+  min-width: 200px;
+}
+
+.auction-title-main {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.auction-id {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-family: monospace;
+}
+
+.category-cell,
+.location-cell {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.date-cell {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.bids-count {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--btn-primary-bg);
+}
+
+/* ── Responsive Table ── */
+@media (max-width: 1200px) {
+  .auctions-table {
+    font-size: 0.75rem;
+  }
+  
+  .auctions-table th,
+  .auctions-table td {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .auction-thumb {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .auction-title-main {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .auction-filters-bar {
+    flex-direction: column;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .auctions-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
 </style>

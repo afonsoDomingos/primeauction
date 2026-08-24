@@ -70,9 +70,9 @@
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ formatCurrency(overview.revenue.total) }}</div>
+            <div class="stat-value">{{ formatCurrencyCompact(overview.revenue.total) }}</div>
             <div class="stat-label">Receita Estimada</div>
-            <div class="stat-change">Média: {{ formatCurrency(overview.revenue.averageBid) }}/lance</div>
+            <div class="stat-change">Média: {{ formatCurrencyCompact(overview.revenue.averageBid) }}/lance</div>
           </div>
         </div>
       </div>
@@ -237,9 +237,18 @@ const fetchAnalytics = async () => {
 };
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('pt-PT', {
+  return new Intl.NumberFormat('pt-MZ', {
     style: 'currency',
-    currency: 'EUR'
+    currency: 'MZN'
+  }).format(value);
+};
+
+const formatCurrencyCompact = (value) => {
+  return new Intl.NumberFormat('pt-MZ', {
+    style: 'currency',
+    currency: 'MZN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(value);
 };
 
@@ -370,7 +379,7 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #1f2937;
   line-height: 1.2;
@@ -520,7 +529,7 @@ onMounted(() => {
 }
 
 .stat-number {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1f2937;
 }

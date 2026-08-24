@@ -8,7 +8,7 @@
         <p class="page-subtitle">Encontre os melhores leilões e faça o seu lance agora</p>
         
         <!-- Filtros Activos -->
-        <div v-if="route.query.search || route.query.status || route.query.category" class="active-filters">
+        <div v-if="route.query.search || route.query.status || route.query.category || route.query.location" class="active-filters">
           <span v-if="route.query.search" class="filter-badge">
             Pesquisa: <strong>{{ route.query.search }}</strong>
             <button @click="clearSearch" class="clear-btn" title="Limpar pesquisa">&times;</button>
@@ -21,27 +21,41 @@
             Categoria: <strong>{{ route.query.category }}</strong>
             <button @click="clearCategory" class="clear-btn" title="Limpar categoria">&times;</button>
           </span>
+          <span v-if="route.query.location" class="filter-badge">
+            Província: <strong>{{ route.query.location }}</strong>
+            <button @click="clearLocation" class="clear-btn" title="Limpar província">&times;</button>
+          </span>
         </div>
       </div>
 
-      <!-- Category Filter Bar (Horizontal Chips) -->
-      <div class="categories-bar">
-        <button 
-          @click="selectCategory('')" 
-          class="category-chip" 
-          :class="{ active: !route.query.category }"
-        >
-          <span>🏷️ Todos</span>
-        </button>
-        <button 
-          v-for="cat in categories" 
-          :key="cat._id" 
-          @click="selectCategory(cat.name)" 
-          class="category-chip" 
-          :class="{ active: route.query.category === cat.name }"
-        >
-          <span>{{ getCategoryEmoji(cat.name) }} {{ cat.name }}</span>
-        </button>
+      <!-- Filters Bar (Category Chips & Location Select) -->
+      <div class="filters-wrapper">
+        <div class="categories-bar">
+          <button 
+            @click="selectCategory('')" 
+            class="category-chip" 
+            :class="{ active: !route.query.category }"
+          >
+            <span>🏷️ Todos</span>
+          </button>
+          <button 
+            v-for="cat in categories" 
+            :key="cat._id" 
+            @click="selectCategory(cat.name)" 
+            class="category-chip" 
+            :class="{ active: route.query.category === cat.name }"
+          >
+            <span>{{ getCategoryEmoji(cat.name) }} {{ cat.name }}</span>
+          </button>
+        </div>
+
+        <div class="location-filter-box">
+          <span class="location-icon">📍</span>
+          <select :value="route.query.location || ''" @change="onLocationChange" class="location-select">
+            <option value="">Todas as Províncias</option>
+            <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
+          </select>
+        </div>
       </div>
 
       <div v-if="loading" class="loading-grid">
@@ -63,6 +77,9 @@
             <img :src="auction.imageUrl" :alt="auction.title" class="card-img" loading="lazy" />
             <div class="card-status" :class="auction.status">
               {{ auction.status === 'active' ? 'Activo' : (auction.status === 'upcoming' ? 'Agendado' : 'Terminado') }}
+            </div>
+            <div class="card-location-tag">
+              📍 {{ auction.location || 'Maputo' }}
             </div>
           </div>
           <div class="card-content">
@@ -118,12 +135,14 @@ const fetchAuctions = async () => {
     const searchVal = route.query.search || '';
     const statusVal = route.query.status || '';
     const categoryVal = route.query.category || '';
+    const locationVal = route.query.location || '';
     
     let url = `${apiUrl}/api/auctions`;
     const params = [];
     if (searchVal) params.push(`search=${encodeURIComponent(searchVal)}`);
     if (statusVal) params.push(`status=${encodeURIComponent(statusVal)}`);
     if (categoryVal) params.push(`category=${encodeURIComponent(categoryVal)}`);
+    if (locationVal) params.push(`location=${encodeURIComponent(locationVal)}`);
     if (params.length > 0) {
       url += `?${params.join('&')}`;
     }
@@ -161,6 +180,37 @@ const clearStatus = () => {
 
 const clearCategory = () => {
   selectCategory('');
+};
+
+const provinces = [
+  'Maputo Cidade',
+  'Maputo Província',
+  'Gaza',
+  'Inhambane',
+  'Sofala (Beira)',
+  'Manica',
+  'Tete',
+  'Zambézia',
+  'Nampula',
+  'Niassa',
+  'Cabo Delgado (Pemba)'
+];
+
+const onLocationChange = (event) => {
+  const loc = event.target.value;
+  const query = { ...route.query };
+  if (loc) {
+    query.location = loc;
+  } else {
+    delete query.location;
+  }
+  router.push({ path: '/auctions', query });
+};
+
+const clearLocation = () => {
+  const query = { ...route.query };
+  delete query.location;
+  router.push({ path: '/auctions', query });
 };
 
 const goToAuction = (id) => {
@@ -215,6 +265,9 @@ watch(() => route.query.status, () => {
   fetchAuctions();
 });
 watch(() => route.query.category, () => {
+  fetchAuctions();
+});
+watch(() => route.query.location, () => {
   fetchAuctions();
 });
 
@@ -530,11 +583,79 @@ onUnmounted(() => {
   font-size: 0.9rem;
 }
 
+/* ─── Filters Wrapper & Location Select ─── */
+.filters-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.categories-bar {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem;
+  flex: 1;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.location-filter-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 0.4rem 0.85rem;
+  border-radius: 30px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.location-icon {
+  font-size: 1rem;
+}
+
+.location-select {
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+  padding-right: 0.5rem;
+}
+
+.card-location-tag {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
 /* ─── Mobile ─── */
 @media (max-width: 580px) {
   .auction-grid,
   .loading-grid {
     grid-template-columns: 1fr;
+  }
+  .filters-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .location-filter-box {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

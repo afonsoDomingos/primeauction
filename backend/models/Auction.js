@@ -67,6 +67,12 @@ const auctionSchema = new mongoose.Schema({
   likesCount: {
     type: Number,
     default: 0
+  },
+  location: {
+    type: String,
+    required: false,
+    default: 'Maputo',
+    trim: true
   }
 }, {
   timestamps: true,

@@ -25,13 +25,14 @@
           <p class="profile-email">{{ authStore.user?.email }}</p>
           <p v-if="authStore.user?.phone" class="profile-phone">📞 {{ authStore.user.phone }}</p>
           <p v-if="authStore.user?.bio" class="profile-bio">“{{ authStore.user.bio }}”</p>
-          <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
             <span class="status-badge" :class="authStore.user?.status">
               {{ authStore.user?.status === 'active' ? 'Activo' : 'Bloqueado' }}
             </span>
             <span class="status-badge role-badge">
               {{ authStore.user?.role === 'admin' ? 'Administrador' : 'Cliente' }}
             </span>
+            <StarRating :rating="authStore.user?.averageRating || 0" :count="authStore.user?.ratingsCount || 0" size="sm" />
             <span v-if="authStore.user?.province" class="status-badge province-badge">📍 {{ authStore.user.province }}</span>
             <span v-if="authStore.user?.gender" class="status-badge gender-badge">{{ authStore.user.gender === 'Masculino' ? '♂' : authStore.user.gender === 'Feminino' ? '♀' : '⚥' }} {{ authStore.user.gender }}</span>
             <span v-if="authStore.user?.age" class="status-badge age-badge">🎂 {{ authStore.user.age }} anos</span>
@@ -83,6 +84,13 @@
           @click="activeTab = 'chat'"
         >
           Mensagens
+        </button>
+        <button 
+          class="tab-btn" 
+          :class="{ active: activeTab === 'reviews' }" 
+          @click="changeTab('reviews')"
+        >
+          Reputação & Avaliações
         </button>
         <button 
           class="tab-btn" 
@@ -543,6 +551,67 @@
         </div>
       </div>
     </Transition>
+      <!-- TAB Content: Reviews & Reputation -->
+      <div v-if="activeTab === 'reviews'" class="tab-pane animate-fade-in">
+        <div style="background: white; border-radius: 16px; padding: 1.5rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0;">Sua Reputação & Avaliações</h3>
+              <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.25rem;">Opiniões e pontuações deixadas por compradores e vendedores com quem fez negócios.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; background: #f8fafc; padding: 0.75rem 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <StarRating :rating="authStore.user?.averageRating || 0" :count="authStore.user?.ratingsCount || 0" size="lg" />
+            </div>
+          </div>
+
+          <!-- Loading state -->
+          <div v-if="loadingReviews" style="text-align: center; padding: 2rem;">
+            <div class="spinner-sm" style="margin: 0 auto 0.5rem auto;"></div>
+            <span style="color: #64748b; font-size: 0.9rem;">A carregar avaliações...</span>
+          </div>
+
+          <!-- Reviews List -->
+          <div v-else-if="userReviews.length > 0" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div 
+              v-for="rev in userReviews" 
+              :key="rev._id" 
+              style="padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc;"
+            >
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; overflow: hidden;">
+                    <img v-if="rev.reviewer?.profilePhoto" :src="rev.reviewer.profilePhoto" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                    <span v-else>{{ rev.reviewer?.name?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                  </div>
+                  <div>
+                    <h5 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #1e293b;">{{ rev.reviewer?.name || 'Utilizador' }}</h5>
+                    <span style="font-size: 0.75rem; color: #64748b;">
+                      Avaliação como {{ rev.type === 'seller' ? 'Vendedor' : 'Comprador' }} • {{ new Date(rev.createdAt).toLocaleDateString('pt-MZ') }}
+                    </span>
+                  </div>
+                </div>
+                <StarRating :rating="rev.rating" size="sm" :showText="false" />
+              </div>
+
+              <p v-if="rev.comment" style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #334155; line-height: 1.4;">
+                "{{ rev.comment }}"
+              </p>
+
+              <div v-if="rev.auction" style="font-size: 0.75rem; color: #64748b; background: white; padding: 0.35rem 0.65rem; border-radius: 6px; display: inline-block; border: 1px solid #e2e8f0;">
+                📦 Referente ao leilão: <strong>{{ rev.auction.title }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else style="text-align: center; padding: 3rem 1rem;">
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">⭐</span>
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: #1e293b;">Ainda não tem avaliações</h4>
+            <p style="margin: 0; font-size: 0.875rem; color: #64748b;">Participe e conclua leilões para começar a receber opiniões e construir a sua reputação na plataforma.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -554,6 +623,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useToastStore } from '../stores/toastStore';
 import Chat from '../components/Chat.vue';
+import StarRating from '../components/StarRating.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -568,6 +638,8 @@ const proposals = ref([]);
 const loadingProposals = ref(false);
 const payments = ref([]);
 const loadingPayments = ref(false);
+const userReviews = ref([]);
+const loadingReviews = ref(false);
 
 // Certificate Modal State
 const showCertModal = ref(false);
@@ -587,6 +659,21 @@ const printCert = () => {
   window.print();
 };
 
+const fetchMyReviews = async () => {
+  if (!authStore.user) return;
+  loadingReviews.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const userId = authStore.user._id || authStore.user.id;
+    const res = await axios.get(`${apiUrl}/api/reviews/user/${userId}`);
+    userReviews.value = res.data.data;
+  } catch (err) {
+    console.error('Error fetching user reviews:', err);
+  } finally {
+    loadingReviews.value = false;
+  }
+};
+
 const changeTab = (tab) => {
   activeTab.value = tab;
   if (tab === 'watchlist') {
@@ -595,6 +682,8 @@ const changeTab = (tab) => {
     fetchMyProposals();
   } else if (tab === 'payments') {
     fetchMyPayments();
+  } else if (tab === 'reviews') {
+    fetchMyReviews();
   }
 };
 
