@@ -27,6 +27,25 @@
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
+
+            <!-- Auto-play Control -->
+            <div v-if="allImages.length > 1" class="autoplay-control">
+              <button 
+                type="button" 
+                class="autoplay-btn"
+                :class="{ playing: isAutoPlaying }"
+                @click.stop="toggleAutoPlay"
+                :title="isAutoPlaying ? 'Pausar slideshow' : 'Iniciar slideshow'"
+              >
+                <svg v-if="!isAutoPlaying" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16"/>
+                  <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
         
@@ -38,9 +57,16 @@
             class="gallery-thumb"
             :class="{ active: (activeImage || auction.imageUrl) === img }"
             @click="activeImage = img"
+            :title="`Imagem ${idx + 1} de ${auction.images.length}`"
           >
             <img :src="img" alt="Miniatura do produto" />
+            <div v-if="(activeImage || auction.imageUrl) === img" class="thumb-indicator"></div>
           </div>
+        </div>
+
+        <!-- Auto-play Progress Bar -->
+        <div v-if="isAutoPlaying && allImages.length > 1" class="autoplay-progress">
+          <div class="progress-bar" :style="{ width: progressPercentage + '%' }"></div>
         </div>
       </div>
 
@@ -837,6 +863,8 @@ const displayBidAmount = ref('');
 const activeImage = ref('');
 let socket = null;
 const activeTab = ref('details');
+const autoPlayInterval = ref(null);
+const isAutoPlaying = ref(false);
 
 // --- Review System Logic ---
 const showReviewModal = ref(false);
@@ -960,6 +988,11 @@ const currentImageIndex = computed(() => {
   return idx >= 0 ? idx : 0;
 });
 
+const progressPercentage = computed(() => {
+  if (allImages.value.length <= 1) return 100;
+  return ((currentImageIndex.value + 1) / allImages.value.length) * 100;
+});
+
 const prevImage = () => {
   if (allImages.value.length <= 1) return;
   let newIdx = currentImageIndex.value - 1;
@@ -972,6 +1005,50 @@ const nextImage = () => {
   let newIdx = currentImageIndex.value + 1;
   if (newIdx >= allImages.value.length) newIdx = 0;
   activeImage.value = allImages.value[newIdx];
+};
+
+// Auto-play functionality
+const startAutoPlay = () => {
+  if (allImages.value.length <= 1) return;
+  stopAutoPlay(); // Clear any existing interval
+  isAutoPlaying.value = true;
+  autoPlayInterval.value = setInterval(() => {
+    nextImage();
+  }, 3000); // Change image every 3 seconds
+};
+
+const stopAutoPlay = () => {
+  if (autoPlayInterval.value) {
+    clearInterval(autoPlayInterval.value);
+    autoPlayInterval.value = null;
+  }
+  isAutoPlaying.value = false;
+};
+
+const toggleAutoPlay = () => {
+  if (isAutoPlaying.value) {
+    stopAutoPlay();
+  } else {
+    startAutoPlay();
+  }
+};
+
+// Keyboard navigation
+const handleKeydown = (e) => {
+  if (allImages.value.length <= 1) return;
+  
+  switch(e.key) {
+    case 'ArrowLeft':
+      prevImage();
+      break;
+    case 'ArrowRight':
+      nextImage();
+      break;
+    case ' ':
+      e.preventDefault();
+      toggleAutoPlay();
+      break;
+  }
 };
 
 const isMpesaModalOpen = ref(false);
@@ -1615,6 +1692,9 @@ onMounted(() => {
   fetchUserWatchlist();
   fetchComments();
   
+  // Add keyboard event listener for gallery navigation
+  window.addEventListener('keydown', handleKeydown);
+  
   countdownInterval = setInterval(() => {
     now.value = new Date();
   }, 1000);
@@ -1673,6 +1753,10 @@ onUnmounted(() => {
     socket.disconnect();
   }
   if (countdownInterval) clearInterval(countdownInterval);
+  
+  // Clean up gallery auto-play and keyboard listeners
+  stopAutoPlay();
+  window.removeEventListener('keydown', handleKeydown);
 });
 </script>
 
@@ -1741,6 +1825,34 @@ onUnmounted(() => {
   opacity: 1;
   border-color: var(--btn-primary-bg);
   transform: translateY(-2px);
+}
+
+.thumb-indicator {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--btn-primary-bg);
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Auto-play Progress Bar */
+.autoplay-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 5;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--btn-primary-bg), #5b8def);
+  transition: width 0.3s ease;
 }
 
 .image-overlay {
@@ -1825,6 +1937,55 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-arrow-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+  transform: scale(1.1);
+}
+
+.gallery-arrow-btn:active {
+  transform: scale(0.95);
+}
+
+/* Auto-play Control */
+.autoplay-control {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+.autoplay-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.autoplay-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+
+.autoplay-btn.playing {
+  background: rgba(59, 130, 246, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.autoplay-btn:active {
+  transform: scale(0.95);
+}
 }
 
 .gallery-arrow-btn:hover {
