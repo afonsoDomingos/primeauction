@@ -1823,7 +1823,7 @@ onUnmounted(() => {
 .gallery-thumb:hover,
 .gallery-thumb.active {
   opacity: 1;
-  border-color: var(--btn-primary-bg);
+  border-color: #3e6ae1;
   transform: translateY(-2px);
 }
 
@@ -1833,7 +1833,7 @@ onUnmounted(() => {
   right: 4px;
   width: 8px;
   height: 8px;
-  background: var(--btn-primary-bg);
+  background: #3e6ae1;
   border-radius: 50%;
   border: 2px solid white;
 }
@@ -1851,7 +1851,7 @@ onUnmounted(() => {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--btn-primary-bg), #5b8def);
+  background: linear-gradient(90deg, #3e6ae1, #5b8def);
   transition: width 0.3s ease;
 }
 
@@ -1986,11 +1986,10 @@ onUnmounted(() => {
 .autoplay-btn:active {
   transform: scale(0.95);
 }
-}
 
 .gallery-arrow-btn:hover {
-  background: var(--btn-primary-bg, #0284c7);
-  border-color: var(--btn-primary-bg, #0284c7);
+  background: #0284c7;
+  border-color: #0284c7;
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
@@ -2002,7 +2001,7 @@ onUnmounted(() => {
 /* ─── Content Side ─── */
 .content-side {
   flex: 4;
-  background-color: var(--bg-color);
+  background-color: #ffffff;
   overflow-y: auto;
   padding: 90px 2.5rem 3rem;
   box-shadow: -8px 0 30px rgba(0,0,0,0.05);
@@ -2034,7 +2033,7 @@ onUnmounted(() => {
 
 .status-badge.ended {
   background-color: rgba(0,0,0,0.06);
-  color: var(--text-light);
+  color: #5c5e62;
 }
 
 /* ─── Title & Description ─── */
@@ -2042,12 +2041,12 @@ onUnmounted(() => {
   font-size: clamp(1.75rem, 3vw, 2.5rem);
   font-weight: 700;
   margin-bottom: 1rem;
-  color: var(--text-primary);
+  color: #171a20;
   line-height: 1.2;
 }
 
 .description {
-  color: var(--text-secondary);
+  color: #393c41;
   line-height: 1.7;
   margin-bottom: 2rem;
   font-size: 0.95rem;
@@ -2080,21 +2079,21 @@ onUnmounted(() => {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-light);
+  color: #5c5e62;
   font-weight: 600;
 }
 
 .price {
   font-size: 1.65rem;
   font-weight: 700;
-  color: var(--btn-primary-bg);
+  color: #3e6ae1;
   line-height: 1;
 }
 
 .time {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #393c41;
 }
 
 /* ─── Section Titles ─── */
@@ -2102,14 +2101,14 @@ onUnmounted(() => {
   font-size: 1.1rem;
   margin-bottom: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #171a20;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .bid-count {
-  background-color: var(--btn-primary-bg);
+  background-color: #3e6ae1;
   color: white;
   border-radius: 20px;
   font-size: 0.72rem;
@@ -2130,7 +2129,7 @@ onUnmounted(() => {
 
 .currency-prefix {
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #393c41;
   font-size: 0.9rem;
   white-space: nowrap;
 }
@@ -2153,7 +2152,7 @@ onUnmounted(() => {
 }
 
 .error-msg {
-  color: var(--danger-color);
+  color: #ed4e50;
   margin-top: 0.75rem;
   font-size: 0.875rem;
 }
@@ -2165,14 +2164,14 @@ onUnmounted(() => {
   padding: 0.875rem 1rem;
   background-color: #fff8e6;
   color: #856404;
-  border-radius: var(--radius-md);
+  border-radius: 0.375rem;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
   border: 1px solid #fceab0;
 }
 
 .auth-warning a {
-  color: var(--btn-primary-bg);
+  color: #3e6ae1;
   font-weight: 600;
 }
 
@@ -2182,7 +2181,7 @@ onUnmounted(() => {
 }
 
 .ended-text {
-  color: var(--text-light);
+  color: #5c5e62;
   font-size: 0.9rem;
 }
 
@@ -2223,7 +2222,7 @@ onUnmounted(() => {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--text-light);
+  color: #5c5e62;
   letter-spacing: 1px;
   margin-bottom: 0.25rem;
 }
@@ -2237,12 +2236,12 @@ onUnmounted(() => {
 
 .winner-price {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: #393c41;
 }
 
 .winner-price span {
   font-weight: 700;
-  color: var(--btn-primary-bg);
+  color: #3e6ae1;
 }
 
 /* ─── Bid List ─── */
@@ -2282,7 +2281,7 @@ onUnmounted(() => {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background-color: var(--btn-primary-bg);
+  background-color: #3e6ae1;
   color: white;
   display: flex;
   align-items: center;
@@ -2317,12 +2316,12 @@ onUnmounted(() => {
 
 .bid-amount {
   font-weight: 700;
-  color: var(--btn-primary-bg);
+  color: #3e6ae1;
   font-size: 0.95rem;
 }
 
 .no-bids {
-  color: var(--text-light);
+  color: #5c5e62;
   font-style: italic;
   padding: 1.5rem 0;
   text-align: center;
@@ -2341,7 +2340,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #f0f0f0;
-  border-top-color: var(--btn-primary-bg);
+  border-top-color: #3e6ae1;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -2445,13 +2444,13 @@ onUnmounted(() => {
 .modal-header-row h4 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #171a20;
   margin: 0;
 }
 
 .modal-subtitle {
   font-size: 0.875rem;
-  color: var(--text-light);
+  color: #5c5e62;
   margin-bottom: 1.5rem;
   line-height: 1.4;
 }
@@ -2473,7 +2472,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: #393c41;
   cursor: pointer;
 }
 
@@ -2532,7 +2531,7 @@ onUnmounted(() => {
   background: none;
   border: none;
   font-size: 1rem;
-  color: var(--text-light);
+  color: #5c5e62;
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 4px;
@@ -2540,7 +2539,7 @@ onUnmounted(() => {
   margin-left: auto;
 }
 .wizard-close-btn:hover {
-  color: var(--text-primary);
+  color: #171a20;
 }
 
 .wizard-steps {
@@ -2558,7 +2557,7 @@ onUnmounted(() => {
   transition: all 0.3s ease;
 }
 .wizard-dot.active {
-  background-color: var(--btn-primary-bg, #1a56db);
+  background-color: #1a56db;
   width: 22px;
   border-radius: 4px;
 }
@@ -2569,7 +2568,7 @@ onUnmounted(() => {
 .wizard-step-label {
   text-align: center;
   font-size: 0.72rem;
-  color: var(--text-light);
+  color: #5c5e62;
   margin-bottom: 1.25rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2602,18 +2601,18 @@ onUnmounted(() => {
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #393c41;
   transition: all 0.2s ease;
   user-select: none;
 }
 .wizard-gender-btn:hover {
-  border-color: var(--btn-primary-bg, #1a56db);
-  color: var(--btn-primary-bg, #1a56db);
+  border-color: #1a56db;
+  color: #1a56db;
 }
 .wizard-gender-btn.selected {
-  border-color: var(--btn-primary-bg, #1a56db);
+  border-color: #1a56db;
   background-color: rgba(26, 86, 219, 0.07);
-  color: var(--btn-primary-bg, #1a56db);
+  color: #1a56db;
   font-weight: 600;
 }
 
@@ -2694,7 +2693,7 @@ onUnmounted(() => {
 
 .suggestion-label {
   font-size: 0.75rem;
-  color: var(--text-light);
+  color: #5c5e62;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2709,7 +2708,7 @@ onUnmounted(() => {
 .btn-suggestion {
   background: white;
   border: 1.5px solid #e5e7eb;
-  color: var(--text-secondary);
+  color: #393c41;
   padding: 0.45rem 1rem;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -2720,8 +2719,8 @@ onUnmounted(() => {
 }
 
 .btn-suggestion:hover {
-  border-color: var(--btn-primary-bg, #1a56db);
-  color: var(--btn-primary-bg, #1a56db);
+  border-color: #1a56db;
+  color: #1a56db;
   background-color: rgba(26, 86, 219, 0.04);
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(26, 86, 219, 0.08);
@@ -2789,7 +2788,7 @@ onUnmounted(() => {
 .chart-card-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #171a20;
   margin-bottom: 1rem;
 }
 
