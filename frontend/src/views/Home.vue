@@ -542,10 +542,6 @@
             <div class="stat-num-bold">{{ formatNumber(stats.totalBids) }}</div>
             <div class="stat-lbl-sub">Lances Colocados</div>
           </div>
-          <div class="stat-card-minimal">
-            <div class="stat-num-bold highlight-revenue">{{ formatCurrency(stats.totalRevenue) }}</div>
-            <div class="stat-lbl-sub">Volume Transacionado</div>
-          </div>
         </div>
       </div>
     </section>
