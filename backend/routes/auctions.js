@@ -8,7 +8,7 @@ const {
   uploadAuctionImage,
   uploadAuctionImages
 } = require('../controllers/auctionController');
-const { protect, authorize } = require('../middlewares/auth');
+const { protect, authorize, optionalAuth } = require('../middlewares/auth');
 const { uploadAuctionImage: uploadMiddleware } = require('../config/cloudinary');
 
 const router = express.Router();
@@ -35,7 +35,7 @@ router.route('/')
   .post(protect, authorize('admin'), createAuction);
 
 router.route('/:id')
-  .get(getAuction)
+  .get(optionalAuth, getAuction)
   .put(protect, authorize('admin'), updateAuction)
   .delete(protect, authorize('admin'), deleteAuction);
 

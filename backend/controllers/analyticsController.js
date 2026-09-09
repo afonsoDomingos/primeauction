@@ -3,6 +3,7 @@ const Auction = require('../models/Auction');
 const Bid = require('../models/Bid');
 const Proposal = require('../models/Proposal');
 const Message = require('../models/Message');
+const Payment = require('../models/Payment');
 
 // @desc    Get analytics overview
 // @route   GET /api/analytics/overview
@@ -47,19 +48,21 @@ exports.getOverview = async (req, res) => {
       winner: { $ne: null }
     }).select('_id');
 
-    const auctionIds = finishedAuctionsWithBids.map(a => a._id);
-    const winningBids = await Bid.find({
-      auction: { $in: auctionIds }
-    });
-
-    let totalRevenue = 0;
+    let totalAuctionVolume = 0;
     for (const auction of finishedAuctionsWithBids) {
       const highestBid = await Bid.findOne({ auction: auction._id })
         .sort('-amount');
       if (highestBid) {
-        totalRevenue += highestBid.amount;
+        totalAuctionVolume += highestBid.amount;
       }
     }
+
+    // Direct platform revenue from completed participation fees
+    const completedPayments = await Payment.aggregate([
+      { $match: { status: 'completed' } },
+      { $group: { _id: null, totalFees: { $sum: '$amount' } } }
+    ]);
+    const totalFeeRevenue = completedPayments[0]?.totalFees || 0;
 
     // Average bid value
     const avgBidValue = totalBids > 0 
@@ -104,7 +107,9 @@ exports.getOverview = async (req, res) => {
           bids: bidsThisWeek
         },
         revenue: {
-          total: totalRevenue,
+          total: totalFeeRevenue,
+          totalFeeRevenue: totalFeeRevenue,
+          totalAuctionVolume: totalAuctionVolume,
           averageBid: avgBidValue[0]?.avg || 0
         },
         categories: categoryStats,

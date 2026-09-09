@@ -24,6 +24,26 @@ const auctionSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Please add a starting price']
   },
+  participationFee: {
+    type: Number,
+    required: [true, 'Por favor defina a taxa de participação'],
+    default: 1000,
+    min: 0
+  },
+  participants: [{
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User'
+    },
+    payment: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Payment'
+    },
+    paidAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   currentPrice: {
     type: Number,
     default: function() {

@@ -1,5 +1,6 @@
 const Bid = require('../models/Bid');
 const Auction = require('../models/Auction');
+const Payment = require('../models/Payment');
 
 // @desc    Get bids for an auction
 // @route   GET /api/bids/:auctionId
@@ -58,6 +59,35 @@ exports.placeBid = async (req, res) => {
     // Check if auction is active
     if (auction.isEnded || auction.status !== 'active' || Date.now() > new Date(auction.endTime).getTime()) {
       return res.status(400).json({ success: false, error: 'Este leilão já foi encerrado.' });
+    }
+
+    // Check participation fee requirement
+    const feeRequired = auction.participationFee !== undefined && auction.participationFee !== null 
+      ? auction.participationFee 
+      : 1000;
+
+    if (feeRequired > 0) {
+      const isParticipant = auction.participants && auction.participants.some(
+        p => p.user && p.user.toString() === req.user.id.toString()
+      );
+      let hasPaid = isParticipant;
+      if (!hasPaid) {
+        const paymentRecord = await Payment.exists({
+          user: req.user.id,
+          auction: auctionId,
+          status: 'completed'
+        });
+        hasPaid = Boolean(paymentRecord);
+      }
+
+      if (!hasPaid) {
+        return res.status(403).json({
+          success: false,
+          requiresFee: true,
+          feeAmount: feeRequired,
+          error: `É necessário pagar a taxa de participação de ${feeRequired.toLocaleString('pt-MZ')} MZN para validar lances neste leilão.`
+        });
+      }
     }
 
     // Validate bid amount

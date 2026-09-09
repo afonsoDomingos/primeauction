@@ -1,7 +1,71 @@
 const Payment = require('../models/Payment');
 const Auction = require('../models/Auction');
+const Bid = require('../models/Bid');
 const axios = require('axios');
 const crypto = require('crypto');
+
+// Helper to fulfill participation fee and optional initial bid upon successful payment
+const fulfillSuccessfulPayment = async (payment, io) => {
+  try {
+    const auction = await Auction.findById(payment.auction);
+    if (!auction) return;
+
+    const userId = payment.user?._id || payment.user;
+
+    // 1. Add user to auction participants if not already added
+    if (!auction.participants) auction.participants = [];
+    const alreadyParticipant = auction.participants.some(
+      p => p.user && p.user.toString() === userId.toString()
+    );
+
+    if (!alreadyParticipant) {
+      auction.participants.push({
+        user: userId,
+        payment: payment._id,
+        paidAt: payment.completedAt || new Date()
+      });
+      await auction.save();
+    }
+
+    // 2. If an initial bid was proposed and auction is still active, register it!
+    if (payment.initialBidAmount && auction.status === 'active' && !auction.isEnded) {
+      if (payment.initialBidAmount > auction.currentPrice) {
+        const bid = await Bid.create({
+          auction: auction._id,
+          user: userId,
+          amount: payment.initialBidAmount
+        });
+
+        auction.currentPrice = payment.initialBidAmount;
+        await auction.save();
+        await bid.populate({ path: 'user', select: 'name profilePhoto' });
+
+        if (io) {
+          io.to(auction._id.toString()).emit('new_bid', {
+            auctionId: auction._id.toString(),
+            currentPrice: payment.initialBidAmount,
+            bid,
+            endTime: auction.endTime,
+            wasExtended: false,
+            extendedMinutes: 3
+          });
+        }
+      }
+    }
+
+    // 3. Emit real-time participation confirmed event to the user
+    if (io) {
+      io.to(`user_${userId}`).emit('participation_confirmed', {
+        auctionId: auction._id.toString(),
+        paymentId: payment._id,
+        amount: payment.amount,
+        status: 'completed'
+      });
+    }
+  } catch (err) {
+    console.error('Error fulfilling successful payment:', err);
+  }
+};
 
 // Helper to generate unique M-Pesa Transaction ID (Vodacom Mozambique format)
 const generateMpesaTxId = () => {
@@ -83,20 +147,13 @@ const callVodacomMpesaApi = async ({ phoneNumber, amount, reference }) => {
 // @access  Private
 exports.initiateMpesaPayment = async (req, res) => {
   try {
-    const { auctionId, amount, phoneNumber } = req.body;
+    const { auctionId, phoneNumber, initialBidAmount, type } = req.body;
+    let amount = req.body.amount;
 
-    if (!auctionId || !amount || !phoneNumber) {
+    if (!auctionId || !phoneNumber) {
       return res.status(400).json({
         success: false,
-        error: 'Por favor, forneça o ID do leilão, valor e número de telefone M-Pesa.'
-      });
-    }
-
-    const cleanedPhone = formatMpesaPhone(phoneNumber);
-    if (!/^(84|85)\d{7}$/.test(cleanedPhone)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Número M-Pesa inválido. Insira um número Vodacom válido em Moçambique (ex: 84XXXXXXX ou 85XXXXXXX).'
+        error: 'Por favor, forneça o ID do leilão e número de telefone M-Pesa.'
       });
     }
 
@@ -105,6 +162,21 @@ exports.initiateMpesaPayment = async (req, res) => {
       return res.status(404).json({
         success: false,
         error: 'Leilão não encontrado.'
+      });
+    }
+
+    const paymentType = type || 'participation_fee';
+    if (!amount || amount <= 0) {
+      amount = auction.participationFee !== undefined && auction.participationFee !== null 
+        ? auction.participationFee 
+        : 1000;
+    }
+
+    const cleanedPhone = formatMpesaPhone(phoneNumber);
+    if (!/^(84|85)\d{7}$/.test(cleanedPhone)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Número M-Pesa inválido. Insira um número Vodacom válido em Moçambique (ex: 84XXXXXXX ou 85XXXXXXX).'
       });
     }
 
@@ -125,7 +197,9 @@ exports.initiateMpesaPayment = async (req, res) => {
       phoneNumber: `+258 ${cleanedPhone.substring(0, 2)} ${cleanedPhone.substring(2, 5)} ${cleanedPhone.substring(5)}`,
       mpesaTransactionId,
       reference,
-      status: 'pending'
+      status: 'pending',
+      type: paymentType,
+      initialBidAmount: initialBidAmount ? Number(initialBidAmount) : null
     });
 
     res.status(200).json({
@@ -138,8 +212,10 @@ exports.initiateMpesaPayment = async (req, res) => {
         phoneNumber: payment.phoneNumber,
         mpesaTransactionId: payment.mpesaTransactionId,
         status: payment.status,
+        type: payment.type,
+        initialBidAmount: payment.initialBidAmount,
         vodacomResponse: apiResult || { ResponseCode: 'INS-0', ResponseDesc: 'Sandbox Test Mode Active' },
-        promptMessage: `Prime Auction: Confirmar pagamento de ${payment.amount.toLocaleString('pt-MZ')} MZN para o leilão "${auction.title}"?`
+        promptMessage: `Prime Auction: Confirmar pagamento da taxa de participação de ${payment.amount.toLocaleString('pt-MZ')} MZN para o leilão "${auction.title}"?`
       }
     });
   } catch (err) {
@@ -199,15 +275,20 @@ exports.confirmMpesaPayment = async (req, res) => {
     payment.completedAt = new Date();
     await payment.save();
 
+    // Fulfill participation fee registration & initial bid placement
+    await fulfillSuccessfulPayment(payment, req.io);
+
     // Create real payment notification
     try {
       const { createNotification } = require('./notificationController');
       await createNotification({
         userId: payment.user._id,
         title: 'Pagamento Confirmado',
-        message: `Pagamento M-Pesa de ${payment.amount.toLocaleString('pt-MZ')} MZN recebido e confirmado com sucesso! 🏦`,
+        message: payment.type === 'participation_fee'
+          ? `Taxa de participação de ${payment.amount.toLocaleString('pt-MZ')} MZN confirmada com sucesso! Agora pode licitar livremente no leilão. 🔨`
+          : `Pagamento M-Pesa de ${payment.amount.toLocaleString('pt-MZ')} MZN recebido e confirmado com sucesso! 🏦`,
         type: 'payment',
-        link: '/profile'
+        link: `/auction/${payment.auction?._id || payment.auction}`
       });
     } catch (notifErr) {
       console.error('Error creating payment notification:', notifErr);
@@ -319,6 +400,9 @@ exports.handleMpesaCallback = async (req, res) => {
         }
         payment.completedAt = new Date();
         await payment.save();
+
+        // Fulfill participation fee registration & initial bid placement
+        await fulfillSuccessfulPayment(payment, req.io);
 
         // Emit real-time confirmation to user socket room
         if (req.io) {

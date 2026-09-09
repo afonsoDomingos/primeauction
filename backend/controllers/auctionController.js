@@ -1,5 +1,6 @@
 const Auction = require('../models/Auction');
 const Bid = require('../models/Bid');
+const Payment = require('../models/Payment');
 
 // @desc    Get all auctions
 // @route   GET /api/auctions
@@ -83,7 +84,33 @@ exports.getAuction = async (req, res) => {
       select: 'name email profilePhoto averageRating ratingsCount'
     });
 
-    res.status(200).json({ success: true, data: auction });
+    // Ensure participationFee fallback
+    if (auction.participationFee === undefined || auction.participationFee === null) {
+      auction.participationFee = 1000;
+    }
+
+    // Check if authenticated user has already paid the participation fee
+    let hasPaidFee = false;
+    if (req.user) {
+      const isParticipant = auction.participants && auction.participants.some(
+        p => p.user && p.user.toString() === req.user._id.toString()
+      );
+      if (isParticipant) {
+        hasPaidFee = true;
+      } else {
+        const paymentExists = await Payment.exists({
+          user: req.user._id,
+          auction: auction._id,
+          status: 'completed'
+        });
+        hasPaidFee = Boolean(paymentExists);
+      }
+    }
+
+    const auctionData = auction.toObject ? auction.toObject({ virtuals: true }) : auction;
+    auctionData.hasPaidFee = hasPaidFee;
+
+    res.status(200).json({ success: true, data: auctionData });
   } catch (err) {
     console.error('[getAuction] Error:', err);
     res.status(500).json({ success: false, error: err.message });
@@ -96,6 +123,11 @@ exports.getAuction = async (req, res) => {
 exports.createAuction = async (req, res) => {
   try {
     req.body.createdBy = req.user.id;
+    if (req.body.participationFee !== undefined) {
+      req.body.participationFee = Number(req.body.participationFee);
+    } else {
+      req.body.participationFee = 1000;
+    }
 
     const auction = await Auction.create(req.body);
 
@@ -114,6 +146,10 @@ exports.updateAuction = async (req, res) => {
 
     if (!auction) {
       return res.status(404).json({ success: false, error: 'Auction not found' });
+    }
+
+    if (req.body.participationFee !== undefined) {
+      req.body.participationFee = Number(req.body.participationFee);
     }
 
     auction = await Auction.findByIdAndUpdate(req.params.id, req.body, {

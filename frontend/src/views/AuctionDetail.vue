@@ -193,6 +193,22 @@
                 <span>Lance Válido! Proposta de <strong>+{{ formatCurrency(bidAmount - auction.currentPrice) }}</strong> acima do valor atual.</span>
               </div>
 
+              <!-- Participation Fee / Active Status Banner -->
+              <div v-if="auction.hasPaidFee" class="participation-banner participant-active animate-fade-in">
+                <span class="banner-icon">🛡️</span>
+                <div class="banner-content">
+                  <span class="banner-title">Participação Habilitada</span>
+                  <span class="banner-desc">Taxa de inscrição confirmada. Os seus lances são registados instantaneamente.</span>
+                </div>
+              </div>
+              <div v-else class="participation-banner fee-required animate-fade-in">
+                <span class="banner-icon">🎫</span>
+                <div class="banner-content">
+                  <span class="banner-title">Taxa de Participação: <strong>{{ formatCurrency(auction.participationFee || 1000) }}</strong></span>
+                  <span class="banner-desc">Pagamento único para validar a sua inscrição neste leilão.</span>
+                </div>
+              </div>
+
               <div class="input-with-button">
                 <span class="currency-prefix">MZN</span>
                 <input 
@@ -209,7 +225,7 @@
                   class="btn btn-primary btn-pill bid-submit"
                   :disabled="isBidInvalid || isOwner"
                 >
-                  Licitar Agora
+                  {{ auction.hasPaidFee ? 'Licitar Agora' : 'Pagar Taxa & Licitar' }}
                 </button>
               </div>
 
@@ -787,7 +803,9 @@
     :isOpen="isMpesaModalOpen"
     :auctionId="auction._id"
     :auctionTitle="auction.title"
-    :amount="auction.currentPrice"
+    :amount="auction.participationFee !== undefined && auction.participationFee !== null ? auction.participationFee : 1000"
+    :proposedBidAmount="bidAmount"
+    paymentType="participation_fee"
     @close="isMpesaModalOpen = false"
     @success="handleMpesaSuccess"
   />
@@ -1070,8 +1088,12 @@ const handleDirectPayClick = () => {
   isDirectPaymentAttempt.value = true;
   openProfileWizard();
 };
-const handleMpesaSuccess = (receipt) => {
-  toastStore.add('Pagamento M-Pesa registado com sucesso! ✓', 'success');
+const handleMpesaSuccess = async (receipt) => {
+  if (auction.value) {
+    auction.value.hasPaidFee = true;
+  }
+  toastStore.success('Taxa de participação confirmada e lance registado com sucesso! 🎉');
+  await fetchAuctionData();
 };
 
 const userWatchlist = ref([]);
@@ -1442,8 +1464,9 @@ const setBidIncrement = (increment) => {
 const fetchAuctionData = async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const headers = authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {};
     const [auctionRes, bidsRes] = await Promise.all([
-      axios.get(`${apiUrl}/api/auctions/${route.params.id}`),
+      axios.get(`${apiUrl}/api/auctions/${route.params.id}`, { headers }),
       axios.get(`${apiUrl}/api/bids/${route.params.id}`)
     ]);
     auction.value = auctionRes.data.data;
@@ -1489,7 +1512,7 @@ const submitProfileDetails = async () => {
       showProfileModal.value = false;
       profileStep.value = 1;
 
-      if (isDirectPaymentAttempt.value) {
+      if (isDirectPaymentAttempt.value || (auction.value && !auction.value.hasPaidFee)) {
         isDirectPaymentAttempt.value = false;
         openMpesaModal();
       } else {
@@ -1532,6 +1555,11 @@ const openProfileWizard = () => {
 };
 
 const placeBid = async () => {
+  if (!authStore.isAuthenticated) {
+    toastStore.warning('Por favor, faça login para licitar.');
+    return;
+  }
+
   if (isOwner.value) {
     toastStore.error('Você é o vendedor deste leilão e não pode licitar no seu próprio artigo.');
     return;
@@ -1546,8 +1574,19 @@ const placeBid = async () => {
 
   isDirectPaymentAttempt.value = false;
   
-  // ALWAYS open profile wizard modal first to fill/confirm details before placing bid
-  openProfileWizard();
+  if (!isProfileComplete.value) {
+    openProfileWizard();
+    return;
+  }
+
+  // If user has not yet paid the participation fee, open payment modal to pay fee
+  if (auction.value && !auction.value.hasPaidFee) {
+    openMpesaModal();
+    return;
+  }
+
+  // User already paid participation fee, execute bid directly
+  await executePlaceBid();
 };
 
 const executePlaceBid = async () => {
@@ -1561,7 +1600,7 @@ const executePlaceBid = async () => {
     );
 
     if (res.data && res.data.success) {
-      toastStore.success(`Lance de ${formatCurrency(bidVal)} registado! ✓`);
+      toastStore.success(`Lance de ${formatCurrency(bidVal)} registado com sucesso! 🔨`);
       
       // Update local price and bid history immediately
       if (auction.value) {
@@ -1573,11 +1612,16 @@ const executePlaceBid = async () => {
       
       // Re-fetch auction data to ensure 100% sync with server populate
       await fetchAuctionData();
-      
-      openMpesaModal();
     }
   } catch (err) {
-    toastStore.error(err.response?.data?.error || 'Erro ao registar lance');
+    const errData = err.response?.data;
+    if (errData?.requiresFee) {
+      toastStore.warning(errData.error || 'É necessário pagar a taxa de participação para licitar.');
+      if (auction.value) auction.value.hasPaidFee = false;
+      openMpesaModal();
+    } else {
+      toastStore.error(errData?.error || 'Erro ao registar lance');
+    }
   }
 };
 
@@ -3703,5 +3747,61 @@ onUnmounted(() => {
   background: rgba(16, 185, 129, 0.2);
   color: #34d399;
   border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* Participation Fee & Status Banners */
+.participation-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.participation-banner .banner-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.participation-banner .banner-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.participation-banner .banner-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.participation-banner .banner-desc {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.participation-banner.participant-active {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.participation-banner.fee-required {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.dark .participation-banner.participant-active {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #86efac;
+}
+
+.dark .participation-banner.fee-required {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fcd34d;
 }
 </style>

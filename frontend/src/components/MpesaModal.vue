@@ -90,24 +90,32 @@
 
             <!-- Order Summary -->
             <div class="checkout-summary-box">
-              <h5 class="summary-box-title">Resumo da compra</h5>
+              <h5 class="summary-box-title">Detalhes da Participação</h5>
               <div class="summary-line">
-                <span>{{ auctionTitle }}</span>
-                <span>{{ formatCurrency(customAmount) }}</span>
+                <span>Leilão:</span>
+                <span class="summary-auction-title">{{ auctionTitle }}</span>
+              </div>
+              <div class="summary-line">
+                <span>Taxa de Inscrição:</span>
+                <span style="font-weight: 700; color: #10b981;">{{ formatCurrency(customAmount) }}</span>
+              </div>
+              <div v-if="proposedBidAmount" class="summary-line" style="background: rgba(59, 130, 246, 0.08); padding: 6px 10px; border-radius: 8px; margin: 6px 0;">
+                <span style="color: #1e40af; font-weight: 600;">Lance a Ativar:</span>
+                <span style="font-weight: 700; color: #1e40af;">{{ formatCurrency(proposedBidAmount) }}</span>
               </div>
               <div class="summary-line total-line">
-                <strong>Total</strong>
+                <strong>Total a Pagar Agora</strong>
                 <strong class="total-amount">{{ formatCurrency(customAmount) }}</strong>
               </div>
             </div>
 
             <p class="banking-security-note">
-              Nós protegemos seus dados de pagamento com criptografia para garantir segurança em nível bancário.
+              🔒 Pagamento único de taxa para habilitar a sua participação neste leilão.
             </p>
 
             <button type="submit" class="btn btn-vibrant-pay" :disabled="loading || !phoneNumber || !customAmount || customAmount <= 0">
               <span v-if="loading" class="spinner-inline"></span>
-              <span>{{ loading ? 'A enviar pedido STK Push...' : 'Comprar agora' }}</span>
+              <span>{{ loading ? 'A enviar pedido STK Push...' : (proposedBidAmount ? 'Pagar Taxa & Ativar Lance' : 'Pagar Taxa de Participação') }}</span>
             </button>
           </form>
 
@@ -130,24 +138,32 @@
 
             <!-- Order Summary -->
             <div class="checkout-summary-box">
-              <h5 class="summary-box-title">Resumo da compra</h5>
+              <h5 class="summary-box-title">Detalhes da Participação</h5>
               <div class="summary-line">
-                <span>{{ auctionTitle }}</span>
-                <span>{{ formatCurrency(customAmount) }}</span>
+                <span>Leilão:</span>
+                <span class="summary-auction-title">{{ auctionTitle }}</span>
+              </div>
+              <div class="summary-line">
+                <span>Taxa de Inscrição:</span>
+                <span style="font-weight: 700; color: #10b981;">{{ formatCurrency(customAmount) }}</span>
+              </div>
+              <div v-if="proposedBidAmount" class="summary-line" style="background: rgba(59, 130, 246, 0.08); padding: 6px 10px; border-radius: 8px; margin: 6px 0;">
+                <span style="color: #1e40af; font-weight: 600;">Lance a Ativar:</span>
+                <span style="font-weight: 700; color: #1e40af;">{{ formatCurrency(proposedBidAmount) }}</span>
               </div>
               <div class="summary-line total-line">
-                <strong>Total</strong>
+                <strong>Total a Pagar Agora</strong>
                 <strong class="total-amount">{{ formatCurrency(customAmount) }}</strong>
               </div>
             </div>
 
             <p class="banking-security-note">
-              Nós protegemos seus dados de pagamento com criptografia para garantir segurança em nível bancário.
+              🔒 Pagamento único de taxa para habilitar a sua participação neste leilão.
             </p>
 
             <button type="submit" class="btn btn-vibrant-pay emola-btn-style" :disabled="loading || !phoneNumber || !customAmount || customAmount <= 0">
               <span v-if="loading" class="spinner-inline"></span>
-              <span>{{ loading ? 'A enviar...' : 'Comprar agora via eMola' }}</span>
+              <span>{{ loading ? 'A enviar...' : (proposedBidAmount ? 'Pagar Taxa & Ativar Lance' : 'Pagar Taxa via eMola') }}</span>
             </button>
           </form>
 
@@ -167,23 +183,31 @@
 
             <!-- Order Summary -->
             <div class="checkout-summary-box">
-              <h5 class="summary-box-title">Resumo da compra</h5>
+              <h5 class="summary-box-title">Detalhes da Participação</h5>
               <div class="summary-line">
-                <span>{{ auctionTitle }}</span>
-                <span>{{ formatCurrency(customAmount) }}</span>
+                <span>Leilão:</span>
+                <span class="summary-auction-title">{{ auctionTitle }}</span>
+              </div>
+              <div class="summary-line">
+                <span>Taxa de Inscrição:</span>
+                <span style="font-weight: 700; color: #10b981;">{{ formatCurrency(customAmount) }}</span>
+              </div>
+              <div v-if="proposedBidAmount" class="summary-line" style="background: rgba(59, 130, 246, 0.08); padding: 6px 10px; border-radius: 8px; margin: 6px 0;">
+                <span style="color: #1e40af; font-weight: 600;">Lance a Ativar:</span>
+                <span style="font-weight: 700; color: #1e40af;">{{ formatCurrency(proposedBidAmount) }}</span>
               </div>
               <div class="summary-line total-line">
-                <strong>Total</strong>
+                <strong>Total a Pagar Agora</strong>
                 <strong class="total-amount">{{ formatCurrency(customAmount) }}</strong>
               </div>
             </div>
 
             <p class="banking-security-note">
-              Nós protegemos seus dados de pagamento com criptografia para garantir segurança em nível bancário.
+              🔒 Pagamento único de taxa para habilitar a sua participação neste leilão.
             </p>
 
             <button type="submit" class="btn btn-vibrant-pay visa-btn-style" :disabled="loading">
-              <span>Comprar agora com Cartão</span>
+              <span>{{ proposedBidAmount ? 'Pagar Taxa & Ativar Lance com Cartão' : 'Pagar Taxa com Cartão' }}</span>
             </button>
           </form>
         </div>
@@ -326,7 +350,9 @@ const props = defineProps({
   isOpen: { type: Boolean, default: false },
   auctionId: { type: String, required: true },
   auctionTitle: { type: String, default: 'Leilão Prime' },
-  amount: { type: Number, required: true }
+  amount: { type: Number, required: true },
+  proposedBidAmount: { type: Number, default: null },
+  paymentType: { type: String, default: 'participation_fee' }
 });
 
 const emit = defineEmits(['close', 'success']);
@@ -527,7 +553,9 @@ const handleInitiatePayment = async () => {
     const res = await axios.post(`${apiUrl}/api/payments/mpesa/initiate`, {
       auctionId: props.auctionId,
       amount: customAmount.value,
-      phoneNumber: cleaned
+      phoneNumber: cleaned,
+      initialBidAmount: props.proposedBidAmount,
+      type: props.paymentType
     }, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });

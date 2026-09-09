@@ -43,3 +43,27 @@ exports.authorize = (...roles) => {
     next();
   };
 };
+
+// Optional auth - populates req.user if token is present, but doesn't fail if missing
+exports.optionalAuth = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id);
+  } catch (err) {
+    // Ignore invalid token for public endpoints
+  }
+  next();
+};

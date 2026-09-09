@@ -315,7 +315,7 @@
                   <th>ID Transação M-Pesa</th>
                   <th>Referência</th>
                   <th>Telemóvel</th>
-                  <th>Valor</th>
+                  <th>Taxa Paga</th>
                   <th>Estado</th>
                   <th>Data</th>
                   <th>Acções</th>
@@ -324,7 +324,10 @@
               <tbody>
                 <tr v-for="pay in payments" :key="pay._id">
                   <td>
-                    <strong class="prop-table-title">{{ pay.auction?.title || 'Leilão' }}</strong>
+                    <div style="display: flex; flex-direction: column;">
+                      <strong class="prop-table-title">{{ pay.auction?.title || 'Leilão' }}</strong>
+                      <span style="font-size: 0.75rem; color: #059669; font-weight: 600;">🎫 Taxa de Participação</span>
+                    </div>
                   </td>
                   <td><code style="color: #e60000; font-weight: 700; background: #fff1f2; padding: 0.25rem 0.5rem; border-radius: 4px;">{{ pay.mpesaTransactionId }}</code></td>
                   <td>{{ pay.reference }}</td>

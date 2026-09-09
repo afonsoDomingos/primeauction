@@ -38,6 +38,15 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     default: 'M-Pesa (Vodacom)'
   },
+  type: {
+    type: String,
+    enum: ['participation_fee', 'auction_settlement'],
+    default: 'participation_fee'
+  },
+  initialBidAmount: {
+    type: Number,
+    default: null
+  },
   completedAt: {
     type: Date
   }

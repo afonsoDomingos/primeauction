@@ -194,11 +194,15 @@
               </div>
               <div class="form-group half">
                 <label class="form-label">Preço Inicial (MZN)</label>
-                <input type="number" v-model="form.startingPrice" class="form-input" placeholder="0" min="0" required />
+                <input type="number" v-model.number="form.startingPrice" class="form-input" placeholder="0" min="0" required />
               </div>
             </div>
 
             <div class="form-row">
+              <div class="form-group half">
+                <label class="form-label">Taxa de Participação (MZN) 🎫</label>
+                <input type="number" v-model.number="form.participationFee" class="form-input" placeholder="1000" min="0" required />
+              </div>
               <div class="form-group half">
                 <label class="form-label">Categoria</label>
                 <select v-model="form.category" class="form-input" required>
@@ -208,7 +212,10 @@
                   </option>
                 </select>
               </div>
-              <div class="form-group half">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group full">
                 <label class="form-label">Província / Localização 📍</label>
                 <select v-model="form.location" class="form-input" required>
                   <option v-for="prov in provincesList" :key="prov" :value="prov">
@@ -417,6 +424,7 @@
                 <tr>
                   <th>Utilizador / Cliente</th>
                   <th>Leilão / Artigo</th>
+                  <th>Finalidade</th>
                   <th>ID Transação M-Pesa</th>
                   <th>Referência</th>
                   <th>Telemóvel</th>
@@ -427,7 +435,7 @@
               </thead>
               <tbody>
                 <tr v-if="mpesaPayments.length === 0">
-                  <td colspan="8" class="empty-row">Nenhum pagamento M-Pesa registado até ao momento.</td>
+                  <td colspan="9" class="empty-row">Nenhum pagamento M-Pesa registado até ao momento.</td>
                 </tr>
                 <tr v-for="pay in mpesaPayments" :key="pay._id">
                   <td>
@@ -438,6 +446,11 @@
                   </td>
                   <td>
                     <span style="font-weight: 600; font-size: 0.85rem;">{{ pay.auction?.title || 'Leilão' }}</span>
+                  </td>
+                  <td>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; font-size: 0.75rem; border-radius: 6px;">
+                      🎫 Taxa de Participação
+                    </span>
                   </td>
                   <td><code style="color: #e60000; font-weight: 700; background: #fff1f2; padding: 0.2rem 0.4rem; border-radius: 4px;">{{ pay.mpesaTransactionId }}</code></td>
                   <td>{{ pay.reference }}</td>
@@ -511,6 +524,7 @@
                   <th>Estado</th>
                   <th>Preço Inicial</th>
                   <th>Lance Actual</th>
+                  <th>Taxa Part. 🎫</th>
                   <th>Data Início</th>
                   <th>Data Fim</th>
                   <th>Lances</th>
@@ -519,7 +533,7 @@
               </thead>
               <tbody>
                 <tr v-if="filteredAuctions.length === 0">
-                  <td colspan="11" class="empty-row">Nenhum leilão encontrado com os filtros actuais.</td>
+                  <td colspan="12" class="empty-row">Nenhum leilão encontrado com os filtros actuais.</td>
                 </tr>
                 <tr v-for="auction in filteredAuctions" :key="auction._id" class="auction-row">
                   <td class="image-cell">
@@ -538,6 +552,7 @@
                   </td>
                   <td class="price-cell">{{ formatCurrency(auction.startingPrice) }}</td>
                   <td class="price-cell">{{ formatCurrency(auction.currentPrice) }}</td>
+                  <td class="price-cell" style="color: #059669; font-weight: 700;">{{ formatCurrency(auction.participationFee || 1000) }}</td>
                   <td class="date-cell">{{ formatDate(auction.startTime) }}</td>
                   <td class="date-cell">{{ formatDate(auction.endTime) }}</td>
                   <td class="bids-count">{{ auction.bids?.length || 0 }}</td>
@@ -996,15 +1011,19 @@
               </div>
             </div>
 
-            <!-- Prices -->
-            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Prices & Participation Fee -->
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Preço Inicial (MZN)</label>
                 <input type="number" v-model.number="editForm.startingPrice" class="form-input" min="0" required />
               </div>
               <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Preço Actual (MZN)</label>
+                <label class="form-label">Lance Actual (MZN)</label>
                 <input type="number" v-model.number="editForm.currentPrice" class="form-input" min="0" required />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Taxa de Participação (MZN) 🎫</label>
+                <input type="number" v-model.number="editForm.participationFee" class="form-input" min="0" required />
               </div>
             </div>
 
@@ -1246,6 +1265,7 @@ const form = ref({
   imageUrl: '',
   images: [],
   startingPrice: 0,
+  participationFee: 1000,
   startTime: '',
   endTime: '',
   category: '',
@@ -1553,7 +1573,7 @@ const handleCreate = async () => {
       proposalBeingConverted.value = null;
     }
 
-    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, startTime: '', endTime: '', category: '' };
+    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, participationFee: 1000, startTime: '', endTime: '', category: '', location: 'Maputo' };
     showAlert('Leilão criado com sucesso! ✓');
     fetchData();
   } catch (err) {
@@ -1637,6 +1657,7 @@ const editForm = ref({
   location: 'Maputo',
   startingPrice: 0,
   currentPrice: 0,
+  participationFee: 1000,
   imageUrl: '',
   images: [],
   startTime: '',
@@ -1664,6 +1685,7 @@ const openEditModal = (auction) => {
     location: auction.location || 'Maputo',
     startingPrice: auction.startingPrice || 0,
     currentPrice: auction.currentPrice || 0,
+    participationFee: auction.participationFee !== undefined && auction.participationFee !== null ? auction.participationFee : 1000,
     imageUrl: auction.imageUrl || (imgs.length > 0 ? imgs[0] : ''),
     images: imgs,
     startTime: formatDateForInput(auction.startTime),
@@ -1736,6 +1758,7 @@ const submitEditAuction = async () => {
       category: editForm.value.category,
       startingPrice: Number(editForm.value.startingPrice),
       currentPrice: Number(editForm.value.currentPrice),
+      participationFee: Number(editForm.value.participationFee || 1000),
       imageUrl: editForm.value.imageUrl,
       images: editForm.value.images,
       status: editForm.value.status,
