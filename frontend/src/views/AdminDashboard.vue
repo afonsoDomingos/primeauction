@@ -193,6 +193,7 @@
                 <input 
                   type="text" 
                   v-model="form.title" 
+                  @change="handleTitleChange"
                   class="form-input" 
                   placeholder="Nome do item" 
                   list="car-names-list"
@@ -1921,15 +1922,96 @@ const isAutomotiveCategory = computed(() => {
   return isVeiculos || hasAutomotiveFlag;
 });
 
+// Vehicle data (loaded from backend or default)
+const vehicleMakes = ref([]);
+const vehicleColors = ref([]);
+const vehicleFeatures = ref([]);
+
+// Load vehicle data from backend
+const loadVehicleData = async () => {
+  try {
+    const res = await axios.get(`${apiUrl}/api/vehicles/data`);
+    if (res.data) {
+      vehicleMakes.value = res.data.vehicleMakes || [];
+      vehicleColors.value = res.data.vehicleColors || [];
+      vehicleFeatures.value = res.data.vehicleFeatures || [];
+    }
+  } catch (err) {
+    console.error('Failed to load vehicle data:', err);
+    // Use fallback data if backend fails
+    vehicleMakes.value = [
+      { name: 'Toyota', popularModels: ['Corolla', 'Hilux', 'RAV4', 'Camry', 'Yaris', 'Land Cruiser', 'Prado', 'Prius', 'Etios', 'Vitz', 'Avanza', 'Fortuner', 'Hiace', 'Coaster'] },
+      { name: 'Volkswagen', popularModels: ['Golf', 'Polo', 'Tiguan', 'Passat', 'Amarok', 'Touareg', 'Jetta', 'Vento', 'Fox', 'Saveiro', 'T-Cross', 'Nivus', 'T-Roc'] },
+      { name: 'Honda', popularModels: ['Civic', 'CR-V', 'Accord', 'HR-V', 'Jazz', 'Fit', 'City', 'BR-V', 'Odyssey', 'Pilot', 'Ridgeline', 'NSX'] },
+      { name: 'Ford', popularModels: ['Fiesta', 'Focus', 'Ranger', 'Mustang', 'Explorer', 'Transit', 'EcoSport', 'Edge', 'Fusion', 'Mondeo', 'Territory', 'F-150'] },
+      { name: 'BMW', popularModels: ['Série 3', 'Série 5', 'X3', 'X5', 'Série 1', 'X1', 'Série 7', 'X6', 'X7', 'Z4', 'M3', 'M5', 'i3', 'i8'] },
+      { name: 'Mercedes-Benz', popularModels: ['Classe A', 'Classe C', 'Classe E', 'GLC', 'GLE', 'GLB', 'Sprinter', 'Classe B', 'CLA', 'CLS', 'SLK', 'SL', 'G-Class', 'SLS'] },
+      { name: 'Audi', popularModels: ['A3', 'A4', 'A6', 'Q3', 'Q5', 'Q7', 'Q2', 'Q8', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'RS3', 'RS5', 'RS6', 'RS7', 'R8', 'e-tron', 'TT', 'R8'] },
+      { name: 'Nissan', popularModels: ['Qashqai', 'Juke', 'X-Trail', 'Navara', '370Z', 'Note', 'Micra', 'Leaf', 'Patrol', 'GT-R', 'Sentra', 'Altima', 'Versa', 'Frontier'] },
+      { name: 'Hyundai', popularModels: ['i20', 'i30', 'Tucson', 'Santa Fe', 'ix35', 'Creta', 'Elantra', 'Sonata', 'Accent', 'Veloster', 'Genesis', 'Kona', 'Ioniq', 'Ioniq 5', 'Venue'] },
+      { name: 'Kia', popularModels: ['Picanto', 'Rio', 'Ceed', 'Sportage', 'Sorento', 'Stonic', 'Seltos', 'Carnival', 'Soul', 'Optima', 'Sedona', 'Telluride', 'EV6', 'Stinger'] },
+      { name: 'Renault', popularModels: ['Clio', 'Megane', 'Captur', 'Duster', 'Kangoo', 'Sandero', 'Laguna', 'Fluence', 'Twingo', 'Zoe', 'Kadjar', 'Arkana', 'Austral'] },
+      { name: 'Peugeot', popularModels: ['208', '308', '3008', '2008', '5008', 'Partner', 'Bipper', 'Rifter', '2008', '508', '108', 'e-208', 'e-2008', 'e-308'] },
+      { name: 'Fiat', popularModels: ['Uno', 'Punto', '500', 'Tipo', 'Doblo', 'Fiorino', 'Panda', '500X', '500L', '124 Spider', 'Ducato', 'Scudo', 'Talento'] },
+      { name: 'Suzuki', popularModels: ['Swift', 'Vitara', 'Jimny', 'SX4', 'Baleno', 'Ignis', 'Celerio', 'Alto', 'Wagon R', 'S-Cross', 'Across', 'Grand Vitara', 'XL7'] },
+      { name: 'Mazda', popularModels: ['Mazda2', 'Mazda3', 'CX-5', 'CX-3', 'MX-5', 'MX-30', 'CX-30', 'CX-9', 'CX-8', 'CX-60', '6', 'BT-50', 'Miata'] },
+      { name: 'Mitsubishi', popularModels: ['Lancer', 'ASX', 'Outlander', 'Pajero', 'L200', 'Space Star', 'Eclipse Cross', 'Xpander', 'Attrage', 'Mirage', 'Montero', 'Triton'] },
+      { name: 'Chevrolet', popularModels: ['Onix', 'Cruze', 'Tracker', 'Sonic', 'Cobalt', 'Aveo', 'Spark', 'Malibu', 'Camaro', 'Corvette', 'Silverado', 'Suburban', 'Tahoe', 'Equinox', 'Traverse', 'Blazer'] },
+      { name: 'Land Rover', popularModels: ['Range Rover', 'Discovery', 'Defender', 'Evoque', 'Sport', 'Freelander', 'LR4', 'Velar', 'Range Rover Sport', 'Range Rover Evoque'] },
+      { name: 'Volvo', popularModels: ['XC40', 'XC60', 'XC90', 'V40', 'V60', 'S60', 'S90', 'V90', 'XC90', 'XC70', 'C30', 'S40', 'V70', 'XC90 T8', 'Polestar'] },
+      { name: 'Subaru', popularModels: ['Impreza', 'Forester', 'Outback', 'XV', 'Legacy', 'WRX', 'WRX STI', 'BRZ', 'Ascent', 'Tribeca', 'Levorg', 'Crosstrek', 'Baja'] },
+      { name: 'Jeep', popularModels: ['Wrangler', 'Cherokee', 'Grand Cherokee', 'Renegade', 'Compass', 'Patriot', 'Gladiator', 'Commander', 'Grand Wagoneer', 'Liberty', 'Cherokee'] },
+      { name: 'Dacia', popularModels: ['Sandero', 'Duster', 'Logan', 'Lodgy', 'Dokker', 'Sandero Stepway', 'Lodgy Stepway', 'Jogger', 'Spring'] },
+      { name: 'Lexus', popularModels: ['IS', 'ES', 'GS', 'LS', 'NX', 'UX', 'RX', 'GX', 'LX', 'LC', 'RC', 'LM', 'LF-Ch', 'LC 500h', 'LS 500h'] },
+      { name: 'Infiniti', popularModels: ['Q50', 'Q60', 'Q70', 'QX50', 'QX55', 'QX60', 'QX70', 'QX80', 'FX35', 'FX50', 'G35', 'G37', 'M35', 'M37', 'EX35', 'EX37'] },
+      { name: 'Acura', popularModels: ['ILX', 'TLX', 'RLX', 'RDX', 'MDX', 'NSX', 'ZDX', 'Integra', 'Legend', 'Vigor', 'RSX', 'TSX', 'CL', 'RL'] },
+      { name: 'Seat', popularModels: ['Ibiza', 'Leon', 'Toledo', 'Arona', 'Altea', 'Alhambra', 'Tarraco', 'Ateca', 'Mii', 'Exeo', 'Altea Freetrack'] },
+      { name: 'Skoda', popularModels: ['Fabia', 'Rapid', 'Octavia', 'Superb', 'Yeti', 'Kodiaq', 'Karoq', 'Scala', 'Kamiq', 'Enyaq iV', 'Citigo', 'Roomster'] },
+      { name: 'Mini', popularModels: ['Cooper', 'Cooper S', 'Countryman', 'Clubman', 'Paceman', 'Cabrio', 'Coupe', 'John Cooper Works', 'Rocketman', 'Aceman'] },
+      { name: 'Smart', popularModels: ['Fortwo', 'Forfour', 'Roadster', 'Cabrio', 'eq fortwo', 'eq forfour', 'smart #1', 'smart #3'] }
+    ];
+    vehicleColors.value = ['Branco', 'Preto', 'Cinza', 'Prata', 'Azul', 'Vermelho', 'Verde', 'Amarelo', 'Laranja', 'Bege', 'Marrom', 'Bronze', 'Dourado', 'Roxo'];
+    vehicleFeatures.value = ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Teto Solar', 'Retrovisores Elétricos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Bancos Aquecidos', 'Sistema de Som Premium', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Rebatíveis', 'Keyless Entry', 'Start-Stop', 'Alerta de Ponto Cego', 'Controle de Tração', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'Isofix', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Rodas de Liga Leve', 'Pneus Run-Flat', 'Barra de Reboque', 'Hitch'];
+  }
+};
+
 const availableMakes = computed(() => {
-  const selectedCategory = categories.value.find(cat => cat.name === form.value.category);
-  return selectedCategory && selectedCategory.makes ? selectedCategory.makes : [];
+  // Always use vehicleMakes data (from backend or fallback)
+  return vehicleMakes.value;
 });
 
 const availableModels = computed(() => {
   const selectedMake = availableMakes.value.find(make => make.name === form.value.vehicleSpecs?.make);
   return selectedMake ? selectedMake.popularModels : [];
 });
+
+// Smart filter: auto-fill make and model from title
+const handleTitleChange = () => {
+  const title = form.value.title;
+  if (!title) return;
+  
+  // Try to extract make and model from title
+  const titleWords = title.split(' ');
+  
+  // Check each word against available makes
+  for (const word of titleWords) {
+    const make = availableMakes.value.find(m => m.name.toLowerCase() === word.toLowerCase());
+    if (make) {
+      form.value.vehicleSpecs.make = make.name;
+      
+      // Try to find model from remaining words
+      const remainingWords = titleWords.filter(w => w.toLowerCase() !== word.toLowerCase());
+      for (const modelWord of remainingWords) {
+        const model = make.popularModels.find(m => m.toLowerCase().includes(modelWord.toLowerCase()));
+        if (model) {
+          form.value.vehicleSpecs.model = model;
+          break;
+        }
+      }
+      break;
+    }
+  }
+};
 
 const vehicleYears = computed(() => {
   const currentYear = new Date().getFullYear();
@@ -1939,11 +2021,6 @@ const vehicleYears = computed(() => {
   }
   return years;
 });
-
-const vehicleColors = [
-  'Branco', 'Preto', 'Cinza', 'Prata', 'Azul', 'Vermelho', 'Verde', 
-  'Amarelo', 'Laranja', 'Bege', 'Marrom', 'Bronze', 'Dourado', 'Roxo'
-];
 
 const popularCarNames = [
   'Toyota Corolla', 'Toyota Hilux', 'Toyota RAV4', 'Toyota Camry', 'Toyota Yaris', 'Toyota Land Cruiser', 'Toyota Prado',
@@ -2502,6 +2579,9 @@ onMounted(async () => {
     conditionLevel: null,
     features: []
   };
+  
+  // Load vehicle data
+  loadVehicleData();
   
   fetchData();
   // Load current homepage settings
