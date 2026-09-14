@@ -582,9 +582,9 @@
     <section class="newsletter-section">
       <div class="newsletter-container">
         <div class="newsletter-content">
-          <div class="newsletter-icon">📧</div>
-          <h2 class="newsletter-title">Não perca nenhum leilão!</h2>
-          <p class="newsletter-subtitle">Receba alertas exclusivos de novos leilões e ofertas especiais diretamente no seu e-mail. Junte-se a +2.500 utilizadores.</p>
+          <div class="newsletter-icon">🚗</div>
+          <h2 class="newsletter-title">Não perca o carro dos seus sonhos!</h2>
+          <p class="newsletter-subtitle">Receba alertas exclusivos de novos leilões de veículos e ofertas especiais diretamente no seu e-mail. Junte-se a +2.500 entusiastas de automóveis.</p>
         </div>
         <form @submit.prevent="handleNewsletterSubscribe" class="newsletter-form">
           <div class="newsletter-input-group">
