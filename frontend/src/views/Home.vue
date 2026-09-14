@@ -742,6 +742,7 @@ const formatSelectedDayLabel = (dateKey) => {
 };
 
 const calendarDays = computed(() => {
+  console.log('📅 [DEBUG] Calculando dias do calendário...');
   const days = [];
   const today = new Date();
   const year = today.getFullYear();
@@ -749,9 +750,14 @@ const calendarDays = computed(() => {
   
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const dayNamesShort = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  
+  console.log('📊 [DEBUG] Ano:', year, 'Mês:', month, 'Dias no mês:', daysInMonth);
+  console.log('📊 [DEBUG] allActiveAuctionsRaw:', allActiveAuctionsRaw.value.length);
+  console.log('📊 [DEBUG] upcomingAuctions:', upcomingAuctions.value.length);
 
   // Combine ALL active and upcoming auctions for 100% accurate day counts
   const allAuctions = [...allActiveAuctionsRaw.value, ...upcomingAuctions.value];
+  console.log('📊 [DEBUG] Total auctions para calendário:', allAuctions.length);
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dateObj = new Date(year, month, d);
@@ -774,6 +780,10 @@ const calendarDays = computed(() => {
       count
     });
   }
+  
+  console.log('📅 [DEBUG] Dias do calendário gerados:', days.length);
+  console.log('📅 [DEBUG] Exemplo de dia:', days[0]);
+  
   return days;
 });
 
@@ -942,8 +952,11 @@ const upcomingAuctions = ref([]);
 
 const fetchActiveAuctions = async () => {
   loadingAuctions.value = true;
+  console.log('🔄 [DEBUG] Iniciando carregamento de leilões...');
+  
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    console.log('🔗 [DEBUG] API URL:', apiUrl);
     
     // Pass authentication token so backend can determine if user is admin
     const headers = {};
@@ -951,13 +964,21 @@ const fetchActiveAuctions = async () => {
       headers['Authorization'] = `Bearer ${authStore.token}`;
     }
     
+    console.log('📡 [DEBUG] Chamando API: GET /api/auctions?status=active');
     const res = await axios.get(`${apiUrl}/api/auctions?status=active`, { headers });
+    
+    console.log('📊 [DEBUG] Resposta da API:', res.data);
+    
     if (res.data && res.data.success) {
       const activeData = res.data.data;
+      console.log('✅ [DEBUG] Leilões ativos recebidos:', activeData.length);
+      console.log('📋 [DEBUG] Dados dos leilões:', activeData);
+      
       allActiveAuctionsRaw.value = activeData;
 
       // 1. Vendas em Destaque: Slice top 4
       featuredAuctions.value = activeData.slice(0, 4);
+      console.log('⭐ [DEBUG] Featured auctions:', featuredAuctions.value.length);
 
       // 2. Leilões ao Vivo: Map active auctions to event structure
       liveEvents.value = activeData.map((auction) => {
@@ -982,10 +1003,14 @@ const fetchActiveAuctions = async () => {
           badge: auction.startingPrice > 500000 ? 'Veículo Premium' : ''
         };
       });
+      console.log('🎯 [DEBUG] Live events:', liveEvents.value.length);
 
       // 3. Mais Procurados: Sort by bids count descending and slice top 4
       const sortedByBids = [...activeData].sort((a, b) => (b.bids?.length || 0) - (a.bids?.length || 0));
       comingSoonItems.value = sortedByBids.slice(0, 4);
+      console.log('🔥 [DEBUG] Coming soon items:', comingSoonItems.value.length);
+    } else {
+      console.warn('⚠️ [DEBUG] API retornou success=false:', res.data);
     }
 
     // Load upcoming auctions
@@ -995,19 +1020,24 @@ const fetchActiveAuctions = async () => {
         headers['Authorization'] = `Bearer ${authStore.token}`;
       }
       
+      console.log('📡 [DEBUG] Chamando API: GET /api/auctions?status=upcoming');
       const resUpcoming = await axios.get(`${apiUrl}/api/auctions?status=upcoming`, { headers });
       if (resUpcoming.data && resUpcoming.data.success) {
         upcomingAuctions.value = resUpcoming.data.data;
+        console.log('📅 [DEBUG] Upcoming auctions:', upcomingAuctions.value.length);
       }
     } catch (errUpcoming) {
-      console.error('Failed to load upcoming auctions:', errUpcoming);
+      console.error('❌ [DEBUG] Failed to load upcoming auctions:', errUpcoming);
     }
 
 
   } catch (err) {
-    console.error('Failed to load active auctions:', err);
+    console.error('❌ [DEBUG] Failed to load active auctions:', err);
+    console.error('❌ [DEBUG] Error details:', err.message);
+    console.error('❌ [DEBUG] Error response:', err.response?.data);
   } finally {
     loadingAuctions.value = false;
+    console.log('✅ [DEBUG] Carregamento finalizado. loadingAuctions:', loadingAuctions.value);
   }
 };
 
