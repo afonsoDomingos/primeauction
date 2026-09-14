@@ -282,9 +282,10 @@ O sistema foi desenhado para ser facilmente extensível:
 ## ✅ Status da Implementação
 
 - ✅ Backend - Modelos atualizados (incluindo conditionLevel)
-- ✅ Backend - Dados de veículos criados
+- ✅ Backend - Dados de veículos criados (32 marcas, 150+ modelos)
 - ✅ Backend - Sistema de níveis de estado criado
 - ✅ Backend - Dados de características por marca criados
+- ✅ Backend - Sugestões de preço por modelo criadas
 - ✅ Backend - Controllers atualizados (incluindo filtros na API + faixa de preço e ano)
 - ✅ Backend - Rotas adicionadas
 - ✅ Frontend - AdminDashboard com campos de veículo
@@ -293,6 +294,9 @@ O sistema foi desenhado para ser facilmente extensível:
 - ✅ Frontend - Auto-preenchimento de características por tipo de carroçaria
 - ✅ Frontend - Auto-preenchimento ao aprovar proposta
 - ✅ Frontend - Botão "Limpar Todas" para características
+- ✅ Frontend - Auto-sugestão de preço ao selecionar modelo
+- ✅ Frontend - 32 marcas disponíveis (incluindo Lexus, Infiniti, Acura, Seat, Skoda, Mini, Smart)
+- ✅ Frontend - 8-15 modelos por marca (antes: 6-7)
 - ✅ Frontend - Estilos responsivos
 - ✅ Frontend - Funcionalidades dinâmicas
 - ✅ Frontend - Filtros na página de leilões implementados
@@ -305,4 +309,4 @@ O sistema foi desenhado para ser facilmente extensível:
 - ⏳ Frontend - Exibição de especificações em detalhes (próximo passo)
 - ⏳ Frontend - Formulário de proposta com campos de veículo (próximo passo)
 
-O sistema está pronto para uso básico no painel de administração, filtros de veículos estão funcionando na página de leilões, e a página inicial está otimizada para o nicho de automóveis. O sistema de níveis de estado está implementado com modal informativo para o administrador. O auto-preenchimento de características por marca e tipo economiza tempo significativo do administrador. As próximas etapas serão implementar a exibição de especificações na página de detalhes e o formulário de proposta com campos de veículo.
+O sistema está pronto para uso básico no painel de administração, filtros de veículos estão funcionando na página de leilões, e a página inicial está otimizada para o nicho de automóveis. O sistema de níveis de estado está implementado com modal informativo para o administrador. O auto-preenchimento de características por marca e tipo economiza tempo significativo do administrador. Os selects de veículos foram melhorados com mais modelos e sugestão automática de preço baseada no mercado. As próximas etapas serão implementar a exibição de especificações na página de detalhes e o formulário de proposta com campos de veículo.
