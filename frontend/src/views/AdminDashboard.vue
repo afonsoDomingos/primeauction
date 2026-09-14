@@ -292,12 +292,14 @@
                     placeholder="Selecione ou digite o ano"
                     min="1990"
                     :max="new Date().getFullYear() + 1"
+                    @blur="validateYear"
                   />
                   <datalist id="years-list">
                     <option v-for="year in vehicleYears" :key="year" :value="year">
                       {{ year }}
                     </option>
                   </datalist>
+                  <small v-if="yearError" class="form-error">{{ yearError }}</small>
                 </div>
               </div>
 
@@ -308,9 +310,11 @@
                     type="text" 
                     v-model="form.vehicleSpecs.mileageDisplay"
                     @input="handleMileageInput"
+                    @blur="validateMileage"
                     class="form-input" 
                     placeholder="Ex: 50.000"
                   />
+                  <small v-if="mileageError" class="form-error">{{ mileageError }}</small>
                 </div>
                 
                 <div class="form-group">
@@ -1972,6 +1976,51 @@ const popularCarNames = [
   'Smart Fortwo', 'Smart Forfour'
 ];
 
+// Validation state
+const yearError = ref('');
+const mileageError = ref('');
+
+const validateYear = () => {
+  const year = form.value.vehicleSpecs.year;
+  const currentYear = new Date().getFullYear();
+  
+  if (!year) {
+    yearError.value = '';
+    return;
+  }
+  
+  const yearNum = parseInt(year);
+  
+  if (yearNum < 1990) {
+    yearError.value = 'Ano deve ser 1990 ou mais recente';
+    form.value.vehicleSpecs.year = 1990;
+  } else if (yearNum > currentYear + 1) {
+    yearError.value = `Ano não pode ser maior que ${currentYear + 1}`;
+    form.value.vehicleSpecs.year = currentYear + 1;
+  } else {
+    yearError.value = '';
+  }
+};
+
+const validateMileage = () => {
+  const mileage = form.value.vehicleSpecs.mileage;
+  
+  if (!mileage) {
+    mileageError.value = '';
+    return;
+  }
+  
+  if (mileage < 0) {
+    mileageError.value = 'Quilometragem não pode ser negativa';
+    form.value.vehicleSpecs.mileage = 0;
+  } else if (mileage > 500000) {
+    mileageError.value = 'Quilometragem muito alta (máximo: 500.000 km)';
+    form.value.vehicleSpecs.mileage = 500000;
+  } else {
+    mileageError.value = '';
+  }
+};
+
 const descriptionTemplates = [
   'Excelente estado de conservação. Unico dono. Manutenção em concessionária. Sem acidentes. Todos os livros de manutenção.',
   'Veículo muito bem cuidado. Quilometragem baixa. Ar condicionado e direção assistida. Bancos em bom estado.',
@@ -3228,6 +3277,13 @@ const formatTicketDate = (dateString) => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.form-error {
+  display: block;
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
 }
 
 /* ── Table ── */
