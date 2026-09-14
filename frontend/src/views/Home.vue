@@ -51,7 +51,11 @@
       <!-- Floating Ribbon Bar at the bottom of Hero -->
       <div class="hero-floating-ribbon animate-fade-in">
         <div class="ribbon-item">
-          <span class="ribbon-icon">⚡</span>
+          <span class="ribbon-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ribbon-icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </span>
           <div class="ribbon-text">
             <strong>Liquidação Instantânea</strong>
             <span>Pagamento direto via Vodacom M-Pesa</span>
@@ -189,7 +193,12 @@
       <div class="container">
         <div class="calendar-bar-header">
           <div class="calendar-bar-title-group">
-            <span class="calendar-bar-badge">📅 PESQUISA POR DIA DE LEILÃO</span>
+            <span class="calendar-bar-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="calendar-icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              PESQUISA POR DIA DE LEILÃO
+            </span>
             <h3 class="calendar-bar-title">Calendário Semanal & Mensal</h3>
           </div>
           <div class="calendar-bar-actions">
@@ -308,7 +317,11 @@
                     <span class="detail-text">{{ event.code }}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-icon">🔨</span>
+                    <span class="detail-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                    </span>
                     <span class="detail-text">{{ event.type }}</span>
                   </div>
                   
@@ -379,10 +392,16 @@
               <!-- Badges Overlay -->
               <div class="badge-overlay-container">
                 <span class="badge-item date-badge">
-                  📅 {{ formatBadgeDate(auction.endTime) }}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {{ formatBadgeDate(auction.endTime) }}
                 </span>
                 <span class="badge-item bid-badge">
-                  🔨 {{ auction.bids?.length || 0 }}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  {{ auction.bids?.length || 0 }}
                 </span>
                 <button 
                   @click.stop="toggleLike(auction._id)" 
@@ -503,7 +522,12 @@
             
             <div class="interest-info">
               <h3 class="interest-title">{{ item.title }}</h3>
-              <p class="interest-sub">🔨 {{ item.bids?.length || 0 }} Lances &bull; Lance Atual: <strong>{{ formatCurrency(item.currentPrice) }}</strong></p>
+              <p class="interest-sub">
+                <svg xmlns="http://www.w3.org/2000/svg" class="interest-icon-inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                {{ item.bids?.length || 0 }} Lances &bull; Lance Atual: <strong>{{ formatCurrency(item.currentPrice) }}</strong>
+              </p>
             </div>
           </div>
         </div>
@@ -1120,6 +1144,35 @@ onUnmounted(() => {
   border-radius: 3px;
   background: white;
   padding: 1px 4px;
+}
+
+.calendar-icon-small {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}
+
+.ribbon-icon-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.detail-icon-svg {
+  width: 16px;
+  height: 16px;
+}
+
+.badge-icon {
+  width: 12px;
+  height: 12px;
+  margin-right: 4px;
+}
+
+.interest-icon-inline {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  vertical-align: middle;
 }
 
 .hero-content {
