@@ -2035,63 +2035,26 @@ const generateDescription = () => {
   const vs = form.value.vehicleSpecs;
   let description = '';
   
-  // Vehicle name
+  // Vehicle name (short)
   if (vs.make && vs.model) {
     description += `${vs.make} ${vs.model}`;
     if (vs.year) description += ` ${vs.year}`;
-    description += '. ';
-  }
-  
-  // Condition
-  if (vs.condition) {
-    const conditionText = {
-      'Novo': 'Veículo novo, nunca usado.',
-      'Seminovo': 'Veículo seminovo em excelentes condições.',
-      'Usado': 'Veículo usado bem cuidado.',
-      'Reformado': 'Veículo reformado em boas condições.',
-      'Para Peças': 'Veículo para peças ou desmantelamento.'
-    };
-    description += conditionText[vs.condition] || '';
-    description += ' ';
   }
   
   // Mileage
   if (vs.mileage) {
-    description += `Quilometragem: ${vs.mileage.toLocaleString('pt-MZ')} km. `;
+    description += ` - ${vs.mileage.toLocaleString('pt-MZ')} km`;
   }
   
-  // Features
+  // Condition
+  if (vs.condition) {
+    description += ` - ${vs.condition}`;
+  }
+  
+  // Key features (max 3)
   if (vs.features && vs.features.length > 0) {
-    const importantFeatures = vs.features.slice(0, 5);
-    description += `Equipado com: ${importantFeatures.join(', ')}. `;
-  }
-  
-  // Additional details
-  if (vs.fuelType) {
-    description += `Combustível: ${vs.fuelType}. `;
-  }
-  
-  if (vs.transmission) {
-    description += `Câmbio: ${vs.transmission}. `;
-  }
-  
-  if (vs.color) {
-    description += `Cor: ${vs.color}. `;
-  }
-  
-  if (vs.bodyType) {
-    description += `Tipo: ${vs.bodyType}. `;
-  }
-  
-  // Condition level
-  if (vs.conditionLevel) {
-    const levelText = {
-      1: 'Estado: Excelente (Nível 1).',
-      2: 'Estado: Bom (Nível 2).',
-      3: 'Estado: Regular (Nível 3).',
-      4: 'Estado: Para Peças (Nível 4).'
-    };
-    description += levelText[vs.conditionLevel] || '';
+    const keyFeatures = vs.features.slice(0, 3);
+    description += `. ${keyFeatures.join(', ')}`;
   }
   
   // Set the description
