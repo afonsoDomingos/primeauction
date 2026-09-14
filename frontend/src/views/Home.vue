@@ -430,12 +430,8 @@
         <div v-else-if="upcomingAuctions.length === 0" class="premium-empty-state">
           <div class="empty-state-glow"></div>
           <div class="empty-state-inner">
-            <div class="empty-icon-pulse">
-              <span class="icon-pulse-shadow" style="background-color: rgba(26, 86, 219, 0.2);"></span>
-              <span class="icon-pulse-core">📅</span>
-            </div>
-            <h3 class="empty-title">Sem Leilões Agendados</h3>
-            <p class="empty-text">Não há novos leilões agendados para os próximos dias. Acompanhe o nosso calendário para ficar a par das novidades!</p>
+            <h3 class="empty-title">Sem Leilões</h3>
+            <p class="empty-text">Acompanhe o calendário para novidades!</p>
             <div class="empty-actions">
               <router-link to="/calendario" class="btn btn-empty-action">Ver Calendário</router-link>
             </div>
