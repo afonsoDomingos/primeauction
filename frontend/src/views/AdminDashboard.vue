@@ -1513,7 +1513,7 @@ const form = ref({
   participationFee: 1000,
   startTime: '',
   endTime: '',
-  category: '',
+  category: 'Veículos',
   location: 'Maputo',
   vehicleSpecs: {
     make: null,
@@ -2376,7 +2376,7 @@ const handleCreate = async () => {
       proposalBeingConverted.value = null;
     }
 
-    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, participationFee: 1000, startTime: '', endTime: '', category: '', location: 'Maputo' };
+    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, participationFee: 1000, startTime: '', endTime: '', category: 'Veículos', location: 'Maputo', vehicleSpecs: { make: null, model: null, year: null, mileage: null, fuelType: null, transmission: null, color: null, bodyType: null, condition: null, conditionLevel: null, features: [] } };
     showAlert('Leilão criado com sucesso! ✓');
     fetchData();
   } catch (err) {
