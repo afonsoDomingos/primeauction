@@ -1184,9 +1184,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-<<<<<<< HEAD
-/* Estilos mantidos do original */
-=======
 .home-container {
   width: 100%;
 }
@@ -3799,5 +3796,4 @@ onUnmounted(() => {
 .cal-day-card.is-active .cal-day-badge {
   background: #1a56db;
 }
->>>>>>> parent of 9b7aff4 (Remover seção de newsletter da página inicial para reduzir informação)
 </style>
