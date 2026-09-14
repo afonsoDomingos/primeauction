@@ -190,7 +190,19 @@
             <div class="form-row">
               <div class="form-group half">
                 <label class="form-label">Título</label>
-                <input type="text" v-model="form.title" class="form-input" placeholder="Nome do item" required />
+                <input 
+                  type="text" 
+                  v-model="form.title" 
+                  class="form-input" 
+                  placeholder="Nome do item" 
+                  list="car-names-list"
+                  required 
+                />
+                <datalist id="car-names-list">
+                  <option v-for="carName in popularCarNames" :key="carName" :value="carName">
+                    {{ carName }}
+                  </option>
+                </datalist>
               </div>
               <div class="form-group half">
                 <label class="form-label">Preço Inicial (MZN)</label>
@@ -1855,6 +1867,37 @@ const vehicleYears = computed(() => {
 const vehicleColors = [
   'Branco', 'Preto', 'Cinza', 'Prata', 'Azul', 'Vermelho', 'Verde', 
   'Amarelo', 'Laranja', 'Bege', 'Marrom', 'Bronze', 'Dourado', 'Roxo'
+];
+
+const popularCarNames = [
+  'Toyota Corolla', 'Toyota Hilux', 'Toyota RAV4', 'Toyota Camry', 'Toyota Yaris', 'Toyota Land Cruiser', 'Toyota Prado',
+  'Volkswagen Golf', 'Volkswagen Polo', 'Volkswagen Tiguan', 'Volkswagen Passat', 'Volkswagen Amarok', 'Volkswagen Touareg',
+  'Honda Civic', 'Honda CR-V', 'Honda Accord', 'Honda HR-V', 'Honda Jazz', 'Honda Fit',
+  'Ford Fiesta', 'Ford Focus', 'Ford Ranger', 'Ford Mustang', 'Ford Explorer', 'Ford EcoSport',
+  'BMW Série 3', 'BMW Série 5', 'BMW X3', 'BMW X5', 'BMW X1', 'BMW X7',
+  'Mercedes-Benz Classe A', 'Mercedes-Benz Classe C', 'Mercedes-Benz Classe E', 'Mercedes-Benz GLC', 'Mercedes-Benz GLE',
+  'Audi A3', 'Audi A4', 'Audi A6', 'Audi Q3', 'Audi Q5', 'Audi Q7',
+  'Nissan Qashqai', 'Nissan Juke', 'Nissan X-Trail', 'Nissan Navara', 'Nissan 370Z',
+  'Hyundai i20', 'Hyundai i30', 'Hyundai Tucson', 'Hyundai Santa Fe', 'Hyundai Creta',
+  'Kia Picanto', 'Kia Rio', 'Kia Ceed', 'Kia Sportage', 'Kia Sorento',
+  'Renault Clio', 'Renault Megane', 'Renault Captur', 'Renault Duster',
+  'Peugeot 208', 'Peugeot 308', 'Peugeot 3008', 'Peugeot 2008',
+  'Fiat Uno', 'Fiat Punto', 'Fiat 500', 'Fiat Tipo',
+  'Suzuki Swift', 'Suzuki Vitara', 'Suzuki Jimny',
+  'Mazda Mazda2', 'Mazda Mazda3', 'Mazda CX-5', 'Mazda MX-5',
+  'Mitsubishi Lancer', 'Mitsubishi ASX', 'Mitsubishi Outlander', 'Mitsubishi Pajero',
+  'Chevrolet Onix', 'Chevrolet Cruze', 'Chevrolet Tracker', 'Chevrolet Camaro',
+  'Land Rover Range Rover', 'Land Rover Discovery', 'Land Rover Defender',
+  'Volvo XC40', 'Volvo XC60', 'Volvo XC90',
+  'Subaru Impreza', 'Subaru Forester', 'Subaru Outback',
+  'Jeep Wrangler', 'Jeep Cherokee', 'Jeep Grand Cherokee',
+  'Lexus IS', 'Lexus ES', 'Lexus RX',
+  'Infiniti Q50', 'Infiniti Q60', 'Infiniti QX50',
+  'Acura ILX', 'Acura TLX', 'Acura RDX',
+  'Seat Ibiza', 'Seat Leon', 'Seat Ateca',
+  'Skoda Fabia', 'Skoda Octavia', 'Skoda Superb',
+  'Mini Cooper', 'Mini Countryman', 'Mini Clubman',
+  'Smart Fortwo', 'Smart Forfour'
 ];
 
 const commonVehicleFeatures = [
