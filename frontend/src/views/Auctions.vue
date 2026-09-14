@@ -67,26 +67,33 @@
       <!-- Filters Bar (Category Chips & Location Select) -->
       <div class="filters-wrapper">
         <div class="categories-bar">
-          <button 
-            @click="selectCategory('')" 
-            class="category-chip" 
+          <button
+            @click="selectCategory('')"
+            class="category-chip"
             :class="{ active: !route.query.category }"
           >
-            <span>🏷️ Todos</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            <span>Todos</span>
           </button>
-          <button 
-            v-for="cat in categories" 
-            :key="cat._id" 
-            @click="selectCategory(cat.name)" 
-            class="category-chip" 
+          <button
+            v-for="cat in categories"
+            :key="cat._id"
+            @click="selectCategory(cat.name)"
+            class="category-chip"
             :class="{ active: route.query.category === cat.name }"
           >
-            <span>{{ getCategoryEmoji(cat.name) }} {{ cat.name }}</span>
+            <span v-html="getCategoryIcon(getCategoryEmoji(cat.name))"></span>
+            <span>{{ cat.name }}</span>
           </button>
         </div>
 
         <div class="location-filter-box">
-          <span class="location-icon">📍</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="location-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
           <select :value="route.query.location || ''" @change="onLocationChange" class="location-select">
             <option value="">Todas as Províncias</option>
             <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
@@ -97,7 +104,13 @@
       <!-- Vehicle Filters (shown only for automotive category) -->
       <div v-if="isAutomotiveCategory" class="vehicle-filters-section">
         <div class="vehicle-filters-header">
-          <h4 class="vehicle-filters-title">🚗 Filtros de Veículo</h4>
+          <h4 class="vehicle-filters-title">
+            <svg xmlns="http://www.w3.org/2000/svg" class="vehicle-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Filtros de Veículo
+          </h4>
           <button @click="clearVehicleFilters" class="clear-vehicle-filters" v-if="hasVehicleFilters">
             Limpar Filtros
           </button>
@@ -473,13 +486,26 @@ const getCountdownText = (targetDateString) => {
 
 const getCategoryEmoji = (name) => {
   const norm = name.toLowerCase();
-  if (norm.includes('veiculo') || norm.includes('carro') || norm.includes('moto') || norm.includes('automovel')) return '🚗';
-  if (norm.includes('imovel') || norm.includes('casa') || norm.includes('apartamento') || norm.includes('equipamento')) return '🏠';
-  if (norm.includes('eletronica') || norm.includes('tecnologia') || norm.includes('computador') || norm.includes('telemovel')) return '💻';
-  if (norm.includes('mobiliario') || norm.includes('decoracao') || norm.includes('moveis')) return '🪑';
-  if (norm.includes('maquinaria') || norm.includes('industrial') || norm.includes('fabrica')) return '🏭';
-  if (norm.includes('outro') || norm.includes('geral') || norm.includes('bens')) return '📦';
-  return '🏷️';
+  if (norm.includes('veiculo') || norm.includes('carro') || norm.includes('moto') || norm.includes('automovel')) return 'car';
+  if (norm.includes('imovel') || norm.includes('casa') || norm.includes('apartamento') || norm.includes('equipamento')) return 'home';
+  if (norm.includes('eletronica') || norm.includes('tecnologia') || norm.includes('computador') || norm.includes('telemovel')) return 'electronics';
+  if (norm.includes('mobiliario') || norm.includes('decoracao') || norm.includes('moveis')) return 'furniture';
+  if (norm.includes('maquinaria') || norm.includes('industrial') || norm.includes('fabrica')) return 'industry';
+  if (norm.includes('outro') || norm.includes('geral') || norm.includes('bens')) return 'package';
+  return 'tag';
+};
+
+const getCategoryIcon = (emojiType) => {
+  const icons = {
+    car: '<svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /><path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" /></svg>',
+    home: '<svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>',
+    electronics: '<svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>',
+    furniture: '<svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>',
+    industry: '<svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>',
+    package: '<svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>',
+    tag: '<svg xmlns="http://www.w3.org/2000/svg" class="category-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>'
+  };
+  return icons[emojiType] || icons.tag;
 };
 
 // Vehicle filter computed properties
@@ -719,6 +745,26 @@ onUnmounted(() => {
   white-space: nowrap;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.category-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+.location-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
+}
+
+.vehicle-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
 }
 
 .category-chip:hover {

@@ -63,7 +63,9 @@
         </div>
         <div class="ribbon-divider"></div>
         <div class="ribbon-item">
-          <span class="ribbon-icon">🛡️</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="ribbon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
           <div class="ribbon-text">
             <strong>100% Verificado</strong>
             <span>Plataforma e artigos auditados</span>
@@ -71,7 +73,9 @@
         </div>
         <div class="ribbon-divider"></div>
         <div class="ribbon-item">
-          <span class="ribbon-icon">💎</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="ribbon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
           <div class="ribbon-text">
             <strong>Leilões de Luxo</strong>
             <span>Oportunidades únicas em Moçambique</span>
@@ -132,14 +136,62 @@
         
         <div class="quick-categories">
           <span class="quick-categories-label">Marcas populares:</span>
-          <router-link to="/auctions?category=Veículos&make=Toyota" class="quick-cat-btn">🚗 Toyota</router-link>
-          <router-link to="/auctions?category=Veículos&make=Volkswagen" class="quick-cat-btn">🚙 Volkswagen</router-link>
-          <router-link to="/auctions?category=Veículos&make=Honda" class="quick-cat-btn">🚗 Honda</router-link>
-          <router-link to="/auctions?category=Veículos&make=Ford" class="quick-cat-btn">🚙 Ford</router-link>
-          <router-link to="/auctions?category=Veículos&make=BMW" class="quick-cat-btn">🚘 BMW</router-link>
-          <router-link to="/auctions?category=Veículos&make=Mercedes-Benz" class="quick-cat-btn">🚙 Mercedes</router-link>
-          <router-link to="/auctions?category=Veículos&make=Nissan" class="quick-cat-btn">🚗 Nissan</router-link>
-          <router-link to="/auctions?category=Veículos&make=Hyundai" class="quick-cat-btn">🚙 Hyundai</router-link>
+          <router-link to="/auctions?category=Veículos&make=Toyota" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Toyota
+          </router-link>
+          <router-link to="/auctions?category=Veículos&make=Volkswagen" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Volkswagen
+          </router-link>
+          <router-link to="/auctions?category=Veículos&make=Honda" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Honda
+          </router-link>
+          <router-link to="/auctions?category=Veículos&make=Ford" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Ford
+          </router-link>
+          <router-link to="/auctions?category=Veículos&make=BMW" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            BMW
+          </router-link>
+          <router-link to="/auctions?category=Veículos&make=Mercedes-Benz" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Mercedes
+          </router-link>
+          <router-link to="/auctions?category=Veículos&make=Nissan" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Nissan
+          </router-link>
+          <router-link to="/auctions?category=Veículos&make=Hyundai" class="quick-cat-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="quick-cat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+            </svg>
+            Hyundai
+          </router-link>
         </div>
       </div>
     </section>
@@ -185,7 +237,12 @@
       <div class="container">
         <div class="calendar-bar-header">
           <div class="calendar-bar-title-group">
-            <span class="calendar-bar-badge">📅 PESQUISA POR DIA DE LEILÃO</span>
+            <span class="calendar-bar-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="calendar-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              PESQUISA POR DIA DE LEILÃO
+            </span>
             <h3 class="calendar-bar-title">Calendário Semanal & Mensal</h3>
           </div>
           <div class="calendar-bar-actions">
@@ -292,15 +349,23 @@
                 <div class="event-details">
                   <h4 class="event-card-title" @click="goToAuction(event.id)">{{ event.title }}</h4>
                   <div class="detail-item">
-                    <span class="detail-icon">🚗</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+                    </svg>
                     <span class="detail-text"><strong>{{ event.lots }}</strong> Lotes</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-icon">📍</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                     <span class="detail-text">{{ event.location }}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-icon">📄</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                     <span class="detail-text">{{ event.code }}</span>
                   </div>
                   <div class="detail-item">
@@ -390,13 +455,16 @@
                   </svg>
                   {{ auction.bids?.length || 0 }}
                 </span>
-                <button 
-                  @click.stop="toggleLike(auction._id)" 
+                <button
+                  @click.stop="toggleLike(auction._id)"
                   class="badge-item heart-badge"
                   :class="{ liked: isLiked(auction._id) }"
                   aria-label="Gostar"
                 >
-                  ❤️ {{ getLikesCount(auction._id) }}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="heart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  {{ getLikesCount(auction._id) }}
                 </button>
               </div>
             </div>
@@ -491,7 +559,13 @@
           >
             <div class="interest-img-wrapper">
               <img :src="item.imageUrl" :alt="item.title" class="interest-img" />
-              <span class="coming-soon-badge" style="background-color: #e31b23;">🔥 Popular</span>
+              <span class="coming-soon-badge" style="background-color: #e31b23;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+                </svg>
+                Popular
+              </span>
               
               <button 
                 @click.stop="toggleLike(item._id)" 
@@ -937,7 +1011,7 @@ const toggleLike = async (id) => {
     if (res.data && res.data.success) {
       if (res.data.isAdded) {
         userWatchlist.value.push(id);
-        toastStore.add('Adicionado aos favoritos! ❤️', 'success');
+        toastStore.add('Adicionado aos favoritos!', 'success');
       } else {
         userWatchlist.value = userWatchlist.value.filter(item => item !== id);
         toastStore.add('Removido dos favoritos.', 'success');
@@ -1280,7 +1354,9 @@ onUnmounted(() => {
 }
 
 .ribbon-icon {
-  font-size: 1.25rem;
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
 }
 
 .ribbon-text {
@@ -1798,9 +1874,36 @@ onUnmounted(() => {
 }
 
 .detail-icon {
-  font-size: 0.95rem;
-  width: 20px;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
   display: inline-block;
+}
+
+.badge-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.calendar-badge-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
+}
+
+.quick-cat-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
+}
+
+.heart-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 
 .detail-text {
