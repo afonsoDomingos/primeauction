@@ -445,7 +445,22 @@
 
             <div class="form-group">
               <label class="form-label">Descrição</label>
-              <textarea v-model="form.description" class="form-input" rows="3" placeholder="Descreva o item..." required></textarea>
+              <textarea 
+                v-model="form.description" 
+                class="form-input" 
+                rows="3" 
+                placeholder="Descreva o item..." 
+                list="description-templates"
+                required
+              ></textarea>
+              <datalist id="description-templates">
+                <option v-for="template in descriptionTemplates" :key="template" :value="template">
+                  {{ template.substring(0, 80) }}...
+                </option>
+              </datalist>
+              <button type="button" @click="generateDescription" class="btn-sm" style="margin-top: 0.5rem;">
+                📝 Gerar descrição automática
+              </button>
             </div>
 
             <div class="form-group-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
@@ -1903,6 +1918,24 @@ const popularCarNames = [
   'Smart Fortwo', 'Smart Forfour'
 ];
 
+const descriptionTemplates = [
+  'Excelente estado de conservação. Unico dono. Manutenção em concessionária. Sem acidentes. Todos os livros de manutenção.',
+  'Veículo muito bem cuidado. Quilometragem baixa. Ar condicionado e direção assistida. Bancos em bom estado.',
+  'Carro em perfeitas condições mecânicas. Pneus novos. Revisão recente. Documentação em dia.',
+  'Veículo seminovo com garantia de concessionária. Apenas donos locais. Nunca envolvido em acidentes.',
+  'Carro familiar ideal. Espaçoso e confortável. Economia de combustível excelente. Ideal para cidade e viagens.',
+  'SUV completo com todas as extras. Teto solar, navegação GPS, câmera de ré. Tracção 4x4. Pronto para off-road.',
+  'Carro desportivo bem mantido. Alto desempenho. Suspensão esportiva. Escapamento esportivo. Interior premium.',
+  'Veículo de trabalho em excelentes condições. Caixa de carga limpa. Baixa quilometragem. Ideal para profissionais.',
+  'Carro urbano perfeito. Estacionamento fácil. Economia de combustível. Ideal para cidade. Manutenção económica.',
+  'Veículo premium com acabamento luxuoso. Bancos em couro. Sistema de som premium. Navegação GPS. Teto solar panorâmico.',
+  'Carro de colecionador. Estado impecável. Quilometragem extremamente baixa. Documentação completa. Original.',
+  'Veículo conversível em perfeitas condições. Capota funcionando perfeitamente. Interior protegido do sol.',
+  'Carro híbrido eficiente. Consumo muito baixo. Bateria em excelentes condições. Ideal para cidade.',
+  'Veículo elétrico com autonomia excelente. Carregador doméstico incluído. Sem manutenção de combustível.',
+  'Carro off-road preparado. Suspensão elevada. Pneus off-road. Proteções subchassi. Pronto para aventuras.'
+];
+
 const commonVehicleFeatures = [
   'Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro',
   'Teto Solar', 'Retrovisores Elétricos', 'Sensor de Estacionamento', 'Câmera de Ré',
@@ -1996,6 +2029,75 @@ const handleBodyTypeChange = () => {
 const clearFeatures = () => {
   form.value.vehicleSpecs.features = [];
   toastStore.add('Todas as características foram limpas!', 'success', 2000);
+};
+
+const generateDescription = () => {
+  const vs = form.value.vehicleSpecs;
+  let description = '';
+  
+  // Vehicle name
+  if (vs.make && vs.model) {
+    description += `${vs.make} ${vs.model}`;
+    if (vs.year) description += ` ${vs.year}`;
+    description += '. ';
+  }
+  
+  // Condition
+  if (vs.condition) {
+    const conditionText = {
+      'Novo': 'Veículo novo, nunca usado.',
+      'Seminovo': 'Veículo seminovo em excelentes condições.',
+      'Usado': 'Veículo usado bem cuidado.',
+      'Reformado': 'Veículo reformado em boas condições.',
+      'Para Peças': 'Veículo para peças ou desmantelamento.'
+    };
+    description += conditionText[vs.condition] || '';
+    description += ' ';
+  }
+  
+  // Mileage
+  if (vs.mileage) {
+    description += `Quilometragem: ${vs.mileage.toLocaleString('pt-MZ')} km. `;
+  }
+  
+  // Features
+  if (vs.features && vs.features.length > 0) {
+    const importantFeatures = vs.features.slice(0, 5);
+    description += `Equipado com: ${importantFeatures.join(', ')}. `;
+  }
+  
+  // Additional details
+  if (vs.fuelType) {
+    description += `Combustível: ${vs.fuelType}. `;
+  }
+  
+  if (vs.transmission) {
+    description += `Câmbio: ${vs.transmission}. `;
+  }
+  
+  if (vs.color) {
+    description += `Cor: ${vs.color}. `;
+  }
+  
+  if (vs.bodyType) {
+    description += `Tipo: ${vs.bodyType}. `;
+  }
+  
+  // Condition level
+  if (vs.conditionLevel) {
+    const levelText = {
+      1: 'Estado: Excelente (Nível 1).',
+      2: 'Estado: Bom (Nível 2).',
+      3: 'Estado: Regular (Nível 3).',
+      4: 'Estado: Para Peças (Nível 4).'
+    };
+    description += levelText[vs.conditionLevel] || '';
+  }
+  
+  // Set the description
+  form.value.description = description.trim();
+  
+  toastStore.add('Descrição gerada automaticamente!', 'success', 2000);
 };
 
 const handleModelChange = () => {
@@ -3237,6 +3339,15 @@ const formatTicketDate = (dateString) => {
   padding: 0.3rem 0.75rem;
   font-size: 0.75rem;
   border-radius: var(--radius-md);
+  background-color: var(--btn-primary-bg);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-sm:hover {
+  background-color: #1e40af;
 }
 
 .btn-warning {
