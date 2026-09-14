@@ -60,6 +60,7 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/vehicles', require('./routes/vehicles'));
+app.use('/api/partners', require('./routes/partners'));
 
 // Socket.io logic
 io.on('connection', (socket) => {

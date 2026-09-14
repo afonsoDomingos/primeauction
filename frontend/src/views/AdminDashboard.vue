@@ -1451,13 +1451,6 @@ const toastStore = useToastStore();
 const users = ref([]);
 
 // ── Partners ──
-const defaultPartners = [
-  { name: 'BCI',            description: 'Apoio Financeiro', logoUrl: '' },
-  { name: 'Millennium bim', description: '',                  logoUrl: '' },
-  { name: 'Standard Bank',  description: '',                  logoUrl: '' },
-  { name: 'Santam',         description: 'Seguros',           logoUrl: '' },
-  { name: 'MFC',            description: 'Financiamento',     logoUrl: '' }
-];
 const partnersForm = ref([]);
 const savingPartners = ref(false);
 const partnerFileInputs = ref([]);
@@ -2647,16 +2640,18 @@ onMounted(async () => {
 
   // Load partners settings — fall back to defaults if none saved yet
   try {
-    const resPartners = await axios.get(`${apiUrl}/api/settings/partners`);
-    if (resPartners.data && resPartners.data.success && Array.isArray(resPartners.data.data) && resPartners.data.data.length > 0) {
-      partnersForm.value = resPartners.data.data;
+    const resPartners = await axios.get(`${apiUrl}/api/partners/all`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (resPartners.data && Array.isArray(resPartners.data) && resPartners.data.length > 0) {
+      partnersForm.value = resPartners.data;
     } else {
-      // No partners in DB yet — pre-load defaults so admin can see and edit them
-      partnersForm.value = defaultPartners.map(p => ({ ...p }));
+      // No partners in DB yet — start with empty array
+      partnersForm.value = [];
     }
   } catch (err) {
-    // API error (e.g. 404) — pre-load defaults
-    partnersForm.value = defaultPartners.map(p => ({ ...p }));
+    // API error — start with empty array
+    partnersForm.value = [];
   }
 
   // Setup preview cycling interval
@@ -3306,11 +3301,30 @@ const handlePartnerLogoUpload = async (e, idx) => {
 const savePartners = async () => {
   savingPartners.value = true;
   try {
-    await axios.put(`${apiUrl}/api/settings/partners`,
-      partnersForm.value,
-      { headers: { Authorization: `Bearer ${authStore.token}` } }
-    );
+    // First, delete all existing partners
+    await axios.delete(`${apiUrl}/api/partners/all`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+
+    // Then, create new partners
+    for (const partner of partnersForm.value) {
+      if (partner.name && partner.name.trim()) {
+        await axios.post(`${apiUrl}/api/partners`,
+          {
+            name: partner.name,
+            description: partner.description || '',
+            logoUrl: partner.logoUrl || '',
+            website: partner.website || '',
+            isActive: true,
+            order: 0
+          },
+          { headers: { Authorization: `Bearer ${authStore.token}` } }
+        );
+      }
+    }
+
     showAlert('Parceiros guardados com sucesso! ✓');
+    await fetchPartners(); // Refresh the list
   } catch (err) {
     showAlert('Erro ao guardar parceiros: ' + (err.response?.data?.error || err.message), 'error');
   } finally {

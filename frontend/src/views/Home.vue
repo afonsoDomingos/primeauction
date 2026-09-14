@@ -150,35 +150,17 @@
         <div class="partners-marquee-track">
           <!-- Original set -->
           <div class="partners-marquee-group">
-            <div v-for="partner in partnersList" :key="'a-' + partner.name" class="partner-logo" :title="partner.name">
+            <div v-for="partner in partnersList" :key="'a-' + partner._id" class="partner-logo" :title="partner.name">
               <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
-              <template v-else-if="partner.isStandardBank">
-                <svg viewBox="0 0 100 24" width="95" height="22" fill="currentColor">
-                  <rect x="2" y="2" width="10" height="20" rx="1" fill="#0033a0" />
-                  <rect x="5" y="7" width="4" height="10" fill="#ffffff" />
-                </svg>
-                <span class="logo-text-sb">{{ partner.name }}</span>
-              </template>
-              <span v-else :class="['logo-text', partner.class, { 'logo-santam': partner.isSantam, 'logo-mfc': partner.isMfc }]">
-                {{ partner.name }}
-              </span>
+              <span v-else class="logo-text">{{ partner.name }}</span>
               <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
             </div>
           </div>
           <!-- Duplicate set for seamless loop -->
           <div class="partners-marquee-group" aria-hidden="true">
-            <div v-for="partner in partnersList" :key="'b-' + partner.name" class="partner-logo" :title="partner.name">
+            <div v-for="partner in partnersList" :key="'b-' + partner._id" class="partner-logo" :title="partner.name">
               <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
-              <template v-else-if="partner.isStandardBank">
-                <svg viewBox="0 0 100 24" width="95" height="22" fill="currentColor">
-                  <rect x="2" y="2" width="10" height="20" rx="1" fill="#0033a0" />
-                  <rect x="5" y="7" width="4" height="10" fill="#ffffff" />
-                </svg>
-                <span class="logo-text-sb">{{ partner.name }}</span>
-              </template>
-              <span v-else :class="['logo-text', partner.class, { 'logo-santam': partner.isSantam, 'logo-mfc': partner.isMfc }]">
-                {{ partner.name }}
-              </span>
+              <span v-else class="logo-text">{{ partner.name }}</span>
               <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
             </div>
           </div>
@@ -608,24 +590,9 @@ const heroMobileImageUrls = ref([]);
 
 // Partners list and settings
 const partners = ref([]);
-const defaultPartners = [
-  { name: 'BCI', description: 'Apoio Financeiro', logoUrl: '', class: 'red-blue' },
-  { name: 'Millennium bim', description: '', logoUrl: '', class: 'yellow-red' },
-  { name: 'Standard Bank', description: '', logoUrl: '', isStandardBank: true },
-  { name: 'Santam', description: 'Seguros', logoUrl: '', isSantam: true },
-  { name: 'MFC', description: 'Financiamento', logoUrl: '', isMfc: true }
-];
 
 const partnersList = computed(() => {
-  const list = partners.value.length > 0 ? partners.value : defaultPartners;
-  return list.map(p => {
-    if (p.logoUrl) return p;
-    const match = defaultPartners.find(dp => dp.name.toLowerCase() === p.name.toLowerCase());
-    if (match) {
-      return { ...match, ...p };
-    }
-    return p;
-  });
+  return partners.value;
 });
 
 // Search state
@@ -1057,6 +1024,18 @@ const fetchUpcomingAuctions = async () => {
   }
 };
 
+// Fetch partners from backend
+const fetchPartners = async () => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/partners`);
+    partners.value = res.data;
+  } catch (err) {
+    console.error('Error fetching partners:', err);
+    partners.value = [];
+  }
+};
+
 // 🔧 FIXED: Complete onMounted with all necessary calls
 onMounted(async () => {
   console.log('🚀 Home component mounted');
@@ -1065,7 +1044,8 @@ onMounted(async () => {
   await Promise.all([
     fetchActiveAuctions(),
     fetchUpcomingAuctions(),
-    fetchWatchlist()
+    fetchWatchlist(),
+    fetchPartners()
   ]);
   
   loadingAuctions.value = false;
@@ -1619,40 +1599,7 @@ onUnmounted(() => {
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.5px;
-}
-
-.logo-text.red-blue {
-  color: #0033a0;
-  background: linear-gradient(135deg, #0033a0 60%, #e31b23 60%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.logo-text.yellow-red {
-  color: #e31b23;
-}
-
-.logo-text-sb {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #0033a0;
-  margin-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.logo-santam {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #007cc3;
-  font-style: italic;
-}
-
-.logo-mfc {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: #005a36;
-  letter-spacing: -1px;
+  color: #333;
 }
 
 .logo-desc {
