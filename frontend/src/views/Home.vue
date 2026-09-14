@@ -193,12 +193,7 @@
       <div class="container">
         <div class="calendar-bar-header">
           <div class="calendar-bar-title-group">
-            <span class="calendar-bar-badge">
-              <svg xmlns="http://www.w3.org/2000/svg" class="calendar-icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              PESQUISA POR DIA DE LEILÃO
-            </span>
+            <span class="calendar-bar-badge">📅 PESQUISA POR DIA DE LEILÃO</span>
             <h3 class="calendar-bar-title">Calendário Semanal & Mensal</h3>
           </div>
           <div class="calendar-bar-actions">
@@ -1174,14 +1169,6 @@ onUnmounted(() => {
   border-radius: 3px;
   background: white;
   padding: 1px 4px;
-}
-
-.calendar-icon-small {
-  width: 14px;
-  height: 14px;
-  margin-right: 6px;
-  display: inline-block;
-  vertical-align: middle;
 }
 
 .ribbon-icon-svg {
@@ -2990,36 +2977,6 @@ onUnmounted(() => {
   border-bottom-color: #1e293b;
 }
 
-.horizontal-calendar-section .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .horizontal-calendar-section .container {
-    padding: 0 1rem;
-  }
-}
-
-@media (min-width: 1400px) {
-  .horizontal-calendar-section .container {
-    max-width: 1300px;
-  }
-}
-
-@media (min-width: 1600px) {
-  .horizontal-calendar-section .container {
-    max-width: 1400px;
-  }
-}
-
-@media (min-width: 1920px) {
-  .horizontal-calendar-section .container {
-    max-width: 1500px;
-  }
-}
-
 .calendar-bar-header {
   display: flex;
   justify-content: space-between;
@@ -3033,8 +2990,7 @@ onUnmounted(() => {
   letter-spacing: 1px;
   color: #1a56db;
   text-transform: uppercase;
-  display: flex;
-  align-items: center;
+  display: block;
   margin-bottom: 0.25rem;
 }
 
@@ -3093,9 +3049,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
 }
 
 .calendar-strip {
@@ -3108,7 +3061,6 @@ onUnmounted(() => {
   scrollbar-color: #1a56db #e2e8f0;
   flex: 1;
   min-width: 0;
-  max-width: 100%;
 }
 
 .calendar-strip::-webkit-scrollbar {
@@ -3159,7 +3111,6 @@ onUnmounted(() => {
 /* Day card matching user screenshot exactly */
 .cal-day-card {
   min-width: 52px;
-  max-width: 60px;
   height: 82px;
   background: #f1f5f9;
   border: 1.5px solid transparent;
@@ -3173,7 +3124,6 @@ onUnmounted(() => {
   transition: all 0.2s ease;
   user-select: none;
   flex-shrink: 0;
-  flex-grow: 0;
 }
 
 .dark .cal-day-card {
