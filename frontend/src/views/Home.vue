@@ -1149,7 +1149,9 @@ onUnmounted(() => {
 .calendar-icon-small {
   width: 14px;
   height: 14px;
-  margin-right: 4px;
+  margin-right: 6px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .ribbon-icon-svg {
@@ -2971,7 +2973,8 @@ onUnmounted(() => {
   letter-spacing: 1px;
   color: #1a56db;
   text-transform: uppercase;
-  display: block;
+  display: flex;
+  align-items: center;
   margin-bottom: 0.25rem;
 }
 
