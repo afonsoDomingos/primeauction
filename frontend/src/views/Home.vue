@@ -517,43 +517,6 @@
       </div>
     </section>
 
-    <!-- How It Works Section (Minimalist Redesign at the Bottom) -->
-    <section class="how-it-works-section-minimal">
-      <div class="container">
-        <div class="section-header-center" style="margin-bottom: 2.5rem;">
-          <span class="section-badge-minimal">PLANO DE AÇÃO</span>
-          <h2 class="section-title-premium">Como Funciona</h2>
-          <p class="section-subtitle">A forma mais transparente e rápida de participar em leilões em Moçambique</p>
-        </div>
-
-        <div class="steps-container-minimal">
-          <div class="step-card-minimal">
-            <div class="step-num-badge">01</div>
-            <h3 class="step-title-minimal">Registe-se</h3>
-            <p class="step-desc-minimal">Crie a sua conta de forma gratuita e rápida em menos de 1 minuto.</p>
-          </div>
-
-          <div class="step-card-minimal">
-            <div class="step-num-badge">02</div>
-            <h3 class="step-title-minimal">Explore</h3>
-            <p class="step-desc-minimal">Navegue pelas oportunidades e artigos ativos em todo o país.</p>
-          </div>
-
-          <div class="step-card-minimal">
-            <div class="step-num-badge">03</div>
-            <h3 class="step-title-minimal">Licite</h3>
-            <p class="step-desc-minimal">Faça o seu lance em tempo real com total transparência e histórico.</p>
-          </div>
-
-          <div class="step-card-minimal">
-            <div class="step-num-badge">04</div>
-            <h3 class="step-title-minimal">Liquide via M-Pesa</h3>
-            <p class="step-desc-minimal">Confirme o pagamento seguro com PIN diretamente no telemóvel.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Stats/Trust Section (Minimalist Dark Glass Banner at the Bottom) -->
     <section class="stats-section-minimal">
       <div class="container">
@@ -2405,84 +2368,6 @@ onUnmounted(() => {
 .interest-sub {
   font-size: 0.75rem;
   color: #6b7280;
-}
-
-/* ─── Minimalist How It Works Section ─── */
-.how-it-works-section-minimal {
-  padding: 5rem 1.5rem;
-  background: #f8fafc;
-}
-
-.section-badge-minimal {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: #e60000;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.steps-container-minimal {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-@media (max-width: 992px) {
-  .steps-container-minimal {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 576px) {
-  .steps-container-minimal {
-    grid-template-columns: 1fr;
-  }
-}
-
-.step-card-minimal {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 2rem 1.5rem;
-  text-align: left;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-}
-
-.step-card-minimal:hover {
-  border-color: #e60000;
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(230, 0, 0, 0.08);
-}
-
-.step-num-badge {
-  font-size: 1.15rem;
-  font-weight: 900;
-  color: #e60000;
-  background: #fee2e2;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.25rem;
-}
-
-.step-title-minimal {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 0.4rem;
-}
-
-.step-desc-minimal {
-  font-size: 0.85rem;
-  color: #64748b;
-  line-height: 1.5;
 }
 
 /* ─── Minimalist Dark Stats Banner ─── */
