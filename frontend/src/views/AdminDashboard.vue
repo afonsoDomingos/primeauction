@@ -247,7 +247,7 @@
                 
                 <div class="form-group">
                   <label class="form-label">Modelo</label>
-                  <select v-model="form.vehicleSpecs.model" class="form-input" :disabled="!form.vehicleSpecs.make">
+                  <select v-model="form.vehicleSpecs.model" @change="handleModelChange" class="form-input" :disabled="!form.vehicleSpecs.make">
                     <option value="">Selecione o modelo</option>
                     <option v-for="model in availableModels" :key="model" :value="model">
                       {{ model }}
@@ -1950,6 +1950,247 @@ const handleBodyTypeChange = () => {
 const clearFeatures = () => {
   form.value.vehicleSpecs.features = [];
   toastStore.add('Todas as características foram limpas!', 'success', 2000);
+};
+
+const handleModelChange = () => {
+  // Suggest price based on make and model
+  if (form.value.vehicleSpecs.make && form.value.vehicleSpecs.model) {
+    const priceSuggestions = {
+      'Toyota': {
+        'Corolla': { min: 350000, max: 800000 },
+        'Hilux': { min: 800000, max: 2500000 },
+        'RAV4': { min: 600000, max: 1500000 },
+        'Camry': { min: 500000, max: 1200000 },
+        'Yaris': { min: 250000, max: 500000 },
+        'Land Cruiser': { min: 2000000, max: 5000000 },
+        'Prado': { min: 1500000, max: 4000000 },
+        'Fortuner': { min: 900000, max: 2000000 }
+      },
+      'Volkswagen': {
+        'Golf': { min: 300000, max: 700000 },
+        'Polo': { min: 250000, max: 600000 },
+        'Tiguan': { min: 500000, max: 1200000 },
+        'Passat': { min: 400000, max: 900000 },
+        'Amarok': { min: 700000, max: 1800000 },
+        'Touareg': { min: 1200000, max: 3000000 }
+      },
+      'Honda': {
+        'Civic': { min: 300000, max: 700000 },
+        'CR-V': { min: 500000, max: 1200000 },
+        'Accord': { min: 400000, max: 900000 },
+        'HR-V': { min: 450000, max: 1000000 },
+        'Jazz': { min: 200000, max: 450000 },
+        'Fit': { min: 180000, max: 400000 }
+      },
+      'Ford': {
+        'Fiesta': { min: 200000, max: 500000 },
+        'Focus': { min: 250000, max: 600000 },
+        'Ranger': { min: 800000, max: 2000000 },
+        'Mustang': { min: 1500000, max: 5000000 },
+        'Explorer': { min: 900000, max: 2500000 },
+        'EcoSport': { min: 350000, max: 800000 }
+      },
+      'BMW': {
+        'Série 3': { min: 800000, max: 2500000 },
+        'Série 5': { min: 1200000, max: 4000000 },
+        'X3': { min: 1000000, max: 2500000 },
+        'X5': { min: 1500000, max: 4000000 },
+        'X1': { min: 400000, max: 900000 },
+        'X7': { min: 2000000, max: 6000000 }
+      },
+      'Mercedes-Benz': {
+        'Classe A': { min: 600000, max: 1500000 },
+        'Classe C': { min: 800000, max: 2000000 },
+        'Classe E': { min: 1200000, max: 3500000 },
+        'GLC': { min: 1500000, max: 4000000 },
+        'GLE': { min: 2000000, max: 5000000 },
+        'G-Class': { min: 3000000, max: 8000000 }
+      },
+      'Nissan': {
+        'Qashqai': { min: 350000, max: 800000 },
+        'Juke': { min: 250000, max: 600000 },
+        'X-Trail': { min: 400000, max: 900000 },
+        'Navara': { min: 700000, max: 1800000 },
+        '370Z': { min: 500000, max: 3000000 },
+        'GT-R': { min: 5000000, max: 20000000 }
+      },
+      'Hyundai': {
+        'i20': { min: 180000, max: 400000 },
+        'i30': { min: 200000, max: 500000 },
+        'Tucson': { min: 400000, max: 900000 },
+        'Santa Fe': { min: 600000, max: 1500000 },
+        'Creta': { min: 250000, max: 550000 },
+        'Venue': { min: 200000, max: 450000 }
+      },
+      'Kia': {
+        'Picanto': { min: 150000, max: 350000 },
+        'Rio': { min: 180000, max: 400000 },
+        'Ceed': { min: 200000, max: 500000 },
+        'Sportage': { min: 400000, max: 900000 },
+        'Sorento': { min: 600000, max: 1500000 },
+        'Seltos': { min: 300000, max: 700000 }
+      },
+      'Renault': {
+        'Clio': { min: 150000, max: 400000 },
+        'Megane': { min: 200000, max: 500000 },
+        'Captur': { min: 200000, max: 450000 },
+        'Duster': { min: 300000, max: 700000 },
+        'Sandero': { min: 150000, max: 400000 }
+      },
+      'Peugeot': {
+        '208': { min: 180000, max: 400000 },
+        '308': { min: 250000, max: 550000 },
+        '3008': { min: 350000, max: 800000 },
+        '2008': { min: 200000, max: 450000 },
+        '5008': { min: 400000, max: 900000 }
+      },
+      'Fiat': {
+        'Uno': { min: 100000, max: 250000 },
+        'Punto': { min: 150000, max: 350000 },
+        '500': { min: 200000, max: 400000 },
+        'Tipo': { min: 180000, max: 400000 },
+        'Doblo': { min: 300000, max: 700000 },
+        'Panda': { min: 120000, max: 300000 }
+      },
+      'Suzuki': {
+        'Swift': { min: 180000, max: 400000 },
+        'Vitara': { min: 250000, max: 600000 },
+        'Jimny': { min: 400000, max: 800000 },
+        'SX4': { min: 200000, max: 500000 },
+        'Baleno': { min: 180000, max: 400000 }
+      },
+      'Mazda': {
+        'Mazda2': { min: 200000, max: 450000 },
+        'Mazda3': { min: 300000, max: 700000 },
+        'CX-5': { min: 400000, max: 1000000 },
+        'CX-3': { min: 250000, max: 600000 },
+        'MX-5': { min: 500000, max: 2000000 }
+      },
+      'Mitsubishi': {
+        'Lancer': { min: 250000, max: 600000 },
+        'ASX': { min: 300000, max: 700000 },
+        'Outlander': { min: 400000, max: 900000 },
+        'Pajero': { min: 800000, max: 3000000 },
+        'L200': { min: 700000, max: 1500000 }
+      },
+      'Chevrolet': {
+        'Onix': { min: 200000, max: 500000 },
+        'Cruze': { min: 250000, max: 600000 },
+        'Tracker': { min: 350000, max: 800000 },
+        'Sonic': { min: 180000, max: 400000 },
+        'Camaro': { min: 2000000, max: 8000000 },
+        'Corvette': { min: 5000000, max: 20000000 }
+      },
+      'Land Rover': {
+        'Range Rover': { min: 3000000, max: 10000000 },
+        'Discovery': { min: 2000000, max: 6000000 },
+        'Defender': { min: 1500000, max: 5000000 },
+        'Evoque': { min: 1200000, max: 3500000 },
+        'Freelander': { min: 500000, max: 1200000 }
+      },
+      'Volvo': {
+        'XC40': { min: 600000, max: 1500000 },
+        'XC60': { min: 800000, max: 2000000 },
+        'XC90': { min: 1200000, max: 4000000 },
+        'V40': { min: 400000, max: 900000 },
+        'S60': { min: 500000, max: 1200000 },
+        'S90': { min: 1000000, max: 3000000 }
+      },
+      'Subaru': {
+        'Impreza': { min: 300000, max: 700000 },
+        'Forester': { min: 400000, max: 900000 },
+        'Outback': { min: 500000, max: 1200000 },
+        'XV': { min: 350000, max: 800000 },
+        'WRX': { min: 600000, max: 2000000 },
+        'BRZ': { min: 500000, max: 1500000 }
+      },
+      'Jeep': {
+        'Wrangler': { min: 600000, max: 2000000 },
+        'Cherokee': { min: 500000, max: 1500000 },
+        'Grand Cherokee': { min: 700000, max: 2000000 },
+        'Renegade': { min: 350000, max: 800000 },
+        'Compass': { min: 400000, max: 900000 },
+        'Gladiator': { min: 900000, max: 2500000 }
+      },
+      'Dacia': {
+        'Sandero': { min: 150000, max: 400000 },
+        'Duster': { min: 300000, max: 700000 },
+        'Logan': { min: 120000, max: 300000 },
+        'Lodgy': { min: 130000, max: 350000 }
+      },
+      'Lexus': {
+        'IS': { min: 600000, max: 1500000 },
+        'ES': { min: 500000, max: 1200000 },
+        'GS': { min: 700000, max: 1800000 },
+        'LS': { min: 1500000, max: 5000000 },
+        'NX': { min: 500000, max: 1200000 },
+        'RX': { min: 600000, max: 1500000 },
+        'GX': { min: 1000000, max: 3000000 }
+      },
+      'Infiniti': {
+        'Q50': { min: 500000, max: 1200000 },
+        'Q60': { min: 600000, max: 1500000 },
+        'Q70': { min: 700000, max: 1800000 },
+        'QX50': { min: 400000, max: 1000000 },
+        'QX55': { min: 500000, max: 1200000 },
+        'QX60': { min: 600000, max: 1500000 },
+        'QX70': { min: 800000, max: 2000000 }
+      },
+      'Acura': {
+        'ILX': { min: 400000, max: 900000 },
+        'TLX': { min: 500000, max: 1200000 },
+        'RLX': { min: 800000, max: 2000000 },
+        'RDX': { min: 400000, max: 900000 },
+        'MDX': { min: 600000, max: 1500000 },
+        'NSX': { min: 5000000, max: 20000000 }
+      },
+      'Seat': {
+        'Ibiza': { min: 150000, max: 400000 },
+        'Leon': { min: 200000, max: 500000 },
+        'Toledo': { min: 200000, max: 500000 },
+        'Arona': { min: 250000, max: 600000 },
+        'Altea': { min: 300000, max: 700000 },
+        'Tarraco': { min: 250000, max: 600000 },
+        'Ateca': { min: 400000, max: 900000 }
+      },
+      'Skoda': {
+        'Fabia': { min: 150000, max: 350000 },
+        'Rapid': { min: 200000, max: 500000 },
+        'Octavia': { min: 250000, max: 600000 },
+        'Superb': { min: 300000, max: 800000 },
+        'Yeti': { min: 350000, max: 900000 },
+        'Kodiaq': { min: 500000, max: 1200000 },
+        'Karoq': { min: 350000, max: 800000 }
+      },
+      'Mini': {
+        'Cooper': { min: 250000, max: 600000 },
+        'Cooper S': { min: 350000, max: 800000 },
+        'Countryman': { min: 400000, max: 900000 },
+        'Clubman': { min: 450000, max: 1000000 },
+        'Paceman': { min: 450000, max: 1000000 },
+        'Cabrio': { min: 500000, max: 1200000 },
+        'Coupe': { min: 450000, max: 1000000 }
+      },
+      'Smart': {
+        'Fortwo': { min: 150000, max: 400000 },
+        'Forfour': { min: 180000, max: 450000 },
+        'Roadster': { min: 200000, max: 500000 },
+        'Cabrio': { min: 250000, max: 600000 }
+      }
+    };
+    
+    const makeSuggestions = priceSuggestions[form.value.vehicleSpecs.make];
+    if (makeSuggestions && makeSuggestions[form.value.vehicleSpecs.model]) {
+      const { min, max } = makeSuggestions[form.value.vehicleSpecs.model];
+      const suggestedPrice = Math.round((min + max) / 2);
+      
+      // Only suggest if price is not already set
+      if (!form.value.startingPrice || form.value.startingPrice === 0) {
+        form.value.startingPrice = suggestedPrice;
+        toastStore.add(`Preço sugerido para ${form.value.vehicleSpecs.make} ${form.value.vehicleSpecs.model}: ${formatCurrency(suggestedPrice)}`, 'success', 4000);
+      }
+    }
+  }
 };
 
 const handleMileageInput = (event) => {
