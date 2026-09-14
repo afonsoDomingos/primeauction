@@ -2990,6 +2990,18 @@ onUnmounted(() => {
   border-bottom-color: #1e293b;
 }
 
+.horizontal-calendar-section .container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .horizontal-calendar-section .container {
+    padding: 0 1rem;
+  }
+}
+
 .calendar-bar-header {
   display: flex;
   justify-content: space-between;
@@ -3063,6 +3075,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .calendar-strip {
@@ -3073,6 +3086,8 @@ onUnmounted(() => {
   padding: 0.5rem 0.25rem 0.75rem;
   scrollbar-width: thin;
   scrollbar-color: #1a56db #e2e8f0;
+  flex: 1;
+  min-width: 0;
 }
 
 .calendar-strip::-webkit-scrollbar {
