@@ -50,7 +50,9 @@
         <!-- ── Painel de Eventos do Dia Selecionado ── -->
         <div class="events-panel card">
           <div class="panel-header">
-            <span class="panel-icon">📅</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="panel-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
             <div>
               <h3 class="panel-title">Leilões para o Dia</h3>
               <p class="panel-subtitle">{{ selectedDate.toLocaleDateString('pt-MZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) }}</p>
@@ -63,9 +65,11 @@
           </div>
 
           <div v-else-if="selectedDateEvents.total === 0" class="empty-panel">
-            <div class="empty-state-icon">🏷️</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
             <h4>Sem eventos para este dia</h4>
-            <p>Selecione um dia no calendário que contenha marcadores de cores (🟢 ou 🔴) para ver os leilões correspondentes.</p>
+            <p>Selecione um dia no calendário que contenha marcadores de cores para ver os leilões correspondentes.</p>
           </div>
 
           <div v-else class="events-lists">
@@ -478,7 +482,9 @@ onMounted(() => {
 }
 
 .panel-icon {
-  font-size: 2rem;
+  width: 28px;
+  height: 28px;
+  stroke-width: 2;
 }
 
 .panel-title {
@@ -528,7 +534,9 @@ onMounted(() => {
 }
 
 .empty-state-icon {
-  font-size: 3rem;
+  width: 48px;
+  height: 48px;
+  stroke-width: 2;
   margin-bottom: 1rem;
 }
 

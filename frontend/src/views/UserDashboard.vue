@@ -33,9 +33,31 @@
               {{ authStore.user?.role === 'admin' ? 'Administrador' : 'Cliente' }}
             </span>
             <StarRating :rating="authStore.user?.averageRating || 0" :count="authStore.user?.ratingsCount || 0" size="sm" />
-            <span v-if="authStore.user?.province" class="status-badge province-badge">📍 {{ authStore.user.province }}</span>
-            <span v-if="authStore.user?.gender" class="status-badge gender-badge">{{ authStore.user.gender === 'Masculino' ? '♂' : authStore.user.gender === 'Feminino' ? '♀' : '⚥' }} {{ authStore.user.gender }}</span>
-            <span v-if="authStore.user?.age" class="status-badge age-badge">🎂 {{ authStore.user.age }} anos</span>
+            <span v-if="authStore.user?.province" class="status-badge province-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="badge-icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {{ authStore.user.province }}
+            </span>
+            <span v-if="authStore.user?.gender" class="status-badge gender-badge">
+              <svg v-if="authStore.user.gender === 'Masculino'" xmlns="http://www.w3.org/2000/svg" class="badge-icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <svg v-else-if="authStore.user.gender === 'Feminino'" xmlns="http://www.w3.org/2000/svg" class="badge-icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="badge-icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              {{ authStore.user.gender }}
+            </span>
+            <span v-if="authStore.user?.age" class="status-badge age-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="badge-icon-small" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {{ authStore.user.age }} anos
+            </span>
           </div>
         </div>
         <button @click="logout" class="btn btn-logout">
@@ -134,7 +156,9 @@
           </div>
 
           <div v-else-if="bids.length === 0" class="empty-state">
-            <div class="empty-icon">🏷️</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
             <h4>Ainda não fez nenhum lance</h4>
             <p>Explore os leilões activos e faça o seu primeiro lance!</p>
             <router-link to="/auctions" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
@@ -147,7 +171,11 @@
               <div class="bid-img-wrap" v-if="bid.auction?.imageUrl">
                 <img :src="bid.auction.imageUrl" :alt="bid.auction.title" class="bid-img" />
               </div>
-              <div class="bid-img-wrap placeholder-img" v-else>🏷️</div>
+              <div class="bid-img-wrap placeholder-img" v-else>
+                <svg xmlns="http://www.w3.org/2000/svg" class="placeholder-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
 
               <div class="bid-details">
                 <strong class="bid-auction-title">{{ bid.auction?.title || 'Leilão Removido' }}</strong>
@@ -180,7 +208,9 @@
           </div>
 
           <div v-else-if="watchlist.length === 0" class="empty-state">
-            <div class="empty-icon">❤️</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
             <h4>Sem leilões nos favoritos</h4>
             <p>Clique no coração dos leilões que deseja acompanhar para os ver aqui!</p>
             <router-link to="/auctions" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
@@ -236,7 +266,9 @@
           </div>
 
           <div v-else-if="proposals.length === 0" class="empty-state">
-            <div class="empty-icon">📦</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
             <h4>Nenhuma proposta enviada</h4>
             <p>Tem artigos ou viaturas que gostaria de leiloar? Envie-nos já uma proposta!</p>
             <router-link to="/vender" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
@@ -299,7 +331,10 @@
           </div>
 
           <div v-else-if="payments.length === 0" class="empty-state">
-            <div class="empty-icon">📲</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-3 3m0 0l-3-3m3 3V9" />
+            </svg>
             <h4>Sem pagamentos M-Pesa registados</h4>
             <p>Ainda não efetuou pagamentos de leilões através do M-Pesa.</p>
             <router-link to="/auctions" class="btn btn-primary btn-pill" style="margin-top: 1.5rem;">
@@ -359,7 +394,12 @@
       <div v-else-if="activeTab === 'edit-profile'" class="edit-profile-layout">
         <!-- Profile Info Form -->
         <div class="card edit-card">
-          <h3 class="edit-title">📋 Informações Pessoais</h3>
+          <h3 class="edit-title">
+            <svg xmlns="http://www.w3.org/2000/svg" class="edit-title-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Informações Pessoais
+          </h3>
           
           <form @submit.prevent="handleUpdateProfile" class="edit-form">
             <div class="form-group">
@@ -426,7 +466,12 @@
 
         <!-- Security Form -->
         <div class="card edit-card">
-          <h3 class="edit-title">🔒 Segurança & Palavra-passe</h3>
+          <h3 class="edit-title">
+            <svg xmlns="http://www.w3.org/2000/svg" class="edit-title-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Segurança & Palavra-passe
+          </h3>
           
           <form @submit.prevent="handleUpdatePassword" class="edit-form">
             <div class="form-group">
@@ -536,7 +581,10 @@
                   <span style="font-size: 0.68rem; font-weight: 700; background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;">MFC</span>
                 </div>
                 <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.5rem; margin-bottom: 0; line-height: 1.35;">
-                  🔒 Documento e selo de arrematação emitidos e validados eletronicamente em conformidade com as instituições parceiras da Prime Auction em Moçambique.
+                  <svg xmlns="http://www.w3.org/2000/svg" class="security-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Documento e selo de arrematação emitidos e validados eletronicamente em conformidade com as instituições parceiras da Prime Auction em Moçambique.
                 </p>
               </div>
             </div>
@@ -601,14 +649,19 @@
               </p>
 
               <div v-if="rev.auction" style="font-size: 0.75rem; color: #64748b; background: white; padding: 0.35rem 0.65rem; border-radius: 6px; display: inline-block; border: 1px solid #e2e8f0;">
-                📦 Referente ao leilão: <strong>{{ rev.auction.title }}</strong>
+                <svg xmlns="http://www.w3.org/2000/svg" class="review-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Referente ao leilão: <strong>{{ rev.auction.title }}</strong>
               </div>
             </div>
           </div>
 
           <!-- Empty State -->
           <div v-else style="text-align: center; padding: 3rem 1rem;">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">⭐</span>
+            <svg xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; stroke-width: 2; display: block; margin: 0 auto 0.5rem auto;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.54 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
             <h4 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: #1e293b;">Ainda não tem avaliações</h4>
             <p style="margin: 0; font-size: 0.875rem; color: #64748b;">Participe e conclua leilões para começar a receber opiniões e construir a sua reputação na plataforma.</p>
           </div>
@@ -1209,8 +1262,33 @@ const handlePhotoUpload = async (e) => {
 }
 
 .empty-icon {
-  font-size: 3rem;
+  width: 48px;
+  height: 48px;
+  stroke-width: 2;
   margin-bottom: 1rem;
+}
+
+.badge-icon-small {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.edit-title-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.placeholder-icon {
+  width: 32px;
+  height: 32px;
+  stroke-width: 2;
+  color: #9ca3af;
 }
 
 .empty-state h4 {
