@@ -330,17 +330,27 @@ onMounted(() => {
 .weekday-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
   text-align: center;
   font-weight: 600;
   color: var(--text-light);
   margin-bottom: 1rem;
   font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+.weekday-header {
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
+  margin-bottom: 1rem;
 }
 
 .day-cell {
@@ -355,6 +365,8 @@ onMounted(() => {
   position: relative;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: #fff;
+  min-height: 50px;
+  padding: 4px;
 }
 
 .day-cell:not(.empty):hover {
@@ -396,14 +408,14 @@ onMounted(() => {
   font-size: 1rem;
   font-weight: 500;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .dot-indicators {
   display: flex;
   gap: 4px;
   margin-top: 4px;
-  position: absolute;
-  bottom: 8px;
+  position: relative;
 }
 
 .dot {
@@ -432,11 +444,12 @@ onMounted(() => {
   display: flex;
   gap: 1.5rem;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: 0;
   padding-top: 1rem;
   border-top: 1px solid #f3f4f6;
   font-size: 0.85rem;
   color: var(--text-secondary);
+  flex-wrap: wrap;
 }
 
 .legend-item {
@@ -633,5 +646,41 @@ onMounted(() => {
 
 .event-item-time {
   color: var(--text-light);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .calendar-card {
+    padding: 1.5rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .weekday-row {
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  .days-grid {
+    gap: 4px;
+  }
+
+  .day-cell {
+    min-height: 45px;
+  }
+
+  .day-number {
+    font-size: 0.9rem;
+  }
+
+  .legend-row {
+    gap: 0.75rem;
+  }
+
+  .legend-item {
+    font-size: 0.75rem;
+  }
 }
 </style>
