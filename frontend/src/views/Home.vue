@@ -2991,7 +2991,7 @@ onUnmounted(() => {
 }
 
 .horizontal-calendar-section .container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
@@ -2999,6 +2999,24 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .horizontal-calendar-section .container {
     padding: 0 1rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .horizontal-calendar-section .container {
+    max-width: 1300px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .horizontal-calendar-section .container {
+    max-width: 1400px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .horizontal-calendar-section .container {
+    max-width: 1500px;
   }
 }
 
@@ -3076,6 +3094,8 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .calendar-strip {
@@ -3088,6 +3108,7 @@ onUnmounted(() => {
   scrollbar-color: #1a56db #e2e8f0;
   flex: 1;
   min-width: 0;
+  max-width: 100%;
 }
 
 .calendar-strip::-webkit-scrollbar {
@@ -3138,6 +3159,7 @@ onUnmounted(() => {
 /* Day card matching user screenshot exactly */
 .cal-day-card {
   min-width: 52px;
+  max-width: 60px;
   height: 82px;
   background: #f1f5f9;
   border: 1.5px solid transparent;
@@ -3151,6 +3173,7 @@ onUnmounted(() => {
   transition: all 0.2s ease;
   user-select: none;
   flex-shrink: 0;
+  flex-grow: 0;
 }
 
 .dark .cal-day-card {
