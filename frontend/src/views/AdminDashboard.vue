@@ -221,12 +221,156 @@
               </div>
               <div class="form-group half">
                 <label class="form-label">Categoria</label>
-                <select v-model="form.category" class="form-input" required>
+                <select v-model="form.category" @change="handleCategoryChange" class="form-input" required>
                   <option value="" disabled>Selecione uma categoria</option>
                   <option v-for="cat in categories" :key="cat._id" :value="cat.name">
                     {{ cat.name }}
                   </option>
                 </select>
+              </div>
+            </div>
+
+            <!-- Vehicle-specific fields (shown only for automotive category) -->
+            <div v-if="isAutomotiveCategory" class="vehicle-specs-section">
+              <h4 class="specs-title">🚗 Especificações do Veículo</h4>
+              
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Marca</label>
+                  <select v-model="form.vehicleSpecs.make" @change="handleMakeChange" class="form-input">
+                    <option value="">Selecione a marca</option>
+                    <option v-for="make in availableMakes" :key="make.name" :value="make.name">
+                      {{ make.name }}
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Modelo</label>
+                  <select v-model="form.vehicleSpecs.model" class="form-input" :disabled="!form.vehicleSpecs.make">
+                    <option value="">Selecione o modelo</option>
+                    <option v-for="model in availableModels" :key="model" :value="model">
+                      {{ model }}
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Ano</label>
+                  <select v-model="form.vehicleSpecs.year" class="form-input">
+                    <option value="">Selecione o ano</option>
+                    <option v-for="year in vehicleYears" :key="year" :value="year">
+                      {{ year }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Quilometragem (km)</label>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.mileageDisplay"
+                    @input="handleMileageInput"
+                    class="form-input" 
+                    placeholder="Ex: 50.000"
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Combustível</label>
+                  <select v-model="form.vehicleSpecs.fuelType" class="form-input">
+                    <option value="">Selecione</option>
+                    <option value="Gasolina">Gasolina</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Híbrido">Híbrido</option>
+                    <option value="Elétrico">Elétrico</option>
+                    <option value="GPL">GPL</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Câmbio</label>
+                  <select v-model="form.vehicleSpecs.transmission" class="form-input">
+                    <option value="">Selecione</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Automático">Automático</option>
+                    <option value="CVT">CVT</option>
+                    <option value="DSG">DSG</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Cor</label>
+                  <select v-model="form.vehicleSpecs.color" class="form-input">
+                    <option value="">Selecione a cor</option>
+                    <option v-for="color in vehicleColors" :key="color" :value="color">
+                      {{ color }}
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Tipo de Carroçaria</label>
+                  <select v-model="form.vehicleSpecs.bodyType" class="form-input">
+                    <option value="">Selecione</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Hatchback">Hatchback</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Coupé">Coupé</option>
+                    <option value="Van">Van</option>
+                    <option value="Pickup">Pickup</option>
+                    <option value="Carrinha">Carrinha</option>
+                    <option value="Motociclo">Motociclo</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Estado</label>
+                  <select v-model="form.vehicleSpecs.condition" class="form-input">
+                    <option value="">Selecione</option>
+                    <option value="Novo">Novo</option>
+                    <option value="Seminovo">Seminovo</option>
+                    <option value="Usado">Usado</option>
+                    <option value="Reformado">Reformado</option>
+                    <option value="Para Peças">Para Peças</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Nível de Estado</label>
+                  <select v-model="form.vehicleSpecs.conditionLevel" class="form-input">
+                    <option value="">Selecione o nível</option>
+                    <option value="1">⭐⭐⭐⭐ Nível 1 - Excelente</option>
+                    <option value="2">⭐⭐⭐ Nível 2 - Bom</option>
+                    <option value="3">⭐⭐ Nível 3 - Regular</option>
+                    <option value="4">⭐ Nível 4 - Para Peças</option>
+                  </select>
+                  <button type="button" @click="showConditionLevelModal" class="info-link-btn">
+                    ℹ️ Ver detalhes dos níveis
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Características</label>
+                <div class="features-grid">
+                  <label v-for="feature in commonVehicleFeatures" :key="feature" class="feature-checkbox">
+                    <input 
+                      type="checkbox" 
+                      :value="feature" 
+                      v-model="form.vehicleSpecs.features"
+                      class="feature-input"
+                    />
+                    <span>{{ feature }}</span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -1164,6 +1308,39 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Condition Level Info Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showConditionModal" class="custom-modal-overlay" @click.self="closeConditionModal">
+        <div class="custom-modal-card condition-modal-card animate-scale-in">
+          <div class="modal-header-row">
+            <span class="modal-title-icon">📊</span>
+            <h4>Níveis de Estado do Veículo</h4>
+            <button type="button" class="wizard-close-btn" @click="closeConditionModal" aria-label="Fechar">✕</button>
+          </div>
+          
+          <div class="modal-body condition-modal-body">
+            <div v-for="(level, key) in conditionLevels" :key="key" class="condition-level-card" :style="{ borderLeftColor: level.color }">
+              <div class="condition-level-header">
+                <span class="condition-level-emoji">{{ level.emoji }}</span>
+                <div class="condition-level-info">
+                  <h5 class="condition-level-title">{{ level.name }}</h5>
+                  <p class="condition-level-short">{{ level.shortDescription }}</p>
+                </div>
+              </div>
+              <p class="condition-level-detailed">{{ level.detailedDescription }}</p>
+              <div class="condition-characteristics">
+                <h6>Características Típicas:</h6>
+                <ul>
+                  <li v-for="char in level.typicalCharacteristics" :key="char">{{ char }}</li>
+                </ul>
+              </div>
+              <p class="condition-suitable"><strong>Recomendado para:</strong> {{ level.suitableFor }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -1332,7 +1509,20 @@ const form = ref({
   startTime: '',
   endTime: '',
   category: '',
-  location: 'Maputo'
+  location: 'Maputo',
+  vehicleSpecs: {
+    make: null,
+    model: null,
+    year: null,
+    mileage: null,
+    fuelType: null,
+    transmission: null,
+    color: null,
+    bodyType: null,
+    condition: null,
+    conditionLevel: null,
+    features: []
+  }
 });
 
 const provincesList = [
@@ -1568,6 +1758,72 @@ const rejectProposal = (prop) => {
   });
 };
 
+// Vehicle-related state and functions
+const isAutomotiveCategory = computed(() => {
+  const selectedCategory = categories.value.find(cat => cat.name === form.value.category);
+  return selectedCategory && selectedCategory.isAutomotive;
+});
+
+const availableMakes = computed(() => {
+  const selectedCategory = categories.value.find(cat => cat.name === form.value.category);
+  return selectedCategory && selectedCategory.makes ? selectedCategory.makes : [];
+});
+
+const availableModels = computed(() => {
+  const selectedMake = availableMakes.value.find(make => make.name === form.value.vehicleSpecs?.make);
+  return selectedMake ? selectedMake.popularModels : [];
+});
+
+const vehicleYears = computed(() => {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear + 1; year >= 1990; year--) {
+    years.push(year);
+  }
+  return years;
+});
+
+const vehicleColors = [
+  'Branco', 'Preto', 'Cinza', 'Prata', 'Azul', 'Vermelho', 'Verde', 
+  'Amarelo', 'Laranja', 'Bege', 'Marrom', 'Bronze', 'Dourado', 'Roxo'
+];
+
+const commonVehicleFeatures = [
+  'Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro',
+  'Teto Solar', 'Retrovisores Elétricos', 'Sensor de Estacionamento', 'Câmera de Ré',
+  'Controle de Velocidade', 'Bancos Aquecidos', 'Sistema de Som Premium', 'Navegação GPS',
+  'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos',
+  'Bancos Rebatíveis', 'Keyless Entry', 'Start-Stop', 'Alerta de Ponto Cego'
+];
+
+const handleCategoryChange = () => {
+  // Reset vehicle specs when category changes
+  form.value.vehicleSpecs = {
+    make: null,
+    model: null,
+    year: null,
+    mileage: null,
+    fuelType: null,
+    transmission: null,
+    color: null,
+    bodyType: null,
+    condition: null,
+    features: []
+  };
+};
+
+const handleMakeChange = () => {
+  // Reset model when make changes
+  form.value.vehicleSpecs.model = null;
+};
+
+const handleMileageInput = (event) => {
+  const inputValue = event.target.value;
+  const cleanValue = inputValue.replace(/\D/g, '');
+  form.value.vehicleSpecs.mileage = cleanValue === '' ? null : Number(cleanValue);
+  form.value.vehicleSpecs.mileageDisplay = cleanValue === '' ? '' : Number(cleanValue).toLocaleString('pt-MZ');
+};
+
 const filteredSubscribers = computed(() => {
   if (!subscriberSearchQuery.value.trim()) return subscribers.value;
   const q = subscriberSearchQuery.value.toLowerCase().trim();
@@ -1642,6 +1898,21 @@ const handleAddCategory = async () => {
 };
 
 onMounted(async () => {
+  // Initialize vehicle specs
+  form.value.vehicleSpecs = {
+    make: null,
+    model: null,
+    year: null,
+    mileage: null,
+    fuelType: null,
+    transmission: null,
+    color: null,
+    bodyType: null,
+    condition: null,
+    conditionLevel: null,
+    features: []
+  };
+  
   fetchData();
   // Load current homepage settings
   try {
@@ -1769,6 +2040,81 @@ const closeExtendModal = () => {
   showExtendModal.value = false;
   extendTargetAuction.value = null;
   extendCustomDateTime.value = '';
+};
+
+// ── Condition Level Modal ──
+const showConditionModal = ref(false);
+
+const conditionLevels = {
+  1: {
+    name: 'Excelente',
+    emoji: '⭐⭐⭐⭐',
+    color: '#10b981',
+    shortDescription: 'Veículo em estado impecável',
+    detailedDescription: 'Veículo novo ou seminovo em condições perfeitas. Sem danos visíveis, com pintura original, interior intacto e histórico de manutenção completo. Funcionamento mecânico impecável.',
+    typicalCharacteristics: [
+      'Quilometragem baixa (menos de 30.000 km)',
+      'Sem histórico de acidentes',
+      'Pintura original e sem danos',
+      'Interior como novo',
+      'Manutenção em concessionária',
+      'Funcionamento perfeito de todos os sistemas'
+    ],
+    suitableFor: 'Clientes que exigem a máxima qualidade e estão dispostos a pagar por um veículo impecável.'
+  },
+  2: {
+    name: 'Bom',
+    emoji: '⭐⭐⭐',
+    color: '#3b82f6',
+    shortDescription: 'Veículo bem conservado',
+    detailedDescription: 'Veículo usado em bom estado geral. Pode ter pequenos sinais de uso normais, mas sem problemas mecânicos significativos. Pintura e interior bem conservados.',
+    typicalCharacteristics: [
+      'Quilometragem moderada (30.000 - 80.000 km)',
+      'Pequenos arranhões ou desgaste normal',
+      'Funcionamento mecânico bom',
+      'Manutenção regular',
+      'Pode ter tido um ou dois proprietários'
+    ],
+    suitableFor: 'Clientes que buscam um veículo confiável com boa relação custo-benefício.'
+  },
+  3: {
+    name: 'Regular',
+    emoji: '⭐⭐',
+    color: '#f59e0b',
+    shortDescription: 'Veículo com desgaste visível',
+    detailedDescription: 'Veículo com sinais visíveis de uso e desgaste. Pode necessitar de pequenas reparações ou manutenção. Funcional, mas com problemas estéticos ou mecânicos menores.',
+    typicalCharacteristics: [
+      'Quilometragem alta (80.000 - 150.000 km)',
+      'Sinais visíveis de desgaste',
+      'Pode necessitar de reparos menores',
+      'Funcionamento mecânico aceitável',
+      'Pintura ou interior desgastados'
+    ],
+    suitableFor: 'Clientes com orçamento limitado ou que pretendem fazer reparos.'
+  },
+  4: {
+    name: 'Para Peças',
+    emoji: '⭐',
+    color: '#ef4444',
+    shortDescription: 'Veículo para desmantelamento',
+    detailedDescription: 'Veículo não adequado para uso regular devido a problemas mecânicos severos ou danos extensivos. Ideal para recuperação de peças ou para quem tem conhecimentos de mecânica.',
+    typicalCharacteristics: [
+      'Problemas mecânicos severos',
+      'Danos extensivos na carroçaria',
+      'Quilometragem muito alta (acima de 150.000 km)',
+      'Pode não estar em condições de circular',
+      'Valor principalmente nas peças'
+    ],
+    suitableFor: 'Mecânicos, oficinas ou compradores que pretendem desmantelar o veículo para peças.'
+  }
+};
+
+const showConditionLevelModal = () => {
+  showConditionModal.value = true;
+};
+
+const closeConditionModal = () => {
+  showConditionModal.value = false;
 };
 
 const applyPreset = (hours) => {
@@ -3385,6 +3731,210 @@ const formatTicketDate = (dateString) => {
   
   .auctions-table {
     display: block;
+  }
+}
+
+/* ── Vehicle Specs Section ── */
+.vehicle-specs-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.specs-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.feature-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feature-checkbox:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.feature-checkbox input:checked + span {
+  color: var(--btn-primary-bg);
+  font-weight: 500;
+}
+
+.feature-input {
+  accent-color: var(--btn-primary-bg);
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 1024px) {
+  .form-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Condition Level Modal ── */
+.condition-modal-card {
+  max-width: 900px;
+  width: 95%;
+  max-height: 90vh;
+}
+
+.condition-modal-body {
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.condition-level-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-left-width: 5px;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  transition: all 0.2s;
+}
+
+.condition-level-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.condition-level-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.condition-level-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.condition-level-info {
+  flex: 1;
+}
+
+.condition-level-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.condition-level-short {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.condition-level-detailed {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}
+
+.condition-characteristics {
+  margin-bottom: 1rem;
+}
+
+.condition-characteristics h6 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 0.5rem 0;
+}
+
+.condition-characteristics ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.condition-characteristics li {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  padding: 0.25rem 0;
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.condition-characteristics li::before {
+  content: '•';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--btn-primary-bg);
+  font-weight: bold;
+}
+
+.condition-suitable {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 0.75rem;
+  background: #eff6ff;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.info-link-btn {
+  background: none;
+  border: none;
+  color: var(--btn-primary-bg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  margin-top: 0.5rem;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.info-link-btn:hover {
+  color: #1e40af;
+}
     overflow-x: auto;
     white-space: nowrap;
   }

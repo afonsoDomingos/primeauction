@@ -7,7 +7,7 @@ const Payment = require('../models/Payment');
 // @access  Public
 exports.getAuctions = async (req, res) => {
   try {
-    const { search, status, category, location } = req.query;
+    const { search, status, category, location, make, model, year, fuelType, transmission, bodyType, condition, conditionLevel, maxMileage } = req.query;
     let queryObj = {};
 
     // For non-admin users, hide finished auctions by default
@@ -45,6 +45,35 @@ exports.getAuctions = async (req, res) => {
         { description: { $regex: search, $options: 'i' } },
         { location: { $regex: search, $options: 'i' } }
       ];
+    }
+
+    // Vehicle filters
+    if (make) {
+      queryObj['vehicleSpecs.make'] = make;
+    }
+    if (model) {
+      queryObj['vehicleSpecs.model'] = model;
+    }
+    if (year) {
+      queryObj['vehicleSpecs.year'] = parseInt(year);
+    }
+    if (fuelType) {
+      queryObj['vehicleSpecs.fuelType'] = fuelType;
+    }
+    if (transmission) {
+      queryObj['vehicleSpecs.transmission'] = transmission;
+    }
+    if (bodyType) {
+      queryObj['vehicleSpecs.bodyType'] = bodyType;
+    }
+    if (condition) {
+      queryObj['vehicleSpecs.condition'] = condition;
+    }
+    if (conditionLevel) {
+      queryObj['vehicleSpecs.conditionLevel'] = parseInt(conditionLevel);
+    }
+    if (maxMileage) {
+      queryObj['vehicleSpecs.mileage'] = { $lte: parseInt(maxMileage) };
     }
 
     const auctions = await Auction.find(queryObj).sort('-createdAt').populate('bids');

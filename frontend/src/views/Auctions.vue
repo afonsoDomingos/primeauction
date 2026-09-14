@@ -8,7 +8,7 @@
         <p class="page-subtitle">Encontre os melhores leilões e faça o seu lance agora</p>
         
         <!-- Filtros Activos -->
-        <div v-if="route.query.search || route.query.status || route.query.category || route.query.location" class="active-filters">
+        <div v-if="route.query.search || route.query.status || route.query.category || route.query.location || hasVehicleFilters" class="active-filters">
           <span v-if="route.query.search" class="filter-badge">
             Pesquisa: <strong>{{ route.query.search }}</strong>
             <button @click="clearSearch" class="clear-btn" title="Limpar pesquisa">&times;</button>
@@ -24,6 +24,42 @@
           <span v-if="route.query.location" class="filter-badge">
             Província: <strong>{{ route.query.location }}</strong>
             <button @click="clearLocation" class="clear-btn" title="Limpar província">&times;</button>
+          </span>
+          <span v-if="route.query.make" class="filter-badge">
+            Marca: <strong>{{ route.query.make }}</strong>
+            <button @click="clearVehicleFilter('make')" class="clear-btn" title="Limpar marca">&times;</button>
+          </span>
+          <span v-if="route.query.model" class="filter-badge">
+            Modelo: <strong>{{ route.query.model }}</strong>
+            <button @click="clearVehicleFilter('model')" class="clear-btn" title="Limpar modelo">&times;</button>
+          </span>
+          <span v-if="route.query.year" class="filter-badge">
+            Ano: <strong>{{ route.query.year }}</strong>
+            <button @click="clearVehicleFilter('year')" class="clear-btn" title="Limpar ano">&times;</button>
+          </span>
+          <span v-if="route.query.fuelType" class="filter-badge">
+            Combustível: <strong>{{ route.query.fuelType }}</strong>
+            <button @click="clearVehicleFilter('fuelType')" class="clear-btn" title="Limpar combustível">&times;</button>
+          </span>
+          <span v-if="route.query.transmission" class="filter-badge">
+            Câmbio: <strong>{{ route.query.transmission }}</strong>
+            <button @click="clearVehicleFilter('transmission')" class="clear-btn" title="Limpar câmbio">&times;</button>
+          </span>
+          <span v-if="route.query.bodyType" class="filter-badge">
+            Tipo: <strong>{{ route.query.bodyType }}</strong>
+            <button @click="clearVehicleFilter('bodyType')" class="clear-btn" title="Limpar tipo">&times;</button>
+          </span>
+          <span v-if="route.query.condition" class="filter-badge">
+            Estado: <strong>{{ route.query.condition }}</strong>
+            <button @click="clearVehicleFilter('condition')" class="clear-btn" title="Limpar estado">&times;</button>
+          </span>
+          <span v-if="route.query.conditionLevel" class="filter-badge">
+            Nível: <strong>{{ getConditionLevelLabel(route.query.conditionLevel) }}</strong>
+            <button @click="clearVehicleFilter('conditionLevel')" class="clear-btn" title="Limpar nível">&times;</button>
+          </span>
+          <span v-if="route.query.maxMileage" class="filter-badge">
+            Quilometragem: <strong>{{ parseInt(route.query.maxMileage).toLocaleString('pt-MZ') }} km</strong>
+            <button @click="clearVehicleFilter('maxMileage')" class="clear-btn" title="Limpar quilometragem">&times;</button>
           </span>
         </div>
       </div>
@@ -55,6 +91,132 @@
             <option value="">Todas as Províncias</option>
             <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
           </select>
+        </div>
+      </div>
+
+      <!-- Vehicle Filters (shown only for automotive category) -->
+      <div v-if="isAutomotiveCategory" class="vehicle-filters-section">
+        <div class="vehicle-filters-header">
+          <h4 class="vehicle-filters-title">🚗 Filtros de Veículo</h4>
+          <button @click="clearVehicleFilters" class="clear-vehicle-filters" v-if="hasVehicleFilters">
+            Limpar Filtros
+          </button>
+        </div>
+        
+        <div class="vehicle-filters-grid">
+          <!-- Make Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Marca</label>
+            <select v-model="vehicleFilters.make" @change="applyVehicleFilters" class="filter-select">
+              <option value="">Todas</option>
+              <option v-for="make in availableMakes" :key="make.name" :value="make.name">
+                {{ make.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Model Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Modelo</label>
+            <select v-model="vehicleFilters.model" @change="applyVehicleFilters" class="filter-select" :disabled="!vehicleFilters.make">
+              <option value="">Todos</option>
+              <option v-for="model in availableModels" :key="model" :value="model">
+                {{ model }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Year Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Ano</label>
+            <select v-model="vehicleFilters.year" @change="applyVehicleFilters" class="filter-select">
+              <option value="">Todos</option>
+              <option v-for="year in vehicleYears" :key="year" :value="year">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Fuel Type Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Combustível</label>
+            <select v-model="vehicleFilters.fuelType" @change="applyVehicleFilters" class="filter-select">
+              <option value="">Todos</option>
+              <option value="Gasolina">Gasolina</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Híbrido">Híbrido</option>
+              <option value="Elétrico">Elétrico</option>
+              <option value="GPL">GPL</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <!-- Transmission Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Câmbio</label>
+            <select v-model="vehicleFilters.transmission" @change="applyVehicleFilters" class="filter-select">
+              <option value="">Todos</option>
+              <option value="Manual">Manual</option>
+              <option value="Automático">Automático</option>
+              <option value="CVT">CVT</option>
+              <option value="DSG">DSG</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <!-- Body Type Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Tipo</label>
+            <select v-model="vehicleFilters.bodyType" @change="applyVehicleFilters" class="filter-select">
+              <option value="">Todos</option>
+              <option value="Sedan">Sedan</option>
+              <option value="Hatchback">Hatchback</option>
+              <option value="SUV">SUV</option>
+              <option value="Coupé">Coupé</option>
+              <option value="Van">Van</option>
+              <option value="Pickup">Pickup</option>
+              <option value="Carrinha">Carrinha</option>
+              <option value="Motociclo">Motociclo</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <!-- Condition Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Estado</label>
+            <select v-model="vehicleFilters.condition" @change="applyVehicleFilters" class="filter-select">
+              <option value="">Todos</option>
+              <option value="Novo">Novo</option>
+              <option value="Seminovo">Seminovo</option>
+              <option value="Usado">Usado</option>
+              <option value="Reformado">Reformado</option>
+              <option value="Para Peças">Para Peças</option>
+            </select>
+          </div>
+
+          <!-- Condition Level Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Nível</label>
+            <select v-model="vehicleFilters.conditionLevel" @change="applyVehicleFilters" class="filter-select">
+              <option value="">Todos</option>
+              <option value="1">⭐⭐⭐⭐ Excelente</option>
+              <option value="2">⭐⭐⭐ Bom</option>
+              <option value="3">⭐⭐ Regular</option>
+              <option value="4">⭐ Para Peças</option>
+            </select>
+          </div>
+
+          <!-- Mileage Range Filter -->
+          <div class="filter-item">
+            <label class="filter-label">Quilometragem Máx. (km)</label>
+            <input 
+              type="number" 
+              v-model="vehicleFilters.maxMileage" 
+              @input="debounceVehicleFilters"
+              class="filter-input"
+              placeholder="Ex: 50000"
+            />
+          </div>
         </div>
       </div>
 
@@ -108,7 +270,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
@@ -119,6 +281,21 @@ const loading = ref(true);
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+
+// Vehicle filters state
+const vehicleFilters = ref({
+  make: '',
+  model: '',
+  year: '',
+  fuelType: '',
+  transmission: '',
+  bodyType: '',
+  condition: '',
+  conditionLevel: '',
+  maxMileage: ''
+});
+
+let vehicleFilterTimeout = null;
 
 const fetchCategories = async () => {
   try {
@@ -139,12 +316,30 @@ const fetchAuctions = async () => {
     const categoryVal = route.query.category || '';
     const locationVal = route.query.location || '';
     
+    // Vehicle filters
+    const makeVal = route.query.make || '';
+    const modelVal = route.query.model || '';
+    const yearVal = route.query.year || '';
+    const fuelTypeVal = route.query.fuelType || '';
+    const transmissionVal = route.query.transmission || '';
+    const bodyTypeVal = route.query.bodyType || '';
+    const conditionVal = route.query.condition || '';
+    const maxMileageVal = route.query.maxMileage || '';
+    
     let url = `${apiUrl}/api/auctions`;
     const params = [];
     if (searchVal) params.push(`search=${encodeURIComponent(searchVal)}`);
     if (statusVal) params.push(`status=${encodeURIComponent(statusVal)}`);
     if (categoryVal) params.push(`category=${encodeURIComponent(categoryVal)}`);
     if (locationVal) params.push(`location=${encodeURIComponent(locationVal)}`);
+    if (makeVal) params.push(`make=${encodeURIComponent(makeVal)}`);
+    if (modelVal) params.push(`model=${encodeURIComponent(modelVal)}`);
+    if (yearVal) params.push(`year=${encodeURIComponent(yearVal)}`);
+    if (fuelTypeVal) params.push(`fuelType=${encodeURIComponent(fuelTypeVal)}`);
+    if (transmissionVal) params.push(`transmission=${encodeURIComponent(transmissionVal)}`);
+    if (bodyTypeVal) params.push(`bodyType=${encodeURIComponent(bodyTypeVal)}`);
+    if (conditionVal) params.push(`condition=${encodeURIComponent(conditionVal)}`);
+    if (maxMileageVal) params.push(`maxMileage=${encodeURIComponent(maxMileageVal)}`);
     if (params.length > 0) {
       url += `?${params.join('&')}`;
     }
@@ -281,6 +476,137 @@ const getCategoryEmoji = (name) => {
   return '🏷️';
 };
 
+// Vehicle filter computed properties
+const isAutomotiveCategory = computed(() => {
+  const selectedCategory = categories.value.find(cat => cat.name === route.query.category);
+  return selectedCategory && selectedCategory.isAutomotive;
+});
+
+const availableMakes = computed(() => {
+  const selectedCategory = categories.value.find(cat => cat.name === route.query.category);
+  return selectedCategory && selectedCategory.makes ? selectedCategory.makes : [];
+});
+
+const availableModels = computed(() => {
+  const selectedMake = availableMakes.value.find(make => make.name === vehicleFilters.value.make);
+  return selectedMake ? selectedMake.popularModels : [];
+});
+
+const vehicleYears = computed(() => {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear + 1; year >= 1990; year--) {
+    years.push(year);
+  }
+  return years;
+});
+
+const hasVehicleFilters = computed(() => {
+  return Object.values(vehicleFilters.value).some(val => val !== '' && val !== null && val !== undefined);
+});
+
+// Vehicle filter functions
+const applyVehicleFilters = () => {
+  const query = { ...route.query };
+  
+  // Add vehicle filters to query
+  if (vehicleFilters.value.make) query.make = vehicleFilters.value.make;
+  else delete query.make;
+  
+  if (vehicleFilters.value.model) query.model = vehicleFilters.value.model;
+  else delete query.model;
+  
+  if (vehicleFilters.value.year) query.year = vehicleFilters.value.year;
+  else delete query.year;
+  
+  if (vehicleFilters.value.fuelType) query.fuelType = vehicleFilters.value.fuelType;
+  else delete query.fuelType;
+  
+  if (vehicleFilters.value.transmission) query.transmission = vehicleFilters.value.transmission;
+  else delete query.transmission;
+  
+  if (vehicleFilters.value.bodyType) query.bodyType = vehicleFilters.value.bodyType;
+  else delete query.bodyType;
+  
+  if (vehicleFilters.value.condition) query.condition = vehicleFilters.value.condition;
+  else delete query.condition;
+  
+  if (vehicleFilters.value.conditionLevel) query.conditionLevel = vehicleFilters.value.conditionLevel;
+  else delete query.conditionLevel;
+  
+  if (vehicleFilters.value.maxMileage) query.maxMileage = vehicleFilters.value.maxMileage;
+  else delete query.maxMileage;
+  
+  router.push({ path: '/auctions', query });
+};
+
+const debounceVehicleFilters = () => {
+  if (vehicleFilterTimeout) clearTimeout(vehicleFilterTimeout);
+  vehicleFilterTimeout = setTimeout(() => {
+    applyVehicleFilters();
+  }, 500);
+};
+
+const clearVehicleFilters = () => {
+  vehicleFilters.value = {
+    make: '',
+    model: '',
+    year: '',
+    fuelType: '',
+    transmission: '',
+    bodyType: '',
+    condition: '',
+    conditionLevel: '',
+    maxMileage: ''
+  };
+  
+  const query = { ...route.query };
+  delete query.make;
+  delete query.model;
+  delete query.year;
+  delete query.fuelType;
+  delete query.transmission;
+  delete query.bodyType;
+  delete query.condition;
+  delete query.conditionLevel;
+  delete query.maxMileage;
+  
+  router.push({ path: '/auctions', query });
+};
+
+const clearVehicleFilter = (filterKey) => {
+  vehicleFilters.value[filterKey] = '';
+  
+  const query = { ...route.query };
+  delete query[filterKey];
+  
+  router.push({ path: '/auctions', query });
+};
+
+const syncVehicleFiltersFromQuery = () => {
+  vehicleFilters.value = {
+    make: route.query.make || '',
+    model: route.query.model || '',
+    year: route.query.year || '',
+    fuelType: route.query.fuelType || '',
+    transmission: route.query.transmission || '',
+    bodyType: route.query.bodyType || '',
+    condition: route.query.condition || '',
+    conditionLevel: route.query.conditionLevel || '',
+    maxMileage: route.query.maxMileage || ''
+  };
+};
+
+const getConditionLevelLabel = (level) => {
+  const labels = {
+    '1': 'Excelente',
+    '2': 'Bom',
+    '3': 'Regular',
+    '4': 'Para Peças'
+  };
+  return labels[level] || level;
+};
+
 // Watch query parameters
 watch(() => route.query.search, () => {
   fetchAuctions();
@@ -289,14 +615,52 @@ watch(() => route.query.status, () => {
   fetchAuctions();
 });
 watch(() => route.query.category, () => {
+  syncVehicleFiltersFromQuery();
   fetchAuctions();
 });
 watch(() => route.query.location, () => {
   fetchAuctions();
 });
+watch(() => route.query.make, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.model, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.year, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.fuelType, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.transmission, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.bodyType, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.condition, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.conditionLevel, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
+watch(() => route.query.maxMileage, () => {
+  syncVehicleFiltersFromQuery();
+  fetchAuctions();
+});
 
 onMounted(() => {
   fetchCategories();
+  syncVehicleFiltersFromQuery();
   fetchAuctions();
   
   countdownInterval = setInterval(() => {
@@ -680,6 +1044,113 @@ onUnmounted(() => {
   .location-filter-box {
     width: 100%;
     justify-content: center;
+  }
+  .vehicle-filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Vehicle Filters Section ─── */
+.vehicle-filters-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.vehicle-filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.vehicle-filters-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.clear-vehicle-filters {
+  background: none;
+  border: none;
+  color: var(--btn-primary-bg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.clear-vehicle-filters:hover {
+  background: #eff6ff;
+}
+
+.vehicle-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.filter-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-select,
+.filter-input {
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: #ffffff;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.filter-select:hover,
+.filter-input:hover {
+  border-color: #d1d5db;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  border-color: var(--btn-primary-bg);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+}
+
+.filter-select:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .vehicle-filters-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .vehicle-filters-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>

@@ -93,6 +93,74 @@ const auctionSchema = new mongoose.Schema({
     required: false,
     default: 'Maputo',
     trim: true
+  },
+  // Car-specific fields for automotive niche
+  vehicleSpecs: {
+    make: {
+      type: String,
+      default: null
+    },
+    model: {
+      type: String,
+      default: null
+    },
+    year: {
+      type: Number,
+      default: null,
+      min: 1900,
+      max: new Date().getFullYear() + 1
+    },
+    mileage: {
+      type: Number,
+      default: null
+    },
+    fuelType: {
+      type: String,
+      enum: ['Gasolina', 'Diesel', 'Híbrido', 'Elétrico', 'GPL', 'Outro'],
+      default: null
+    },
+    transmission: {
+      type: String,
+      enum: ['Manual', 'Automático', 'CVT', 'DSG', 'Outro'],
+      default: null
+    },
+    color: {
+      type: String,
+      default: null
+    },
+    bodyType: {
+      type: String,
+      enum: ['Sedan', 'Hatchback', 'SUV', 'Coupé', 'Van', 'Pickup', 'Carrinha', 'Motociclo', 'Outro'],
+      default: null
+    },
+    engineSize: {
+      type: String,
+      default: null
+    },
+    doors: {
+      type: Number,
+      enum: [2, 3, 4, 5],
+      default: null
+    },
+    seats: {
+      type: Number,
+      default: null
+    },
+    condition: {
+      type: String,
+      enum: ['Novo', 'Usado', 'Seminovo', 'Para Peças', 'Reformado'],
+      default: null
+    },
+    conditionLevel: {
+      type: Number,
+      enum: [1, 2, 3, 4],
+      default: null,
+      description: '1 = Excelente (Novo/Seminovo), 2 = Bom, 3 = Regular, 4 = Para Peças'
+    },
+    features: {
+      type: [String],
+      default: []
+    }
   }
 }, {
   timestamps: true,
