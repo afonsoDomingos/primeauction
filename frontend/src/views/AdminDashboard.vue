@@ -2056,6 +2056,7 @@ const popularCarNames = [
 // Validation state
 const yearError = ref('');
 const mileageError = ref('');
+const descriptionVariant = ref(0); // Track description variations
 
 const validateYear = () => {
   const year = form.value.vehicleSpecs.year;
@@ -2215,32 +2216,70 @@ const generateDescription = () => {
   const vs = form.value.vehicleSpecs;
   let description = '';
   
+  // Cycle through variations (0, 1, 2, 3)
+  const variant = descriptionVariant.value % 4;
+  descriptionVariant.value++;
+  
   // Vehicle name (short)
   if (vs.make && vs.model) {
     description += `${vs.make} ${vs.model}`;
     if (vs.year) description += ` ${vs.year}`;
   }
   
-  // Mileage
-  if (vs.mileage) {
-    description += ` - ${vs.mileage.toLocaleString('pt-MZ')} km`;
-  }
-  
-  // Condition
-  if (vs.condition) {
-    description += ` - ${vs.condition}`;
-  }
-  
-  // Key features (max 3)
-  if (vs.features && vs.features.length > 0) {
-    const keyFeatures = vs.features.slice(0, 3);
-    description += `. ${keyFeatures.join(', ')}`;
+  // Different variations based on variant number
+  if (variant === 0) {
+    // Variation 1: Standard format
+    if (vs.mileage) {
+      description += ` - ${vs.mileage.toLocaleString('pt-MZ')} km`;
+    }
+    if (vs.condition) {
+      description += ` - ${vs.condition}`;
+    }
+    if (vs.features && vs.features.length > 0) {
+      const keyFeatures = vs.features.slice(0, 3);
+      description += `. ${keyFeatures.join(', ')}`;
+    }
+  } else if (variant === 1) {
+    // Variation 2: Focus on condition
+    if (vs.condition) {
+      description += ` em ${vs.condition.toLowerCase()}`;
+    }
+    if (vs.mileage) {
+      description += ` com ${vs.mileage.toLocaleString('pt-MZ')} km`;
+    }
+    if (vs.features && vs.features.length > 0) {
+      const keyFeatures = vs.features.slice(0, 3);
+      description += `. Equipado com ${keyFeatures.join(', ')}`;
+    }
+  } else if (variant === 2) {
+    // Variation 3: Focus on features
+    if (vs.features && vs.features.length > 0) {
+      const keyFeatures = vs.features.slice(0, 3);
+      description += ` com ${keyFeatures.join(', ')}`;
+    }
+    if (vs.mileage) {
+      description += `. ${vs.mileage.toLocaleString('pt-MZ')} km`;
+    }
+    if (vs.condition) {
+      description += ` - ${vs.condition}`;
+    }
+  } else {
+    // Variation 4: Compact format
+    if (vs.mileage) {
+      description += ` (${vs.mileage.toLocaleString('pt-MZ')} km)`;
+    }
+    if (vs.condition) {
+      description += ` - ${vs.condition}`;
+    }
+    if (vs.fuelType) {
+      description += `. ${vs.fuelType}`;
+    }
   }
   
   // Set the description
   form.value.description = description.trim();
   
-  toastStore.add('Descrição gerada automaticamente!', 'success', 2000);
+  toastStore.add(`Descrição gerada (variação ${variant + 1}/4)!`, 'success', 2000);
 };
 
 const handleModelChange = () => {
