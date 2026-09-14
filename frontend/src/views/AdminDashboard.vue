@@ -3483,6 +3483,9 @@ const formatTicketDate = (dateString) => {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card-icon svg {
@@ -3499,6 +3502,9 @@ const formatTicketDate = (dateString) => {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-title-icon svg {
