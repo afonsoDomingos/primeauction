@@ -249,32 +249,55 @@
               <div class="form-grid-3">
                 <div class="form-group">
                   <label class="form-label">Marca</label>
-                  <select v-model="form.vehicleSpecs.make" @change="handleMakeChange" class="form-input">
-                    <option value="">Selecione a marca</option>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.make" 
+                    @change="handleMakeChange"
+                    class="form-input" 
+                    list="makes-list"
+                    placeholder="Selecione ou digite a marca"
+                  />
+                  <datalist id="makes-list">
                     <option v-for="make in availableMakes" :key="make.name" :value="make.name">
                       {{ make.name }}
                     </option>
-                  </select>
+                  </datalist>
                 </div>
                 
                 <div class="form-group">
                   <label class="form-label">Modelo</label>
-                  <select v-model="form.vehicleSpecs.model" @change="handleModelChange" class="form-input" :disabled="!form.vehicleSpecs.make">
-                    <option value="">Selecione o modelo</option>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.model" 
+                    @change="handleModelChange"
+                    class="form-input" 
+                    list="models-list"
+                    placeholder="Selecione ou digite o modelo"
+                    :disabled="!form.vehicleSpecs.make"
+                  />
+                  <datalist id="models-list">
                     <option v-for="model in availableModels" :key="model" :value="model">
                       {{ model }}
                     </option>
-                  </select>
+                  </datalist>
                 </div>
                 
                 <div class="form-group">
                   <label class="form-label">Ano</label>
-                  <select v-model="form.vehicleSpecs.year" class="form-input">
-                    <option value="">Selecione o ano</option>
+                  <input 
+                    type="number" 
+                    v-model="form.vehicleSpecs.year" 
+                    class="form-input" 
+                    list="years-list"
+                    placeholder="Selecione ou digite o ano"
+                    min="1990"
+                    :max="new Date().getFullYear() + 1"
+                  />
+                  <datalist id="years-list">
                     <option v-for="year in vehicleYears" :key="year" :value="year">
                       {{ year }}
                     </option>
-                  </select>
+                  </datalist>
                 </div>
               </div>
 
@@ -292,45 +315,70 @@
                 
                 <div class="form-group">
                   <label class="form-label">Combustível</label>
-                  <select v-model="form.vehicleSpecs.fuelType" class="form-input">
-                    <option value="">Selecione</option>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.fuelType" 
+                    class="form-input" 
+                    list="fuel-types-list"
+                    placeholder="Selecione ou digite"
+                  />
+                  <datalist id="fuel-types-list">
                     <option value="Gasolina">Gasolina</option>
                     <option value="Diesel">Diesel</option>
                     <option value="Híbrido">Híbrido</option>
                     <option value="Elétrico">Elétrico</option>
                     <option value="GPL">GPL</option>
                     <option value="Outro">Outro</option>
-                  </select>
+                  </datalist>
                 </div>
                 
                 <div class="form-group">
                   <label class="form-label">Câmbio</label>
-                  <select v-model="form.vehicleSpecs.transmission" class="form-input">
-                    <option value="">Selecione</option>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.transmission" 
+                    class="form-input" 
+                    list="transmission-list"
+                    placeholder="Selecione ou digite"
+                  />
+                  <datalist id="transmission-list">
                     <option value="Manual">Manual</option>
                     <option value="Automático">Automático</option>
                     <option value="CVT">CVT</option>
                     <option value="DSG">DSG</option>
                     <option value="Outro">Outro</option>
-                  </select>
+                  </datalist>
                 </div>
               </div>
 
               <div class="form-grid-3">
                 <div class="form-group">
                   <label class="form-label">Cor</label>
-                  <select v-model="form.vehicleSpecs.color" class="form-input">
-                    <option value="">Selecione a cor</option>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.color" 
+                    class="form-input" 
+                    list="colors-list"
+                    placeholder="Selecione ou digite a cor"
+                  />
+                  <datalist id="colors-list">
                     <option v-for="color in vehicleColors" :key="color" :value="color">
                       {{ color }}
                     </option>
-                  </select>
+                  </datalist>
                 </div>
                 
                 <div class="form-group">
                   <label class="form-label">Tipo de Carroçaria</label>
-                  <select v-model="form.vehicleSpecs.bodyType" @change="handleBodyTypeChange" class="form-input">
-                    <option value="">Selecione</option>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.bodyType" 
+                    @change="handleBodyTypeChange"
+                    class="form-input" 
+                    list="body-types-list"
+                    placeholder="Selecione ou digite"
+                  />
+                  <datalist id="body-types-list">
                     <option value="Sedan">Sedan</option>
                     <option value="Hatchback">Hatchback</option>
                     <option value="SUV">SUV</option>
@@ -340,19 +388,25 @@
                     <option value="Carrinha">Carrinha</option>
                     <option value="Motociclo">Motociclo</option>
                     <option value="Outro">Outro</option>
-                  </select>
+                  </datalist>
                 </div>
                 
                 <div class="form-group">
                   <label class="form-label">Estado</label>
-                  <select v-model="form.vehicleSpecs.condition" class="form-input">
-                    <option value="">Selecione</option>
+                  <input 
+                    type="text" 
+                    v-model="form.vehicleSpecs.condition" 
+                    class="form-input" 
+                    list="conditions-list"
+                    placeholder="Selecione ou digite"
+                  />
+                  <datalist id="conditions-list">
                     <option value="Novo">Novo</option>
                     <option value="Seminovo">Seminovo</option>
                     <option value="Usado">Usado</option>
                     <option value="Reformado">Reformado</option>
                     <option value="Para Peças">Para Peças</option>
-                  </select>
+                  </datalist>
                 </div>
                 
                 <div class="form-group">
