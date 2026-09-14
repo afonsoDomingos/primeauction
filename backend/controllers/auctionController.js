@@ -7,7 +7,7 @@ const Payment = require('../models/Payment');
 // @access  Public
 exports.getAuctions = async (req, res) => {
   try {
-    const { search, status, category, location, make, model, year, fuelType, transmission, bodyType, condition, conditionLevel, maxMileage } = req.query;
+    const { search, status, category, location, make, model, year, yearMax, minPrice, maxPrice, fuelType, transmission, bodyType, condition, conditionLevel, maxMileage } = req.query;
     let queryObj = {};
 
     // For non-admin users, hide finished auctions by default
@@ -56,6 +56,19 @@ exports.getAuctions = async (req, res) => {
     }
     if (year) {
       queryObj['vehicleSpecs.year'] = parseInt(year);
+    }
+    if (yearMax) {
+      queryObj['vehicleSpecs.year'] = { $lte: parseInt(yearMax) };
+    }
+    if (minPrice) {
+      queryObj.startingPrice = { $gte: parseInt(minPrice) };
+    }
+    if (maxPrice) {
+      if (queryObj.startingPrice) {
+        queryObj.startingPrice.$lte = parseInt(maxPrice);
+      } else {
+        queryObj.startingPrice = { $lte: parseInt(maxPrice) };
+      }
     }
     if (fuelType) {
       queryObj['vehicleSpecs.fuelType'] = fuelType;

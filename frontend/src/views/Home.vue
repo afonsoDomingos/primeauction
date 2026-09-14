@@ -37,7 +37,7 @@
         <!-- Glowing Live Badge -->
         <div class="hero-live-pill animate-fade-in">
           <span class="pulse-green-dot"></span>
-          <span>Leilões ao Vivo em Moçambique &bull; 100% Verificados</span>
+          <span>Leilões de Veículos ao Vivo em Moçambique &bull; 100% Verificados</span>
         </div>
 
         <h1 
@@ -45,9 +45,9 @@
           class="hero-title hero-title-glowing" 
           :class="{ 'in-view': isHeroInView }"
         >
-          {{ heroTitle }}
+          Encontre o Carro dos Seus Sonhos
         </h1>
-        <p class="hero-subtitle">{{ heroSubtitle }}</p>
+        <p class="hero-subtitle">Leilões exclusivos de automóveis. Toyota, Volkswagen, Honda e muito mais. Licite com confiança.</p>
       </div>
       
       <div class="hero-actions animate-fade-in" style="animation-delay: 0.3s; z-index: 2; position: relative;">
@@ -86,7 +86,7 @@
     <!-- Search Section (Pesquisar Leilões) -->
     <section class="search-section" id="search-section">
       <div class="container">
-        <h2 class="search-section-title">Pesquisar Leilões</h2>
+        <h2 class="search-section-title">Pesquisar Leilões de Veículos</h2>
         <form @submit.prevent="handleSearch" class="search-bar-form">
           <div class="search-input-wrapper">
             <input 
@@ -104,13 +104,45 @@
           </div>
           <router-link to="/auctions" class="btn btn-advanced-search">Pesquisa Avançada</router-link>
         </form>
+        
+        <!-- Vehicle Quick Filters -->
+        <div class="vehicle-quick-filters">
+          <span class="filter-label">Filtros rápidos:</span>
+          <select v-model="quickFilters.make" @change="applyQuickFilters" class="quick-filter-select">
+            <option value="">Todas as Marcas</option>
+            <option v-for="make in popularMakes" :key="make" :value="make">{{ make }}</option>
+          </select>
+          <select v-model="quickFilters.year" @change="applyQuickFilters" class="quick-filter-select">
+            <option value="">Todos os Anos</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+            <option value="2018">2018</option>
+            <option value="older">Antes de 2018</option>
+          </select>
+          <select v-model="quickFilters.priceRange" @change="applyQuickFilters" class="quick-filter-select">
+            <option value="">Todos os Preços</option>
+            <option value="0-500000">0 - 500.000 MZN</option>
+            <option value="500000-1000000">500.000 - 1.000.000 MZN</option>
+            <option value="1000000-2000000">1.000.000 - 2.000.000 MZN</option>
+            <option value="2000000+">Acima de 2.000.000 MZN</option>
+          </select>
+          <button v-if="hasQuickFilters" @click="clearQuickFilters" class="clear-filters-btn">Limpar</button>
+        </div>
+        
         <div class="quick-categories">
-          <span class="quick-categories-label">Pesquisa rápida:</span>
-          <router-link to="/auctions?category=Veículos" class="quick-cat-btn">🚗 Veículos</router-link>
-          <router-link to="/auctions?category=Imóveis%20e%20Equipamentos" class="quick-cat-btn">🏠 Imóveis</router-link>
-          <router-link to="/auctions?category=Electrónica%20e%20Tecnologia" class="quick-cat-btn">💻 Tecnologia</router-link>
-          <router-link to="/auctions?category=Mobiliário%20e%20Decoração" class="quick-cat-btn">🪑 Mobiliário</router-link>
-          <router-link to="/auctions?category=Maquinaria%20Industrial" class="quick-cat-btn">🏭 Maquinaria</router-link>
+          <span class="quick-categories-label">Marcas populares:</span>
+          <router-link to="/auctions?category=Veículos&make=Toyota" class="quick-cat-btn">🚗 Toyota</router-link>
+          <router-link to="/auctions?category=Veículos&make=Volkswagen" class="quick-cat-btn">🚙 Volkswagen</router-link>
+          <router-link to="/auctions?category=Veículos&make=Honda" class="quick-cat-btn">🚗 Honda</router-link>
+          <router-link to="/auctions?category=Veículos&make=Ford" class="quick-cat-btn">� Ford</router-link>
+          <router-link to="/auctions?category=Veículos&make=BMW" class="quick-cat-btn">🚘 BMW</router-link>
+          <router-link to="/auctions?category=Veículos&make=Mercedes-Benz" class="quick-cat-btn">🚙 Mercedes</router-link>
+          <router-link to="/auctions?category=Veículos&make=Nissan" class="quick-cat-btn">🚗 Nissan</router-link>
+          <router-link to="/auctions?category=Veículos&make=Hyundai" class="quick-cat-btn">🚙 Hyundai</router-link>
         </div>
       </div>
     </section>
@@ -674,6 +706,67 @@ const partnersList = computed(() => {
 
 // Search state
 const searchQuery = ref('');
+
+// Vehicle quick filters
+const quickFilters = ref({
+  make: '',
+  year: '',
+  priceRange: ''
+});
+
+const popularMakes = [
+  'Toyota',
+  'Volkswagen',
+  'Honda',
+  'Ford',
+  'BMW',
+  'Mercedes-Benz',
+  'Nissan',
+  'Hyundai',
+  'Kia',
+  'Renault'
+];
+
+const hasQuickFilters = computed(() => {
+  return quickFilters.value.make || quickFilters.value.year || quickFilters.value.priceRange;
+});
+
+const applyQuickFilters = () => {
+  const query = { category: 'Veículos' };
+  
+  if (quickFilters.value.make) {
+    query.make = quickFilters.value.make;
+  }
+  
+  if (quickFilters.value.year) {
+    if (quickFilters.value.year === 'older') {
+      query.yearMax = '2017';
+    } else {
+      query.year = quickFilters.value.year;
+    }
+  }
+  
+  if (quickFilters.value.priceRange) {
+    if (quickFilters.value.priceRange === '2000000+') {
+      query.minPrice = '2000000';
+    } else {
+      const [min, max] = quickFilters.value.priceRange.split('-');
+      query.minPrice = min;
+      query.maxPrice = max;
+    }
+  }
+  
+  router.push({ path: '/auctions', query });
+};
+
+const clearQuickFilters = () => {
+  quickFilters.value = {
+    make: '',
+    year: '',
+    priceRange: ''
+  };
+  router.push({ path: '/auctions', query: { category: 'Veículos' } });
+};
 
 // Dynamic auctions
 const featuredAuctions = ref([]);
@@ -1514,6 +1607,90 @@ onUnmounted(() => {
 
 .quick-cat-btn:hover {
   background-color: #ffffff;
+  color: #1a56db;
+  transform: translateY(-1px);
+}
+
+/* Vehicle Quick Filters */
+.vehicle-quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.quick-filter-select {
+  padding: 0.5rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  min-width: 140px;
+}
+
+.quick-filter-select:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.quick-filter-select:focus {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+.quick-filter-select option {
+  background: #1a1a2e;
+  color: #ffffff;
+}
+
+.clear-filters-btn {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-filters-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+
+@media (max-width: 768px) {
+  .vehicle-quick-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .quick-filter-select {
+    min-width: 100%;
+  }
+  
+  .filter-label {
+    margin-bottom: 0.25rem;
+  }
+}
   color: #1a56db;
   transform: translateY(-1px);
 }

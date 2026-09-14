@@ -320,6 +320,9 @@ const fetchAuctions = async () => {
     const makeVal = route.query.make || '';
     const modelVal = route.query.model || '';
     const yearVal = route.query.year || '';
+    const yearMaxVal = route.query.yearMax || '';
+    const minPriceVal = route.query.minPrice || '';
+    const maxPriceVal = route.query.maxPrice || '';
     const fuelTypeVal = route.query.fuelType || '';
     const transmissionVal = route.query.transmission || '';
     const bodyTypeVal = route.query.bodyType || '';
@@ -335,6 +338,9 @@ const fetchAuctions = async () => {
     if (makeVal) params.push(`make=${encodeURIComponent(makeVal)}`);
     if (modelVal) params.push(`model=${encodeURIComponent(modelVal)}`);
     if (yearVal) params.push(`year=${encodeURIComponent(yearVal)}`);
+    if (yearMaxVal) params.push(`yearMax=${encodeURIComponent(yearMaxVal)}`);
+    if (minPriceVal) params.push(`minPrice=${encodeURIComponent(minPriceVal)}`);
+    if (maxPriceVal) params.push(`maxPrice=${encodeURIComponent(maxPriceVal)}`);
     if (fuelTypeVal) params.push(`fuelType=${encodeURIComponent(fuelTypeVal)}`);
     if (transmissionVal) params.push(`transmission=${encodeURIComponent(transmissionVal)}`);
     if (bodyTypeVal) params.push(`bodyType=${encodeURIComponent(bodyTypeVal)}`);

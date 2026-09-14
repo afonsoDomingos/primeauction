@@ -284,7 +284,7 @@ O sistema foi desenhado para ser facilmente extensível:
 - ✅ Backend - Modelos atualizados (incluindo conditionLevel)
 - ✅ Backend - Dados de veículos criados
 - ✅ Backend - Sistema de níveis de estado criado
-- ✅ Backend - Controllers atualizados (incluindo filtros na API)
+- ✅ Backend - Controllers atualizados (incluindo filtros na API + faixa de preço e ano)
 - ✅ Backend - Rotas adicionadas
 - ✅ Frontend - AdminDashboard com campos de veículo
 - ✅ Frontend - Modal de explicação de níveis de estado
@@ -294,7 +294,10 @@ O sistema foi desenhado para ser facilmente extensível:
 - ✅ Frontend - Filtro por nível de estado
 - ✅ Frontend - Badges de filtros ativos
 - ✅ Frontend - Sincronização com URL
+- ✅ Frontend - Home Page com Hero Section focada em veículos
+- ✅ Frontend - Home Page com filtros rápidos de veículo (marca, ano, faixa de preço)
+- ✅ Frontend - Home Page com chips de marcas populares
 - ⏳ Frontend - Exibição de especificações em detalhes (próximo passo)
 - ⏳ Frontend - Formulário de proposta com campos de veículo (próximo passo)
 
-O sistema está pronto para uso básico no painel de administração e filtros de veículos estão funcionando na página de leilões. O sistema de níveis de estado está implementado com modal informativo para o administrador. As próximas etapas serão implementar a exibição de especificações na página de detalhes e o formulário de proposta com campos de veículo.
+O sistema está pronto para uso básico no painel de administração, filtros de veículos estão funcionando na página de leilões, e a página inicial está otimizada para o nicho de automóveis. O sistema de níveis de estado está implementado com modal informativo para o administrador. As próximas etapas serão implementar a exibição de especificações na página de detalhes e o formulário de proposta com campos de veículo.
