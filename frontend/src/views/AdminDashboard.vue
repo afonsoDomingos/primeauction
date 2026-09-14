@@ -546,9 +546,14 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-pill" :disabled="creating">
-              {{ creating ? 'A criar...' : '✓ Criar Leilão' }}
-            </button>
+            <div class="form-actions">
+              <button type="button" @click="clearForm" class="btn btn-secondary btn-pill">
+                🗑️ Limpar Tudo
+              </button>
+              <button type="submit" class="btn btn-primary btn-pill" :disabled="creating">
+                {{ creating ? 'A criar...' : '✓ Criar Leilão' }}
+              </button>
+            </div>
           </form>
         </div>
 
@@ -2664,6 +2669,39 @@ onUnmounted(() => {
   if (previewIntervalId) clearInterval(previewIntervalId);
 });
 
+const clearForm = () => {
+  form.value = {
+    title: '',
+    startingPrice: '',
+    participationFee: '1000',
+    category: 'Veículos',
+    location: 'Maputo',
+    images: [],
+    imageUrl: '',
+    description: '',
+    startTime: '',
+    endTime: '',
+    vehicleSpecs: {
+      make: null,
+      model: null,
+      year: null,
+      mileage: null,
+      mileageDisplay: '',
+      fuelType: null,
+      transmission: null,
+      color: null,
+      bodyType: null,
+      condition: null,
+      conditionLevel: null,
+      features: []
+    }
+  };
+  yearError.value = '';
+  mileageError.value = '';
+  descriptionVariant.value = 0;
+  toastStore.add('Formulário limpo com sucesso!', 'success', 2000);
+};
+
 const handleCreate = async () => {
   creating.value = true;
   try {
@@ -3403,6 +3441,16 @@ const formatTicketDate = (dateString) => {
   color: #ef4444;
   font-size: 0.75rem;
   margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-actions .btn {
+  flex: 1;
 }
 
 /* ── Table ── */
