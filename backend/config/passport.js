@@ -1,5 +1,5 @@
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
 // Only configure Google Strategy if credentials are provided
@@ -35,7 +35,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.
         provider: 'google',
         profilePhoto: profile.photos[0]?.value,
         role: isFirstUser ? 'admin' : 'user',
-        password: Math.random().toString(36).slice(-8) // Senha aleatória para OAuth
+        password: Math.random().toString(36).slice(-8)
       });
       
       done(null, user);
@@ -44,9 +44,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.
     }
   }));
   
-  console.log('✅ Google OAuth configured');
+  console.log('Google OAuth configured');
 } else {
-  console.log('⚠️ Google OAuth credentials not found, skipping Google Strategy configuration');
+  console.log('Google OAuth credentials not found, skipping Google Strategy configuration');
 }
 
 passport.serializeUser((user, done) => done(null, user.id));
