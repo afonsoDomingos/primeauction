@@ -194,14 +194,30 @@
               </div>
               <div class="form-group half">
                 <label class="form-label">Preço Inicial (MZN)</label>
-                <input type="number" v-model.number="form.startingPrice" class="form-input" placeholder="0" min="0" required />
+                <input 
+                  type="text" 
+                  :value="formatCurrencyInput(form.startingPrice)"
+                  @input="handlePriceInput($event, 'startingPrice')"
+                  @blur="handlePriceBlur($event, 'startingPrice')"
+                  class="form-input" 
+                  placeholder="0" 
+                  required 
+                />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group half">
                 <label class="form-label">Taxa de Participação (MZN) 🎫</label>
-                <input type="number" v-model.number="form.participationFee" class="form-input" placeholder="1000" min="0" required />
+                <input 
+                  type="text" 
+                  :value="formatCurrencyInput(form.participationFee)"
+                  @input="handlePriceInput($event, 'participationFee')"
+                  @blur="handlePriceBlur($event, 'participationFee')"
+                  class="form-input" 
+                  placeholder="1000" 
+                  required 
+                />
               </div>
               <div class="form-group half">
                 <label class="form-label">Categoria</label>
@@ -274,12 +290,24 @@
             <div class="form-group-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Data e Hora de Início (opcional)</label>
-                <input type="datetime-local" v-model="form.startTime" class="form-input" />
+                <input 
+                  type="datetime-local" 
+                  v-model="form.startTime" 
+                  class="form-input"
+                  :min="getMinDateTime()"
+                />
                 <small class="form-help" style="font-size: 0.75rem; color: #666; margin-top: 0.25rem; display: block;">Vazio = Inicia imediatamente</small>
               </div>
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Data e Hora de Fim</label>
-                <input type="datetime-local" v-model="form.endTime" class="form-input" required />
+                <input 
+                  type="datetime-local" 
+                  v-model="form.endTime" 
+                  class="form-input" 
+                  required
+                  :min="form.startTime || getMinDateTime()"
+                />
+                <small class="form-help" style="font-size: 0.75rem; color: #666; margin-top: 0.25rem; display: block;">Mínimo: 1 hora após o início</small>
               </div>
             </div>
 
@@ -1015,15 +1043,39 @@
             <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Preço Inicial (MZN)</label>
-                <input type="number" v-model.number="editForm.startingPrice" class="form-input" min="0" required />
+                <input 
+                  type="text" 
+                  :value="formatCurrencyInput(editForm.startingPrice)"
+                  @input="handleEditPriceInput($event, 'startingPrice')"
+                  @blur="handleEditPriceBlur($event, 'startingPrice')"
+                  class="form-input" 
+                  min="0" 
+                  required 
+                />
               </div>
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Lance Actual (MZN)</label>
-                <input type="number" v-model.number="editForm.currentPrice" class="form-input" min="0" required />
+                <input 
+                  type="text" 
+                  :value="formatCurrencyInput(editForm.currentPrice)"
+                  @input="handleEditPriceInput($event, 'currentPrice')"
+                  @blur="handleEditPriceBlur($event, 'currentPrice')"
+                  class="form-input" 
+                  min="0" 
+                  required 
+                />
               </div>
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Taxa de Participação (MZN) 🎫</label>
-                <input type="number" v-model.number="editForm.participationFee" class="form-input" min="0" required />
+                <input 
+                  type="text" 
+                  :value="formatCurrencyInput(editForm.participationFee)"
+                  @input="handleEditPriceInput($event, 'participationFee')"
+                  @blur="handleEditPriceBlur($event, 'participationFee')"
+                  class="form-input" 
+                  min="0" 
+                  required 
+                />
               </div>
             </div>
 
@@ -1074,11 +1126,22 @@
             <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Início</label>
-                <input type="datetime-local" v-model="editForm.startTime" class="form-input" />
+                <input 
+                  type="datetime-local" 
+                  v-model="editForm.startTime" 
+                  class="form-input"
+                  :min="getMinDateTime()"
+                />
               </div>
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Fim</label>
-                <input type="datetime-local" v-model="editForm.endTime" class="form-input" required />
+                <input 
+                  type="datetime-local" 
+                  v-model="editForm.endTime" 
+                  class="form-input" 
+                  required
+                  :min="editForm.startTime || getMinDateTime()"
+                />
               </div>
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Estado</label>
@@ -1356,6 +1419,48 @@ const formatCurrency = (value) => {
   return `${formatted} MZN`;
 };
 
+// Smart currency input formatting
+const formatCurrencyInput = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+  // Remove non-digit characters
+  const cleanValue = String(value).replace(/\D/g, '');
+  if (cleanValue === '') {
+    return '';
+  }
+  // Format with thousand separators
+  return Number(cleanValue).toLocaleString('pt-MZ');
+};
+
+const handlePriceInput = (event, field) => {
+  const inputValue = event.target.value;
+  // Remove non-digit characters for the actual value
+  const cleanValue = inputValue.replace(/\D/g, '');
+  form.value[field] = cleanValue === '' ? 0 : Number(cleanValue);
+};
+
+const handlePriceBlur = (event, field) => {
+  // Ensure the value is properly formatted when leaving the field
+  if (form.value[field] !== null && form.value[field] !== '') {
+    form.value[field] = Number(form.value[field]);
+  }
+};
+
+const handleEditPriceInput = (event, field) => {
+  const inputValue = event.target.value;
+  // Remove non-digit characters for the actual value
+  const cleanValue = inputValue.replace(/\D/g, '');
+  editForm.value[field] = cleanValue === '' ? 0 : Number(cleanValue);
+};
+
+const handleEditPriceBlur = (event, field) => {
+  // Ensure the value is properly formatted when leaving the field
+  if (editForm.value[field] !== null && editForm.value[field] !== '') {
+    editForm.value[field] = Number(editForm.value[field]);
+  }
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return '-';
   const date = new Date(dateString);
@@ -1368,13 +1473,23 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
+const getMinDateTime = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 const mpesaPayments = ref([]);
 
 const fetchData = async () => {
   try {
     const [usersRes, auctionsRes, ticketsRes, categoriesRes, subscribersRes, proposalsRes, paymentsRes] = await Promise.all([
       axios.get(`${apiUrl}/api/users`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
-      axios.get(`${apiUrl}/api/auctions`),
+      axios.get(`${apiUrl}/api/auctions`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/support`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
       axios.get(`${apiUrl}/api/categories`),
       axios.get(`${apiUrl}/api/newsletter/subscribers`, { headers: { Authorization: `Bearer ${authStore.token}` } }),
@@ -1416,11 +1531,28 @@ const approveProposalAndPrefill = (prop) => {
   form.value.images = [...prop.images];
   form.value.imageUrl = prop.images.length > 0 ? prop.images[0] : '';
   
+  // Set default dates to avoid format issues
+  const now = new Date();
+  const endTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+  
+  // Format dates for datetime-local input (YYYY-MM-DDTHH:mm)
+  const formatDateForInput = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+  
+  form.value.startTime = formatDateForInput(now);
+  form.value.endTime = formatDateForInput(endTime);
+  
   const target = document.querySelector('.create-form');
   if (target) {
     target.scrollIntoView({ behavior: 'smooth' });
   }
-  showAlert('Proposta carregada no formulário de criação! Defina as datas e confirme.', 'success');
+  showAlert('Proposta carregada no formulário de criação! Datas preenchidas automaticamente (início: agora, fim: 7 dias).', 'success');
 };
 
 const rejectProposal = (prop) => {
@@ -1555,11 +1687,35 @@ onUnmounted(() => {
 const handleCreate = async () => {
   creating.value = true;
   try {
+    // Validate dates before sending
+    if (!form.value.endTime) {
+      showAlert('Por favor, defina a data e hora de fim do leilão.', 'error');
+      creating.value = false;
+      return;
+    }
+
+    // Convert string dates to Date objects for validation
+    const startTime = form.value.startTime ? new Date(form.value.startTime) : new Date();
+    const endTime = new Date(form.value.endTime);
+
+    if (endTime <= startTime) {
+      showAlert('A data de fim deve ser posterior à data de início.', 'error');
+      creating.value = false;
+      return;
+    }
+
     if (form.value.imageUrl && !form.value.images.includes(form.value.imageUrl)) {
       form.value.images.unshift(form.value.imageUrl);
     }
     
-    await axios.post(`${apiUrl}/api/auctions`, form.value, {
+    // Prepare data with proper date formatting
+    const auctionData = {
+      ...form.value,
+      startTime: form.value.startTime || new Date().toISOString(),
+      endTime: form.value.endTime
+    };
+    
+    await axios.post(`${apiUrl}/api/auctions`, auctionData, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     });
 
@@ -1752,6 +1908,22 @@ const submitEditAuction = async () => {
   if (!editTargetAuction.value) return;
   updatingAuction.value = true;
   try {
+    // Validate dates
+    if (!editForm.value.endTime) {
+      showAlert('Por favor, defina a data e hora de fim do leilão.', 'error');
+      updatingAuction.value = false;
+      return;
+    }
+
+    const startTime = editForm.value.startTime ? new Date(editForm.value.startTime) : new Date(editTargetAuction.value.startTime);
+    const endTime = new Date(editForm.value.endTime);
+
+    if (endTime <= startTime) {
+      showAlert('A data de fim deve ser posterior à data de início.', 'error');
+      updatingAuction.value = false;
+      return;
+    }
+
     const payload = {
       title: editForm.value.title,
       description: editForm.value.description,

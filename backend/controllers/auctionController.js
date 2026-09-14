@@ -10,8 +10,25 @@ exports.getAuctions = async (req, res) => {
     const { search, status, category, location } = req.query;
     let queryObj = {};
 
-    if (status) {
+    // For non-admin users, hide finished auctions by default
+    // Admins can see all auctions including finished ones
+    const isAdmin = req.user && req.user.role === 'admin';
+    
+    console.log('[getAuctions] User role:', isAdmin ? 'admin' : (req.user ? 'user' : 'guest'));
+    console.log('[getAuctions] Requested status:', status);
+    
+    if (!isAdmin && !status) {
+      // Default: show only active and upcoming auctions for regular users
+      queryObj.status = { $in: ['active', 'upcoming'] };
+      console.log('[getAuctions] Filtering to active/upcoming for non-admin');
+    } else if (status) {
+      // If status is explicitly requested, use it
       queryObj.status = status;
+      console.log('[getAuctions] Using requested status:', status);
+    } else if (isAdmin) {
+      // Admins see all statuses by default
+      // Don't add status filter
+      console.log('[getAuctions] Admin user - showing all auctions');
     }
 
     if (category) {
@@ -31,8 +48,12 @@ exports.getAuctions = async (req, res) => {
     }
 
     const auctions = await Auction.find(queryObj).sort('-createdAt').populate('bids');
+    console.log('[getAuctions] Found', auctions.length, 'auctions');
+    console.log('[getAuctions] Auctions statuses:', auctions.map(a => a.status));
+    
     res.status(200).json({ success: true, count: auctions.length, data: auctions });
   } catch (err) {
+    console.error('[getAuctions] Error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -46,6 +67,15 @@ exports.getAuction = async (req, res) => {
 
     if (!auction) {
       return res.status(404).json({ success: false, error: 'Auction not found' });
+    }
+
+    // Check if auction is finished and user is not admin
+    const isAdmin = req.user && req.user.role === 'admin';
+    if (auction.status === 'finished' && !isAdmin) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Este leilão já terminou e não está mais disponível.' 
+      });
     }
 
     // Resolve status on-demand if startTime has passed but still marked upcoming
@@ -129,10 +159,30 @@ exports.createAuction = async (req, res) => {
       req.body.participationFee = 1000;
     }
 
+    // Handle date formatting from datetime-local input
+    if (req.body.startTime) {
+      req.body.startTime = new Date(req.body.startTime);
+    } else {
+      req.body.startTime = new Date();
+    }
+    
+    if (req.body.endTime) {
+      req.body.endTime = new Date(req.body.endTime);
+    }
+
+    // Validate dates
+    if (req.body.endTime <= req.body.startTime) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'A data de fim deve ser posterior à data de início.' 
+      });
+    }
+
     const auction = await Auction.create(req.body);
 
     res.status(201).json({ success: true, data: auction });
   } catch (err) {
+    console.error('[createAuction] Error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -152,6 +202,25 @@ exports.updateAuction = async (req, res) => {
       req.body.participationFee = Number(req.body.participationFee);
     }
 
+    // Handle date formatting from datetime-local input
+    if (req.body.startTime) {
+      req.body.startTime = new Date(req.body.startTime);
+    }
+    
+    if (req.body.endTime) {
+      req.body.endTime = new Date(req.body.endTime);
+    }
+
+    // Validate dates if both are provided
+    if (req.body.startTime && req.body.endTime) {
+      if (new Date(req.body.endTime) <= new Date(req.body.startTime)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'A data de fim deve ser posterior à data de início.' 
+        });
+      }
+    }
+
     auction = await Auction.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
@@ -159,6 +228,7 @@ exports.updateAuction = async (req, res) => {
 
     res.status(200).json({ success: true, data: auction });
   } catch (err) {
+    console.error('[updateAuction] Error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 };

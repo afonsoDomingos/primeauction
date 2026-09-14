@@ -125,8 +125,10 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/authStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const loading = ref(true);
 const auctions = ref([]);
 const currentYear = ref(new Date().getFullYear());
@@ -148,7 +150,14 @@ const fetchAuctions = async () => {
   loading.value = true;
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const res = await axios.get(`${apiUrl}/api/auctions`);
+    
+    // Pass authentication token so backend can determine if user is admin
+    const headers = {};
+    if (authStore.token) {
+      headers['Authorization'] = `Bearer ${authStore.token}`;
+    }
+    
+    const res = await axios.get(`${apiUrl}/api/auctions`, { headers });
     auctions.value = res.data.data;
   } catch (err) {
     console.error('Error loading auctions for calendar:', err);

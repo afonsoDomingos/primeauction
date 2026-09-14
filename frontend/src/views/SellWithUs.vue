@@ -61,13 +61,16 @@
             <div class="form-group">
               <label class="form-label" for="value">Valor Estimado / Preço Mínimo (MZN)</label>
               <input 
-                type="number" 
+                type="text" 
                 id="value" 
-                v-model="form.estimatedValue" 
+                :value="formatCurrency(form.estimatedValue)"
+                @input="handleValueInput"
+                @blur="handleValueBlur"
                 class="form-input" 
-                placeholder="Ex: 850000" 
+                placeholder="Ex: 1.000.000" 
                 required 
               />
+              <small class="form-hint">O sistema formata automaticamente os valores (ex: 1000000 → 1.000.000)</small>
             </div>
           </div>
 
@@ -300,6 +303,34 @@ const submitProposal = async () => {
     submitting.value = false;
   }
 };
+
+// Currency formatting functions
+const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+  // Remove non-digit characters
+  const cleanValue = String(value).replace(/\D/g, '');
+  if (cleanValue === '') {
+    return '';
+  }
+  // Format with thousand separators
+  return Number(cleanValue).toLocaleString('pt-MZ');
+};
+
+const handleValueInput = (event) => {
+  const inputValue = event.target.value;
+  // Remove non-digit characters for the actual value
+  const cleanValue = inputValue.replace(/\D/g, '');
+  form.value.estimatedValue = cleanValue === '' ? null : Number(cleanValue);
+};
+
+const handleValueBlur = () => {
+  // Ensure the value is properly formatted when leaving the field
+  if (form.value.estimatedValue !== null && form.value.estimatedValue !== '') {
+    form.value.estimatedValue = Number(form.value.estimatedValue);
+  }
+};
 </script>
 
 <style scoped>
@@ -391,6 +422,14 @@ const submitProposal = async () => {
 .form-textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-style: italic;
 }
 
 .form-actions-row {

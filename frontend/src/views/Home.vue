@@ -994,7 +994,14 @@ const fetchActiveAuctions = async () => {
   loadingAuctions.value = true;
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const res = await axios.get(`${apiUrl}/api/auctions?status=active`);
+    
+    // Pass authentication token so backend can determine if user is admin
+    const headers = {};
+    if (authStore.token) {
+      headers['Authorization'] = `Bearer ${authStore.token}`;
+    }
+    
+    const res = await axios.get(`${apiUrl}/api/auctions?status=active`, { headers });
     if (res.data && res.data.success) {
       const activeData = res.data.data;
       allActiveAuctionsRaw.value = activeData;
@@ -1033,7 +1040,12 @@ const fetchActiveAuctions = async () => {
 
     // Load upcoming auctions
     try {
-      const resUpcoming = await axios.get(`${apiUrl}/api/auctions?status=upcoming`);
+      const headers = {};
+      if (authStore.token) {
+        headers['Authorization'] = `Bearer ${authStore.token}`;
+      }
+      
+      const resUpcoming = await axios.get(`${apiUrl}/api/auctions?status=upcoming`, { headers });
       if (resUpcoming.data && resUpcoming.data.success) {
         upcomingAuctions.value = resUpcoming.data.data;
       }

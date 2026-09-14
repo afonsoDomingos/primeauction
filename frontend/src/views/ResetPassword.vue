@@ -69,16 +69,19 @@
                     id="newPassword"
                     v-model="newPassword"
                     class="form-input"
+                    :class="{ 'input-error': passwordError }"
                     placeholder="Mínimo 6 caracteres"
                     required
                     minlength="6"
                     :disabled="loading"
+                    @blur="validatePassword"
                   />
                   <button type="button" class="toggle-pass" @click="showPass = !showPass" tabindex="-1">
                     <svg v-if="!showPass" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     <svg v-else viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                   </button>
                 </div>
+                <span class="field-error" v-if="passwordError">{{ passwordError }}</span>
                 <!-- Strength bar -->
                 <div class="strength-bar-wrap" v-if="newPassword.length > 0">
                   <div class="strength-bar">
@@ -95,17 +98,24 @@
                   id="confirmPassword"
                   v-model="confirmPassword"
                   class="form-input"
-                  :class="{ 'input-mismatch': confirmPassword && newPassword !== confirmPassword }"
+                  :class="{ 'input-mismatch': confirmPassword && newPassword !== confirmPassword, 'input-error': confirmPasswordError }"
                   placeholder="Repita a senha"
                   required
                   :disabled="loading"
+                  @blur="validateConfirmPassword"
                 />
                 <span class="mismatch-msg" v-if="confirmPassword && newPassword !== confirmPassword">
                   As senhas não coincidem
                 </span>
+                <span class="field-error" v-if="confirmPasswordError">{{ confirmPasswordError }}</span>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="loading || newPassword !== confirmPassword">
+              <div class="info-box">
+                <span class="info-icon">🔒</span>
+                <span class="info-text">Use uma senha forte com pelo menos 6 caracteres, incluindo letras maiúsculas e números para maior segurança.</span>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="loading || newPassword !== confirmPassword || passwordError || confirmPasswordError">
                 <span v-if="loading" class="btn-spinner"></span>
                 {{ loading ? 'A guardar...' : 'Guardar nova senha' }}
               </button>
@@ -136,6 +146,28 @@ const loading = ref(false);
 const error = ref('');
 const success = ref(false);
 const invalidToken = ref(false);
+const passwordError = ref('');
+const confirmPasswordError = ref('');
+
+const validatePassword = () => {
+  if (!newPassword.value) {
+    passwordError.value = 'Por favor, introduza a nova senha.';
+  } else if (newPassword.value.length < 6) {
+    passwordError.value = 'A senha deve ter pelo menos 6 caracteres.';
+  } else {
+    passwordError.value = '';
+  }
+};
+
+const validateConfirmPassword = () => {
+  if (!confirmPassword.value) {
+    confirmPasswordError.value = 'Por favor, confirme a nova senha.';
+  } else if (confirmPassword.value !== newPassword.value) {
+    confirmPasswordError.value = 'As senhas não coincidem.';
+  } else {
+    confirmPasswordError.value = '';
+  }
+};
 
 onMounted(() => {
   token.value = route.query.token || '';
@@ -170,10 +202,18 @@ const strengthLabel = computed(() => {
 });
 
 const handleReset = async () => {
+  validatePassword();
+  validateConfirmPassword();
+  
+  if (passwordError.value || confirmPasswordError.value) {
+    return;
+  }
+  
   if (newPassword.value !== confirmPassword.value) {
     error.value = 'As senhas não coincidem.';
     return;
   }
+  
   error.value = '';
   loading.value = true;
   try {
@@ -363,6 +403,45 @@ const handleReset = async () => {
 }
 .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
 .form-input.input-mismatch { border-color: #f87171; }
+
+.form-input.input-error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.form-input.input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.info-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.info-text {
+  font-size: 0.85rem;
+  color: #1e40af;
+  line-height: 1.4;
+}
 
 .mismatch-msg {
   font-size: 0.78rem;

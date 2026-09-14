@@ -26,7 +26,17 @@ exports.getMyBids = async (req, res) => {
       .populate({ path: 'auction', select: 'title imageUrl currentPrice status endTime' })
       .sort('-createdAt');
 
-    res.status(200).json({ success: true, count: bids.length, data: bids });
+    // Filter out finished auctions for non-admin users
+    const isAdmin = req.user.role === 'admin';
+    let filteredBids = bids;
+    
+    if (!isAdmin) {
+      filteredBids = bids.filter(bid => 
+        bid.auction && bid.auction.status !== 'finished'
+      );
+    }
+
+    res.status(200).json({ success: true, count: filteredBids.length, data: filteredBids });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

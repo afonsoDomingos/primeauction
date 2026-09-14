@@ -31,7 +31,7 @@ router.post(
 );
 
 router.route('/')
-  .get(getAuctions)
+  .get(optionalAuth, getAuctions)
   .post(protect, authorize('admin'), createAuction);
 
 router.route('/:id')

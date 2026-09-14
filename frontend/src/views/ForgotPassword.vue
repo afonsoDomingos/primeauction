@@ -70,15 +70,23 @@
                     id="email"
                     v-model="email"
                     class="form-input with-icon"
+                    :class="{ 'input-error': emailError }"
                     placeholder="o-seu@email.com"
                     autocomplete="email"
                     required
                     :disabled="loading"
+                    @blur="validateEmail"
                   />
                 </div>
+                <span class="field-error" v-if="emailError">{{ emailError }}</span>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="loading">
+              <div class="info-box">
+                <span class="info-icon">ℹ️</span>
+                <span class="info-text">Receberá um link seguro no seu email para redefinir a senha. O link expira em 30 minutos.</span>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-pill submit-btn" :disabled="loading || emailError">
                 <span v-if="loading" class="btn-spinner"></span>
                 {{ loading ? 'A enviar...' : 'Enviar link de recuperação' }}
               </button>
@@ -101,8 +109,25 @@ const error = ref('');
 const sent = ref(false);
 const successMessage = ref('');
 const devResetUrl = ref('');
+const emailError = ref('');
+
+const validateEmail = () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email.value) {
+    emailError.value = 'Por favor, introduza o seu email.';
+  } else if (!emailRegex.test(email.value)) {
+    emailError.value = 'Por favor, introduza um email válido.';
+  } else {
+    emailError.value = '';
+  }
+};
 
 const handleForgot = async () => {
+  validateEmail();
+  if (emailError.value) {
+    return;
+  }
+  
   error.value = '';
   loading.value = true;
   try {
@@ -307,6 +332,45 @@ const tryAgain = () => {
 
 .form-input.with-icon {
   padding-left: 44px;
+}
+
+.form-input.input-error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.form-input.input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.info-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.info-text {
+  font-size: 0.85rem;
+  color: #1e40af;
+  line-height: 1.4;
 }
 
 .form-input:focus {

@@ -111,12 +111,14 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '../stores/authStore';
 
 const auctions = ref([]);
 const categories = ref([]);
 const loading = ref(true);
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 const fetchCategories = async () => {
   try {
@@ -147,10 +149,32 @@ const fetchAuctions = async () => {
       url += `?${params.join('&')}`;
     }
 
-    const res = await axios.get(url);
+    // Pass authentication token so backend can determine if user is admin
+    const headers = {};
+    if (authStore.token) {
+      headers['Authorization'] = `Bearer ${authStore.token}`;
+    }
+
+    console.log('[fetchAuctions] User is admin:', authStore.isAdmin);
+    console.log('[fetchAuctions] Request URL:', url);
+    console.log('[fetchAuctions] Has token:', !!authStore.token);
+
+    const res = await axios.get(url, { headers });
     auctions.value = res.data.data;
+    
+    // Double-check filtering on frontend for non-admin users
+    if (!authStore.isAdmin) {
+      const filteredAuctions = auctions.value.filter(auction => 
+        auction.status !== 'finished'
+      );
+      console.log('[fetchAuctions] Frontend filter applied:', auctions.value.length, '->', filteredAuctions.length);
+      auctions.value = filteredAuctions;
+    }
+    
+    console.log('[fetchAuctions] Final auctions count:', auctions.value.length);
+    console.log('[fetchAuctions] Auctions statuses:', auctions.value.map(a => a.status));
   } catch (err) {
-    console.error(err);
+    console.error('[fetchAuctions] Error:', err);
   } finally {
     loading.value = false;
   }

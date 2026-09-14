@@ -91,7 +91,17 @@ exports.getWatchlist = async (req, res) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
-    res.status(200).json({ success: true, count: user.watchlist.length, data: user.watchlist });
+    // Filter out finished auctions for non-admin users
+    const isAdmin = req.user.role === 'admin';
+    let watchlistData = user.watchlist || [];
+    
+    if (!isAdmin) {
+      watchlistData = watchlistData.filter(auction => 
+        auction.status !== 'finished'
+      );
+    }
+
+    res.status(200).json({ success: true, count: watchlistData.length, data: watchlistData });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
