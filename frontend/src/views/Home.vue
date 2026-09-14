@@ -41,7 +41,6 @@
         >
           Seu Próximo Carro
         </h1>
-        <p class="hero-subtitle">Leilões exclusivos de automóveis. Toyota, Volkswagen, Honda e muito mais. Licite com confiança.</p>
       </div>
       
       <div class="hero-actions animate-fade-in" style="animation-delay: 0.3s; z-index: 2; position: relative;">

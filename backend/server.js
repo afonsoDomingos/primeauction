@@ -6,10 +6,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const socketIo = require('socket.io');
 const connectDB = require('./config/db');
-const passport = require('./config/passport');
 
-// Load env vars
+// Load env vars FIRST
 dotenv.config();
+
+const passport = require('./config/passport');
 
 // Connect to database
 connectDB();
