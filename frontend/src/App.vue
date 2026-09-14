@@ -27,7 +27,7 @@
       <p>&copy; {{ new Date().getFullYear() }} Prime Auctions. Todos os direitos reservados. &bull; <router-link to="/calendario" class="footer-link">Calendário</router-link> &bull; <router-link to="/vender" class="footer-link">Vender Connosco</router-link></p>
       <p class="footer-attribution">
         Powered by <a href="https://www.wehosthere.com/" target="_blank" rel="noopener noreferrer" class="footer-link">
-          Wehosthere
+          <img src="/wehosthere.png" alt="Wehosthere" class="footer-logo" />
         </a>
       </p>
     </div>
