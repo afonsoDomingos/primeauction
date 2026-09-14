@@ -4333,8 +4333,4 @@ const formatTicketDate = (dateString) => {
 .info-link-btn:hover {
   color: #1e40af;
 }
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-}
 </style>

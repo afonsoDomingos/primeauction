@@ -1691,9 +1691,6 @@ onUnmounted(() => {
     margin-bottom: 0.25rem;
   }
 }
-  color: #1a56db;
-  transform: translateY(-1px);
-}
 
 /* ─── Partners Section (Infinite Marquee) ─── */
 .partners-section {
