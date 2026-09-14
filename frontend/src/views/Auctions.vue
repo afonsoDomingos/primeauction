@@ -366,7 +366,7 @@ const fetchAuctions = async () => {
     // Double-check filtering on frontend for non-admin users
     if (!authStore.isAdmin) {
       const filteredAuctions = auctions.value.filter(auction => 
-        auction.status !== 'finished'
+        auction.status !== 'finished' && auction.status !== 'ended'
       );
       console.log('[fetchAuctions] Frontend filter applied:', auctions.value.length, '->', filteredAuctions.length);
       auctions.value = filteredAuctions;

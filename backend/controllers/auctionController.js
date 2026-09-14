@@ -19,6 +19,7 @@ exports.getAuctions = async (req, res) => {
     
     if (!isAdmin && !status) {
       // Default: show only active and upcoming auctions for regular users
+      // Hide finished and ended auctions
       queryObj.status = { $in: ['active', 'upcoming'] };
       console.log('[getAuctions] Filtering to active/upcoming for non-admin');
     } else if (status) {
@@ -111,9 +112,9 @@ exports.getAuction = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Auction not found' });
     }
 
-    // Check if auction is finished and user is not admin
+    // Check if auction is finished or ended and user is not admin
     const isAdmin = req.user && req.user.role === 'admin';
-    if (auction.status === 'finished' && !isAdmin) {
+    if ((auction.status === 'finished' || auction.status === 'ended') && !isAdmin) {
       return res.status(404).json({ 
         success: false, 
         error: 'Este leilão já terminou e não está mais disponível.' 
