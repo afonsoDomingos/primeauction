@@ -1841,8 +1841,11 @@ const rejectProposal = (prop) => {
 
 // Vehicle-related state and functions
 const isAutomotiveCategory = computed(() => {
+  // Check if category is Veículos OR has isAutomotive flag
+  const isVeiculos = form.value.category === 'Veículos';
   const selectedCategory = categories.value.find(cat => cat.name === form.value.category);
-  return selectedCategory && selectedCategory.isAutomotive;
+  const hasAutomotiveFlag = selectedCategory && selectedCategory.isAutomotive;
+  return isVeiculos || hasAutomotiveFlag;
 });
 
 const availableMakes = computed(() => {
