@@ -151,16 +151,28 @@
           <!-- Original set -->
           <div class="partners-marquee-group">
             <div v-for="partner in partnersList" :key="'a-' + partner._id" class="partner-logo" :title="partner.name">
-              <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
-              <span v-else class="logo-text">{{ partner.name }}</span>
+              <a v-if="partner.website" :href="partner.website" target="_blank" rel="noopener noreferrer" class="partner-link">
+                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <span v-else class="logo-text">{{ partner.name }}</span>
+              </a>
+              <template v-else>
+                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <span v-else class="logo-text">{{ partner.name }}</span>
+              </template>
               <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
             </div>
           </div>
           <!-- Duplicate set for seamless loop -->
           <div class="partners-marquee-group" aria-hidden="true">
             <div v-for="partner in partnersList" :key="'b-' + partner._id" class="partner-logo" :title="partner.name">
-              <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
-              <span v-else class="logo-text">{{ partner.name }}</span>
+              <a v-if="partner.website" :href="partner.website" target="_blank" rel="noopener noreferrer" class="partner-link">
+                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <span v-else class="logo-text">{{ partner.name }}</span>
+              </a>
+              <template v-else>
+                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <span v-else class="logo-text">{{ partner.name }}</span>
+              </template>
               <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
             </div>
           </div>
@@ -1623,6 +1635,17 @@ onUnmounted(() => {
 .partner-logo:hover .partner-logo-img-dynamic {
   filter: grayscale(0%);
   opacity: 1;
+}
+
+.partner-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.partner-link:hover {
+  text-decoration: none;
 }
 
 /* ─── Premium Titles ─── */

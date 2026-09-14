@@ -1003,6 +1003,7 @@
               <div class="partner-fields">
                 <input type="text" v-model="partner.name" class="form-input partner-input" placeholder="Nome do Parceiro" />
                 <input type="text" v-model="partner.description" class="form-input partner-input" placeholder="Descrição (ex: Seguros, Financiamento...)" />
+                <input type="url" v-model="partner.website" class="form-input partner-input" placeholder="Website do Parceiro (https://...)" />
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                   <input type="url" v-model="partner.logoUrl" class="form-input partner-input" placeholder="URL do Logótipo" style="margin-bottom: 0;" />
                   <button type="button" @click="triggerPartnerLogoUpload(idx)" class="btn btn-sm" style="flex-shrink: 0; white-space: nowrap; background: #f3f4f6; border: 1px solid #e5e7eb; color: var(--text-secondary); font-size:0.75rem;">📂 Carregar</button>
@@ -2640,18 +2641,9 @@ onMounted(async () => {
 
   // Load partners settings — fall back to defaults if none saved yet
   try {
-    const resPartners = await axios.get(`${apiUrl}/api/partners/all`, {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    });
-    if (resPartners.data && Array.isArray(resPartners.data) && resPartners.data.length > 0) {
-      partnersForm.value = resPartners.data;
-    } else {
-      // No partners in DB yet — start with empty array
-      partnersForm.value = [];
-    }
+    await fetchPartners();
   } catch (err) {
-    // API error — start with empty array
-    partnersForm.value = [];
+    console.error('Error in fetchData:', err);
   }
 
   // Setup preview cycling interval
@@ -3266,8 +3258,21 @@ const saveHomepageSettings = async () => {
 };
 
 // ── Partners Handlers ──
+const fetchPartners = async () => {
+  try {
+    const resPartners = await axios.get(`${apiUrl}/api/partners/all`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (resPartners.data && Array.isArray(resPartners.data)) {
+      partnersForm.value = resPartners.data;
+    }
+  } catch (err) {
+    console.error('Error fetching partners:', err);
+  }
+};
+
 const addPartner = () => {
-  partnersForm.value.push({ name: '', description: '', logoUrl: '' });
+  partnersForm.value.push({ name: '', description: '', logoUrl: '', website: '' });
 };
 
 const removePartner = (index) => {
