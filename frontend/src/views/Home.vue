@@ -517,26 +517,6 @@
       </div>
     </section>
 
-    <!-- Stats/Trust Section (Minimalist Dark Glass Banner at the Bottom) -->
-    <section class="stats-section-minimal">
-      <div class="container">
-        <div class="stats-grid-minimal">
-          <div class="stat-card-minimal">
-            <div class="stat-num-bold">{{ formatNumber(stats.totalAuctions) }}</div>
-            <div class="stat-lbl-sub">Leilões Realizados</div>
-          </div>
-          <div class="stat-card-minimal">
-            <div class="stat-num-bold">{{ formatNumber(stats.totalUsers) }}</div>
-            <div class="stat-lbl-sub">Utilizadores Ativos</div>
-          </div>
-          <div class="stat-card-minimal">
-            <div class="stat-num-bold">{{ formatNumber(stats.totalBids) }}</div>
-            <div class="stat-lbl-sub">Lances Colocados</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Features Section (Porquê escolher) -->
     <section class="features-section" id="features">
       <div class="container">
@@ -736,30 +716,6 @@ const formatNumber = (value) => {
 const heroTitleRef = ref(null);
 const isHeroInView = ref(false);
 let heroObserver = null;
-
-const stats = ref({
-  totalAuctions: 15,
-  totalUsers: 2840,
-  totalBids: 420,
-  totalRevenue: 18500000
-});
-
-const fetchStats = async () => {
-  try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const res = await axios.get(`${apiUrl}/api/analytics/public-stats`);
-    if (res.data && res.data.data) {
-      stats.value = {
-        totalAuctions: res.data.data.totalAuctions || 15,
-        totalUsers: res.data.data.totalUsers || 2840,
-        totalBids: res.data.data.totalBids || 420,
-        totalRevenue: res.data.data.totalRevenue || 18500000
-      };
-    }
-  } catch (err) {
-    console.error('Failed to fetch stats, using default baseline:', err);
-  }
-};
 
 // --- Horizontal Day Calendar Strip Logic (Matches user reference) ---
 const selectedCalendarDate = ref(null);
@@ -2133,19 +2089,6 @@ onUnmounted(() => {
   scrollbar-color: #cbd5e1 transparent;
 }
 
-.upcoming-scroll::-webkit-scrollbar {
-  height: 6px;
-}
-
-.upcoming-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.upcoming-scroll::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 20px;
-}
-
 .upcoming-card {
   flex: 0 0 280px;
   scroll-snap-align: start;
@@ -2368,70 +2311,6 @@ onUnmounted(() => {
 .interest-sub {
   font-size: 0.75rem;
   color: #6b7280;
-}
-
-/* ─── Minimalist Dark Stats Banner ─── */
-.stats-section-minimal {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  padding: 4.5rem 1.5rem;
-  color: white;
-}
-
-.stats-grid-minimal {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  text-align: center;
-}
-
-@media (max-width: 992px) {
-  .stats-grid-minimal {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 576px) {
-  .stats-grid-minimal {
-    grid-template-columns: 1fr;
-  }
-}
-
-.stat-card-minimal {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 2.25rem 1.25rem;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.stat-card-minimal:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-4px);
-}
-
-.stat-num-bold {
-  font-size: clamp(1.8rem, 3.5vw, 2.75rem);
-  font-weight: 900;
-  letter-spacing: -1px;
-  color: #ffffff;
-  margin-bottom: 0.4rem;
-}
-
-.highlight-revenue {
-  background: linear-gradient(135deg, #4ade80, #22c55e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.stat-lbl-sub {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 /* ─── Features Section (Original) ─── */
@@ -2874,54 +2753,6 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
-/* ─── Stats/Trust Section ─── */
-.stats-section {
-  background: linear-gradient(135deg, #1a56db 0%, #3e6ae1 100%);
-  padding: 4rem 1.5rem;
-  color: white;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s ease, background 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.stat-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.stat-number {
-  font-size: 2.25rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: 0.95rem;
-  font-weight: 500;
-  opacity: 0.9;
-}
-
 /* ─── How It Works Section ─── */
 .how-it-works-section {
   padding: 5rem 1.5rem;
@@ -3205,33 +3036,6 @@ onUnmounted(() => {
     padding: 0.875rem 1.5rem;
   }
 
-  .stats-section {
-    padding: 2rem 1.25rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.85rem;
-  }
-
-  .stat-item {
-    padding: 1rem 0.75rem;
-  }
-
-  .stat-icon {
-    font-size: 1.5rem;
-    margin-bottom: 0.35rem;
-  }
-
-  .stat-number {
-    font-size: 1.35rem;
-  }
-
-  .stat-label {
-    font-size: 0.75rem;
-  }
-}
-
 /* ── Finished Auctions Styles ── */
 .finished-auctions-section {
   padding: 3.5rem 1.5rem;
@@ -3496,5 +3300,6 @@ onUnmounted(() => {
 
 .cal-day-card.is-active .cal-day-badge {
   background: #1a56db;
+}
 }
 </style>
