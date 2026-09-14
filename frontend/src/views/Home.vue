@@ -317,7 +317,10 @@
           <div class="empty-state-inner">
             <div class="empty-icon-pulse">
               <span class="icon-pulse-shadow" style="background-color: rgba(239, 68, 68, 0.15);"></span>
-              <span class="icon-pulse-core">🔴</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon-pulse-core" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
             </div>
             <h3 class="empty-title">Sem Leilões ao Vivo</h3>
             <p class="empty-text">De momento, não existem eventos a decorrer em direto. Espreite os leilões agendados ou explore o catálogo geral.</p>
@@ -415,7 +418,9 @@
           <div class="empty-state-inner">
             <div class="empty-icon-pulse">
               <span class="icon-pulse-shadow" style="background-color: rgba(250, 204, 21, 0.2);"></span>
-              <span class="icon-pulse-core">⭐</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon-pulse-core" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.54 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
             </div>
             <h3 class="empty-title">Sem Destaques de Momento</h3>
             <p class="empty-text">Estamos a selecionar os melhores artigos e veículos para apresentar nesta secção. Volte brevemente!</p>
@@ -612,10 +617,15 @@
             />
             <button type="submit" class="btn btn-newsletter-submit" :disabled="subscribingNewsletter">
               <span v-if="subscribingNewsletter" class="spinner-inline"></span>
-              {{ subscribingNewsletter ? 'A processar...' : '🔔 Subscrever Grátis' }}
+              {{ subscribingNewsletter ? 'A processar...' : 'Subscrever Grátis' }}
             </button>
           </div>
-          <p class="newsletter-disclaimer">🔒 Respeitamos a sua privacidade. Sem spam, pode cancelar a qualquer momento.</p>
+          <p class="newsletter-disclaimer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="newsletter-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Respeitamos a sua privacidade. Sem spam, pode cancelar a qualquer momento.
+          </p>
         </form>
       </div>
     </section>
@@ -1035,7 +1045,7 @@ const liveEvents = ref([]);
 const comingSoonItems = ref([]);
 const upcomingAuctions = ref([]);
 
-// 🔴 FIXED: Fetch Active Auctions
+// Fetch Active Auctions
 const fetchActiveAuctions = async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -1084,7 +1094,7 @@ const fetchActiveAuctions = async () => {
   }
 };
 
-// 🟢 NEW: Fetch Upcoming Auctions
+// Fetch Upcoming Auctions
 const fetchUpcomingAuctions = async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -1903,6 +1913,12 @@ onUnmounted(() => {
 .heart-icon {
   width: 16px;
   height: 16px;
+  stroke-width: 2;
+}
+
+.newsletter-icon {
+  width: 14px;
+  height: 14px;
   stroke-width: 2;
 }
 
@@ -2825,7 +2841,9 @@ onUnmounted(() => {
 }
 
 .icon-pulse-core {
-  font-size: 2.2rem;
+  width: 40px;
+  height: 40px;
+  stroke-width: 2;
   z-index: 2;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
   display: flex;
