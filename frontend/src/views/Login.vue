@@ -7,9 +7,27 @@
           <h2>Bem-vindo de volta.</h2>
           <p>Aceda à sua conta e continue a explorar os melhores leilões de Moçambique.</p>
           <div class="visual-badges">
-            <span class="v-badge">⚡ Lances em Tempo Real</span>
-            <span class="v-badge">🔒 100% Seguro</span>
-            <span class="v-badge">🏆 Leilões Exclusivos</span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Lances em Tempo Real
+            </span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              100% Seguro
+            </span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 010-5H6" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9h1.5a2.5 2.5 0 010-5H18" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H4a2 2 0 00-2 2v16a2 2 0 002 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 15l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              Leilões Exclusivos
+            </span>
           </div>
         </div>
       </div>
@@ -189,6 +207,12 @@ onMounted(() => {
   font-size: 0.8rem;
   font-weight: 500;
   width: fit-content;
+}
+
+.v-badge-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 
 /* ── Right Form Panel ── */

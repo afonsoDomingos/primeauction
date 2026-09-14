@@ -16,8 +16,18 @@
           <h2>Esqueceu a senha?</h2>
           <p>Sem preocupações. Enviaremos um link seguro para redefinir a sua senha.</p>
           <div class="visual-badges">
-            <span class="v-badge">🔒 Link Seguro</span>
-            <span class="v-badge">⏱️ Expira em 30 min</span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Link Seguro
+            </span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Expira em 30 min
+            </span>
           </div>
         </div>
       </div>
@@ -39,7 +49,7 @@
               {{ successMessage }}
             </p>
             <div v-if="devResetUrl" class="dev-link-box">
-              <span class="dev-label">🛠️ Modo Dev — Link directo:</span>
+              <span class="dev-label">Modo Dev — Link directo:</span>
               <a :href="devResetUrl" class="dev-reset-link">Clique aqui para redefinir</a>
             </div>
             <div class="fp-actions">
@@ -82,7 +92,9 @@
               </div>
 
               <div class="info-box">
-                <span class="info-icon">ℹ️</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="info-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <span class="info-text">Receberá um link seguro no seu email para redefinir a senha. O link expira em 30 minutos.</span>
               </div>
 
@@ -230,6 +242,15 @@ const tryAgain = () => {
   font-size: 0.82rem;
   font-weight: 600;
   backdrop-filter: blur(8px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.v-badge-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 
 /* Right form */
@@ -363,8 +384,11 @@ const tryAgain = () => {
 }
 
 .info-icon {
-  font-size: 1rem;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
   flex-shrink: 0;
+  color: #1e40af;
 }
 
 .info-text {

@@ -7,9 +7,27 @@
           <h2>Junte-se à Prime Auction.</h2>
           <p>Crie a sua conta gratuitamente e comece a participar nos melhores leilões de Moçambique hoje mesmo.</p>
           <div class="visual-badges">
-            <span class="v-badge">✅ Registo Gratuito</span>
-            <span class="v-badge">⚡ Lances em Tempo Real</span>
-            <span class="v-badge">🏆 Leilões Exclusivos</span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Registo Gratuito
+            </span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Lances em Tempo Real
+            </span>
+            <span class="v-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="v-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 010-5H6" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9h1.5a2.5 2.5 0 010-5H18" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H4a2 2 0 00-2 2v16a2 2 0 002 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 15l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              Leilões Exclusivos
+            </span>
           </div>
         </div>
       </div>
@@ -235,6 +253,12 @@ onMounted(() => {
   font-size: 0.8rem;
   font-weight: 500;
   width: fit-content;
+}
+
+.v-badge-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 
 /* ── Right Form Panel ── */
