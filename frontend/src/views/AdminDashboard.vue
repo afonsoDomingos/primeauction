@@ -317,7 +317,7 @@
                 
                 <div class="form-group">
                   <label class="form-label">Tipo de Carroçaria</label>
-                  <select v-model="form.vehicleSpecs.bodyType" class="form-input">
+                  <select v-model="form.vehicleSpecs.bodyType" @change="handleBodyTypeChange" class="form-input">
                     <option value="">Selecione</option>
                     <option value="Sedan">Sedan</option>
                     <option value="Hatchback">Hatchback</option>
@@ -360,6 +360,11 @@
 
               <div class="form-group">
                 <label class="form-label">Características</label>
+                <div class="features-header">
+                  <button type="button" @click="clearFeatures" class="clear-features-btn" v-if="form.vehicleSpecs.features.length > 0">
+                    Limpar Todas
+                  </button>
+                </div>
                 <div class="features-grid">
                   <label v-for="feature in commonVehicleFeatures" :key="feature" class="feature-checkbox">
                     <input 
@@ -1738,6 +1743,70 @@ const approveProposalAndPrefill = (prop) => {
   form.value.startTime = formatDateForInput(now);
   form.value.endTime = formatDateForInput(endTime);
   
+  // Auto-fill vehicle specs if category is Veículos
+  if (prop.category === 'Veículos' && prop.vehicleSpecs) {
+    form.value.vehicleSpecs = {
+      make: prop.vehicleSpecs.make || null,
+      model: prop.vehicleSpecs.model || null,
+      year: prop.vehicleSpecs.year || null,
+      mileage: prop.vehicleSpecs.mileage || null,
+      fuelType: prop.vehicleSpecs.fuelType || null,
+      transmission: prop.vehicleSpecs.transmission || null,
+      color: prop.vehicleSpecs.color || null,
+      bodyType: prop.vehicleSpecs.bodyType || null,
+      condition: prop.vehicleSpecs.condition || null,
+      conditionLevel: prop.vehicleSpecs.conditionLevel || null,
+      features: prop.vehicleSpecs.features || []
+    };
+    
+    // Auto-fill features based on make if specified
+    if (prop.vehicleSpecs.make) {
+      const makeFeaturesMap = {
+        'Toyota': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Volkswagen': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Honda': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Ford': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'BMW': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+        'Mercedes-Benz': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+        'Audi': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+        'Nissan': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Hyundai': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Kia': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Renault': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Peugeot': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Fiat': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Suzuki': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Mazda': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Airbags Frontais', 'Airbags Laterais', 'ABS', 'ESP', 'Imobilizador'],
+        'Mitsubishi': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Chevrolet': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+        'Land Rover': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Teto Solar', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Tração 4x4', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+        'Volvo': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+        'Subaru': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Tração 4x4', 'Airbags Frontais', 'Airbags Laterais', 'ABS', 'ESP', 'Imobilizador'],
+        'Jeep': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Tração 4x4', 'Airbags Frontais', 'Airbags Laterais', 'ABS', 'ESP', 'Imobilizador'],
+        'Dacia': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador']
+      };
+      
+      const makeFeatures = makeFeaturesMap[prop.vehicleSpecs.make] || [];
+      const mergedFeatures = [...new Set([...(prop.vehicleSpecs.features || []), ...makeFeatures])];
+      form.value.vehicleSpecs.features = mergedFeatures;
+    }
+  } else {
+    // Reset vehicle specs for non-vehicle categories
+    form.value.vehicleSpecs = {
+      make: null,
+      model: null,
+      year: null,
+      mileage: null,
+      fuelType: null,
+      transmission: null,
+      color: null,
+      bodyType: null,
+      condition: null,
+      conditionLevel: null,
+      features: []
+    };
+  }
+  
   const target = document.querySelector('.create-form');
   if (target) {
     target.scrollIntoView({ behavior: 'smooth' });
@@ -1815,6 +1884,72 @@ const handleCategoryChange = () => {
 const handleMakeChange = () => {
   // Reset model when make changes
   form.value.vehicleSpecs.model = null;
+  
+  // Auto-fill common features for the selected make
+  if (form.value.vehicleSpecs.make) {
+    const makeFeaturesMap = {
+      'Toyota': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Volkswagen': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Honda': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Ford': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'BMW': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+      'Mercedes-Benz': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+      'Audi': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+      'Nissan': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Hyundai': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Kia': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Renault': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Peugeot': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Fiat': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Suzuki': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Mazda': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Airbags Frontais', 'Airbags Laterais', 'ABS', 'ESP', 'Imobilizador'],
+      'Mitsubishi': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Chevrolet': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Airbags Frontais', 'ABS', 'Imobilizador'],
+      'Land Rover': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Teto Solar', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Tração 4x4', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+      'Volvo': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Bancos em Couro', 'Navegação GPS', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Faróis LED', 'Faróis Automáticos', 'Bancos Aquecidos', 'Sensor de Estacionamento', 'Câmera de Ré', 'Controle de Velocidade', 'Airbags Frontais', 'Airbags Laterais', 'Airbags de Cortina', 'ABS', 'ESP', 'Imobilizador', 'Alarme', 'Keyless Entry', 'Start-Stop'],
+      'Subaru': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Tração 4x4', 'Airbags Frontais', 'Airbags Laterais', 'ABS', 'ESP', 'Imobilizador'],
+      'Jeep': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Apple CarPlay', 'Android Auto', 'Tração 4x4', 'Airbags Frontais', 'Airbags Laterais', 'ABS', 'ESP', 'Imobilizador'],
+      'Dacia': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos', 'Central Multimédia', 'Bluetooth', 'USB', 'Airbags Frontais', 'ABS', 'Imobilizador']
+    };
+    
+    const features = makeFeaturesMap[form.value.vehicleSpecs.make] || [];
+    form.value.vehicleSpecs.features = [...features];
+    
+    // Show toast notification
+    toastStore.add(`Características comuns para ${form.value.vehicleSpecs.make} preenchidas automaticamente!`, 'success', 3000);
+  }
+};
+
+const handleBodyTypeChange = () => {
+  // Add body type specific features
+  if (form.value.vehicleSpecs.bodyType) {
+    const bodyTypeFeaturesMap = {
+      'SUV': ['Tração 4x4', 'Caixa de carga', 'Sensor de Estacionamento', 'Câmera de Ré'],
+      'Pickup': ['Tração 4x4', 'Caixa de carga', 'Barra de Reboque', 'Hitch'],
+      'Sedan': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos'],
+      'Hatchback': ['Ar Condicionado', 'Direção Assistida', 'Vidros Elétricos'],
+      'Coupé': ['Faróis LED', 'Bancos Desportivos', 'Teto Solar'],
+      'Van': ['Ar Condicionado', 'Bancos Rebatíveis', 'Porta Lateral Deslizante'],
+      'Carrinha': ['Ar Condicionado', 'Bancos Rebatíveis', 'Espaço de Carga'],
+      'Motociclo': ['ABS', 'Alarme', 'Imobilizador']
+    };
+    
+    const additionalFeatures = bodyTypeFeaturesMap[form.value.vehicleSpecs.bodyType] || [];
+    
+    // Merge with existing features (avoid duplicates)
+    const currentFeatures = form.value.vehicleSpecs.features || [];
+    const mergedFeatures = [...new Set([...currentFeatures, ...additionalFeatures])];
+    form.value.vehicleSpecs.features = mergedFeatures;
+    
+    if (additionalFeatures.length > 0) {
+      toastStore.add(`Características de ${form.value.vehicleSpecs.bodyType} adicionadas!`, 'success', 2000);
+    }
+  }
+};
+
+const clearFeatures = () => {
+  form.value.vehicleSpecs.features = [];
+  toastStore.add('Todas as características foram limpas!', 'success', 2000);
 };
 
 const handleMileageInput = (event) => {
@@ -3764,6 +3899,28 @@ const formatTicketDate = (dateString) => {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0.75rem;
   margin-top: 0.75rem;
+}
+
+.features-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.clear-features-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.clear-features-btn:hover {
+  background: #fef2f2;
 }
 
 .feature-checkbox {
