@@ -58,6 +58,7 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/vehicles', require('./routes/vehicles'));
 
 // Socket.io logic
 io.on('connection', (socket) => {
