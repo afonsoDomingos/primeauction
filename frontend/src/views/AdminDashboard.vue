@@ -11,35 +11,55 @@
       <!-- KPI Stats Row -->
       <div class="kpi-row">
         <div class="kpi-card">
-          <div class="kpi-icon-wrap user-kpi">👥</div>
+          <div class="kpi-icon-wrap user-kpi">
+            <svg xmlns="http://www.w3.org/2000/svg" class="kpi-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
           <div class="kpi-info">
             <span class="kpi-label">Utilizadores</span>
             <h3 class="kpi-value">{{ users.length }}</h3>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon-wrap auction-kpi">🏷️</div>
+          <div class="kpi-icon-wrap auction-kpi">
+            <svg xmlns="http://www.w3.org/2000/svg" class="kpi-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          </div>
           <div class="kpi-info">
             <span class="kpi-label">Total Leilões</span>
             <h3 class="kpi-value">{{ auctions.length }}</h3>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon-wrap active-kpi">⚡</div>
+          <div class="kpi-icon-wrap active-kpi">
+            <svg xmlns="http://www.w3.org/2000/svg" class="kpi-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
           <div class="kpi-info">
             <span class="kpi-label">Leilões Activos</span>
             <h3 class="kpi-value">{{ kpiStats.activeAuctions }}</h3>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon-wrap value-kpi">💰</div>
+          <div class="kpi-icon-wrap value-kpi">
+            <svg xmlns="http://www.w3.org/2000/svg" class="kpi-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
           <div class="kpi-info">
             <span class="kpi-label">Valorização</span>
             <h3 class="kpi-value">{{ formatCurrencyCompact(kpiStats.totalValueGenerated) }}</h3>
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-icon-wrap ticket-kpi">✉</div>
+          <div class="kpi-icon-wrap ticket-kpi">
+            <svg xmlns="http://www.w3.org/2000/svg" class="kpi-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
           <div class="kpi-info">
             <span class="kpi-label">Tickets Pendentes</span>
             <h3 class="kpi-value">{{ kpiStats.pendingTickets }}</h3>
@@ -51,7 +71,13 @@
       <div class="charts-row">
         <!-- Donut Chart: Leilões -->
         <div class="card chart-card">
-          <h3 class="chart-title">📊 Estado dos Leilões</h3>
+          <h3 class="chart-title">
+            <svg xmlns="http://www.w3.org/2000/svg" class="chart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+            </svg>
+            Estado dos Leilões
+          </h3>
           <div class="chart-content">
             <div class="donut-wrapper">
               <svg width="100%" height="150" viewBox="0 0 120 120" class="donut-svg">
@@ -113,7 +139,12 @@
 
         <!-- Bar Chart: Crescimento de Utilizadores -->
         <div class="card chart-card">
-          <h3 class="chart-title">📈 Registos (Últimos 7 Dias)</h3>
+          <h3 class="chart-title">
+            <svg xmlns="http://www.w3.org/2000/svg" class="chart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            Registos (Últimos 7 Dias)
+          </h3>
           <div class="chart-content">
             <div class="bar-chart-wrapper">
               <svg width="100%" height="150" viewBox="0 0 300 120" class="bar-svg">
@@ -183,7 +214,9 @@
         <!-- ── Criar Leilão ── -->
         <div class="card admin-card">
           <div class="card-header-row">
-            <span class="card-icon">➕</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
             <h3 class="section-title">Criar Novo Leilão</h3>
           </div>
           <form @submit.prevent="handleCreate" class="create-form">
@@ -245,7 +278,13 @@
 
             <!-- Vehicle-specific fields (shown only for automotive category) -->
             <div v-if="isAutomotiveCategory" class="vehicle-specs-section">
-              <h4 class="specs-title">🚗 Especificações do Veículo</h4>
+              <h4 class="specs-title">
+                <svg xmlns="http://www.w3.org/2000/svg" class="specs-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 19V9a7 7 0 0114 0v10" />
+                </svg>
+                Especificações do Veículo
+              </h4>
               
               <div class="form-grid-3">
                 <div class="form-group">
@@ -560,7 +599,9 @@
         <!-- ── Propostas de Venda ── -->
         <div class="card admin-card">
           <div class="card-header-row">
-            <span class="card-icon">📦</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
             <h3 class="section-title">Propostas de Venda</h3>
             <span class="record-count">{{ proposals.length }}</span>
           </div>
@@ -621,7 +662,9 @@
         <!-- ── Utilizadores ── -->
         <div class="card admin-card">
           <div class="card-header-row">
-            <span class="card-icon">👥</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
             <h3 class="section-title">Gerir Utilizadores</h3>
             <span class="record-count">{{ users.length }}</span>
           </div>
@@ -678,7 +721,9 @@
         <div class="card admin-card">
           <div class="card-header-row" style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span class="card-icon" style="background: #e60000; color: white; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900;">M</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" style="background: #e60000; color: white; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 4px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
               <h3 class="section-title">Controlo de Transações M-Pesa</h3>
               <span class="record-count">{{ mpesaPayments.length }}</span>
             </div>
@@ -739,7 +784,9 @@
         <!-- ── Leilões ── -->
         <div class="card admin-card" style="grid-column: 1 / -1;">
           <div class="card-header-row">
-            <span class="card-icon">🏷️</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
             <h3 class="section-title">Gerir Todos os Leilões</h3>
             <span class="record-count">{{ filteredAuctions.length }} / {{ auctions.length }}</span>
           </div>
@@ -859,7 +906,9 @@
         <!-- ── Gerir Página Inicial ── -->
         <div class="card admin-card">
           <div class="card-header-row">
-            <span class="card-icon">🏠</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
             <h3 class="section-title">Gerir Página Inicial</h3>
           </div>
           <p class="settings-hint">Personalize o conteúdo visível na página inicial da plataforma sem precisar alterar o código.</p>
@@ -984,7 +1033,9 @@
         <!-- ── Gerir Parceiros ── -->
         <div class="card admin-card">
           <div class="card-header-row">
-            <span class="card-icon">🤝</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
             <h3 class="section-title">Gerir Parceiros</h3>
             <span class="record-count">{{ partnersForm.length }}</span>
           </div>
@@ -1031,7 +1082,9 @@
         <!-- ── Gerir Suporte (Tickets) ── -->
         <div class="card admin-card">
           <div class="card-header-row">
-            <span class="card-icon">✉</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
             <h3 class="section-title">Tickets de Suporte</h3>
             <span class="record-count">{{ tickets.length }}</span>
           </div>
@@ -1098,7 +1151,9 @@
         <!-- ── Subscritores da Newsletter ── -->
         <div class="card admin-card">
           <div class="card-header-row">
-            <span class="card-icon">✉</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
             <h3 class="section-title">Subscritores da Newsletter</h3>
             <span class="record-count">{{ activeSubscribersCount }} / {{ subscribers.length }}</span>
           </div>
@@ -1411,7 +1466,9 @@
       <div v-if="showConditionModal" class="custom-modal-overlay" @click.self="closeConditionModal">
         <div class="custom-modal-card condition-modal-card animate-scale-in">
           <div class="modal-header-row">
-            <span class="modal-title-icon">📊</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="modal-title-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
             <h4>Níveis de Estado do Veículo</h4>
             <button type="button" class="wizard-close-btn" @click="closeConditionModal" aria-label="Fechar">✕</button>
           </div>
@@ -3423,7 +3480,45 @@ const formatTicketDate = (dateString) => {
 }
 
 .card-icon {
-  font-size: 1.25rem;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.card-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2;
+}
+
+.card-icon svg path {
+  stroke: inherit;
+}
+
+.modal-title-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.modal-title-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2;
+}
+
+.chart-icon {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
+}
+
+.specs-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  margin-right: 0.5rem;
 }
 
 .section-title {
@@ -3938,15 +4033,29 @@ const formatTicketDate = (dateString) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
   flex-shrink: 0;
 }
 
+.kpi-icon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
 .user-kpi { background-color: #e8f0fe; }
+.user-kpi .kpi-icon { stroke: #1e40af; }
+
 .auction-kpi { background-color: #fef3c7; }
+.auction-kpi .kpi-icon { stroke: #92400e; }
+
 .active-kpi { background-color: #ecfdf5; }
+.active-kpi .kpi-icon { stroke: #065f46; }
+
 .value-kpi { background-color: #f3e8ff; }
-.ticket-kpi { background-color: #ffe4e6; color: #e11d48; }
+.value-kpi .kpi-icon { stroke: #7c3aed; }
+
+.ticket-kpi { background-color: #ffe4e6; }
+.ticket-kpi .kpi-icon { stroke: #e11d48; }
 
 .kpi-info {
   display: flex;
