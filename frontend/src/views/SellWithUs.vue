@@ -314,8 +314,8 @@ const formatCurrency = (value) => {
   if (cleanValue === '') {
     return '';
   }
-  // Format with thousand separators
-  return Number(cleanValue).toLocaleString('pt-MZ');
+  // Format with thousand separators and 2 decimal places
+  return Number(cleanValue).toLocaleString('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const handleValueInput = (event) => {
