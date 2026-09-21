@@ -4,7 +4,7 @@
       <!-- Left: Image side (Gallery) -->
       <div class="image-side-container">
         <!-- Main Image -->
-        <div class="main-image-display" :style="{ backgroundImage: `url(${activeImage || auction.imageUrl})` }">
+        <div class="main-image-display" :style="{ backgroundImage: `url(${activeImage || auction.imageUrl})` }" @click="openLightbox(activeImage || auction.imageUrl)" style="cursor: zoom-in;">
           <div class="image-overlay">
             <div class="top-overlay-bar">
               <button class="back-btn" @click="$router.back()">
@@ -859,6 +859,36 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Lightbox for full-screen image viewing -->
+  <Transition name="lightbox">
+    <div v-if="showLightbox" class="lightbox-overlay" @click="closeLightbox" @keydown.esc="closeLightbox">
+      <button class="lightbox-close" @click="closeLightbox" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <button v-if="allImages.length > 1" class="lightbox-nav lightbox-prev" @click.stop="lightboxPrevImage" aria-label="Imagem anterior">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+
+      <img :src="lightboxImage" class="lightbox-image" @click.stop alt="Imagem em tela cheia" />
+
+      <button v-if="allImages.length > 1" class="lightbox-nav lightbox-next" @click.stop="lightboxNextImage" aria-label="Próxima imagem">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+
+      <div class="lightbox-counter">
+        {{ allImages.indexOf(lightboxImage) + 1 }} / {{ allImages.length }}
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -879,6 +909,8 @@ const bids = ref([]);
 const bidAmount = ref(0);
 const displayBidAmount = ref('');
 const activeImage = ref('');
+const showLightbox = ref(false);
+const lightboxImage = ref('');
 let socket = null;
 const activeTab = ref('details');
 const autoPlayInterval = ref(null);
@@ -1025,6 +1057,35 @@ const nextImage = () => {
   activeImage.value = allImages.value[newIdx];
 };
 
+// Lightbox functionality
+const openLightbox = (image) => {
+  lightboxImage.value = image;
+  showLightbox.value = true;
+  document.body.style.overflow = 'hidden';
+};
+
+const closeLightbox = () => {
+  showLightbox.value = false;
+  lightboxImage.value = '';
+  document.body.style.overflow = '';
+};
+
+const lightboxNextImage = () => {
+  if (allImages.value.length <= 1) return;
+  const currentIdx = allImages.value.indexOf(lightboxImage.value);
+  let newIdx = currentIdx + 1;
+  if (newIdx >= allImages.value.length) newIdx = 0;
+  lightboxImage.value = allImages.value[newIdx];
+};
+
+const lightboxPrevImage = () => {
+  if (allImages.value.length <= 1) return;
+  const currentIdx = allImages.value.indexOf(lightboxImage.value);
+  let newIdx = currentIdx - 1;
+  if (newIdx < 0) newIdx = allImages.value.length - 1;
+  lightboxImage.value = allImages.value[newIdx];
+};
+
 // Auto-play functionality
 const startAutoPlay = () => {
   if (allImages.value.length <= 1) return;
@@ -1053,8 +1114,25 @@ const toggleAutoPlay = () => {
 
 // Keyboard navigation
 const handleKeydown = (e) => {
+  // Lightbox keyboard navigation
+  if (showLightbox.value) {
+    switch(e.key) {
+      case 'Escape':
+        closeLightbox();
+        break;
+      case 'ArrowLeft':
+        lightboxPrevImage();
+        break;
+      case 'ArrowRight':
+        lightboxNextImage();
+        break;
+    }
+    return;
+  }
+
+  // Gallery keyboard navigation
   if (allImages.value.length <= 1) return;
-  
+
   switch(e.key) {
     case 'ArrowLeft':
       prevImage();
@@ -3803,5 +3881,98 @@ onUnmounted(() => {
   background: rgba(245, 158, 11, 0.15);
   border-color: rgba(245, 158, 11, 0.35);
   color: #fcd34d;
+}
+
+/* ─── Lightbox Styles ─── */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: background 0.2s;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: background 0.2s;
+}
+
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.lightbox-prev {
+  left: 1.5rem;
+}
+
+.lightbox-next {
+  right: 1.5rem;
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.lightbox-enter-active,
+.lightbox-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.lightbox-enter-from,
+.lightbox-leave-to {
+  opacity: 0;
 }
 </style>
