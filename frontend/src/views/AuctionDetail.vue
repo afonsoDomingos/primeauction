@@ -1268,9 +1268,9 @@ const isUpcoming = computed(() => {
 });
 
 const formatCurrency = (value) => {
-  if (value === undefined || value === null || isNaN(value)) return '0 MZN';
+  if (value === undefined || value === null || isNaN(value)) return '0,00 MZN';
   const valNum = Number(value);
-  const formatted = valNum.toLocaleString('de-DE', { maximumFractionDigits: 2 });
+  const formatted = valNum.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return `${formatted} MZN`;
 };
 
