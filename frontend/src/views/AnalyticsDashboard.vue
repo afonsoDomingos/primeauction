@@ -237,19 +237,16 @@ const fetchAnalytics = async () => {
 };
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('pt-MZ', {
-    style: 'currency',
-    currency: 'MZN'
-  }).format(value);
+  if (value === undefined || value === null) return '0,00 MZN';
+  const formatted = new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  return `${formatted} MZN`;
 };
 
 const formatCurrencyCompact = (value) => {
-  return new Intl.NumberFormat('pt-MZ', {
-    style: 'currency',
-    currency: 'MZN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(value);
+  if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M MZN';
+  if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K MZN';
+  const formatted = new Intl.NumberFormat('pt-MZ', { maximumFractionDigits: 0 }).format(value);
+  return `${formatted} MZN`;
 };
 
 onMounted(() => {
