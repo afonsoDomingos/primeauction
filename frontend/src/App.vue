@@ -167,20 +167,20 @@ main {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3e6ae1 0%, #1a56db 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: #1a56db;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(62, 106, 225, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .scroll-top-btn:hover {
   transform: translateY(-3px) scale(1.08);
-  box-shadow: 0 8px 24px rgba(62, 106, 225, 0.55);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
 }
 
 .scroll-top-btn:active {
