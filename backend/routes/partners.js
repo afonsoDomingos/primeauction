@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Partner = require('../models/Partner');
-const authMiddleware = require('../middleware/auth');
-const adminMiddleware = require('../middleware/admin');
+const { protect, authorize } = require('../middlewares/auth');
 
 // Get all active partners (public)
 router.get('/', async (req, res) => {
@@ -15,7 +14,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get all partners (admin only)
-router.get('/all', authMiddleware, adminMiddleware, async (req, res) => {
+router.get('/all', protect, authorize('admin'), async (req, res) => {
   try {
     const partners = await Partner.find().sort({ order: 1, name: 1 });
     res.json(partners);
@@ -25,7 +24,7 @@ router.get('/all', authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Create partner (admin only)
-router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
+router.post('/', protect, authorize('admin'), async (req, res) => {
   try {
     const partner = new Partner(req.body);
     await partner.save();
@@ -39,7 +38,7 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Update partner (admin only)
-router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
+router.put('/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const partner = await Partner.findByIdAndUpdate(
       req.params.id,
@@ -56,7 +55,7 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Delete partner (admin only)
-router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
+router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const partner = await Partner.findByIdAndDelete(req.params.id);
     if (!partner) {
@@ -69,7 +68,7 @@ router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 // Delete all partners (admin only)
-router.delete('/all', authMiddleware, adminMiddleware, async (req, res) => {
+router.delete('/all', protect, authorize('admin'), async (req, res) => {
   try {
     await Partner.deleteMany({});
     res.json({ message: 'Todos os parceiros removidos com sucesso' });
