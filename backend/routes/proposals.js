@@ -13,8 +13,8 @@ const router = express.Router();
 
 router.use(protect);
 
-// Upload images for a proposal (limit to max 5 images)
-router.post('/upload-images', uploadAuctionImage.array('images', 5), uploadProposalImages);
+// Upload images for a proposal (limit to max 10 images)
+router.post('/upload-images', uploadAuctionImage.array('images', 10), uploadProposalImages);
 
 router.route('/')
   .post(createProposal)

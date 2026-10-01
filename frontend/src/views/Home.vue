@@ -1,20 +1,43 @@
 <template>
   <div class="home-container">
-    <!-- Welcome Pop-up Card (Minimalist Luxury Design) -->
-    <Transition name="fade">
-      <div v-if="showWelcomeCard" class="welcome-overlay" @click.self="closeWelcomeCard">
-        <div class="welcome-popup-card animate-scale-in">
-          <button class="welcome-close-btn" @click="closeWelcomeCard" aria-label="Fechar">✕</button>
-          
-          <div class="welcome-brand-badge">
-            <img src="/logo prime.png" alt="Prime Auction" class="welcome-logo-img" />
+    <!-- Welcome Experience (Antigravity Interactive Wave Particles) -->
+    <Transition name="fade-welcome">
+      <div v-if="showWelcomeCard" class="antigravity-welcome-screen" @mousemove="handleMouseMove">
+        <!-- Interactive Canvas for Floating Wave Particles -->
+        <canvas ref="particleCanvasRef" class="antigravity-canvas"></canvas>
+
+        <button class="antigravity-close-btn" @click="closeWelcomeCard" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <div class="antigravity-content">
+          <div class="antigravity-pill-badge">
+            <img src="/logo prime.png" alt="Prime Auction" class="antigravity-logo" />
+            <span>Prime Auction</span>
           </div>
 
-          <h2 class="welcome-popup-title">Bem-vindo à Prime Auction</h2>
-          <p class="welcome-popup-text">A maior plataforma de leilões de Moçambique. Licite em tempo real com liquidação instantânea em segurança.</p>
+          <h1 class="antigravity-title">
+            Descubra o Futuro dos <br />
+            <span class="gradient-text">Leilões em Moçambique</span>
+          </h1>
 
-          <div class="welcome-footer-row">
-            <button @click="closeWelcomeCard" class="btn btn-primary-royal btn-welcome-action">Explorar Leilões</button>
+          <p class="antigravity-subtitle">
+            Licitações em tempo real, liquidação instantânea via M-Pesa e veículos 100% auditados.
+          </p>
+
+          <div class="antigravity-actions">
+            <button @click="closeWelcomeCard" class="antigravity-btn-primary">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Explorar Leilões</span>
+            </button>
+            <router-link to="/register" @click="closeWelcomeCard" class="antigravity-btn-secondary">
+              Criar Conta Grátis
+            </router-link>
           </div>
         </div>
       </div>
@@ -635,7 +658,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useToastStore } from '../stores/toastStore';
@@ -647,10 +670,147 @@ const authStore = useAuthStore();
 
 const showWelcomeCard = ref(false);
 let welcomeTimeoutId = null;
+const particleCanvasRef = ref(null);
+let animationFrameId = null;
+let particles = [];
+let mousePos = { x: -1000, y: -1000, active: false };
+
+const handleMouseMove = (e) => {
+  mousePos.x = e.clientX;
+  mousePos.y = e.clientY;
+  mousePos.active = true;
+};
+
+const initAntigravityParticles = () => {
+  const canvas = particleCanvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  ctx.scale(dpr, dpr);
+
+  particles = [];
+  // Antigravity palette: royal blues, cyan, vibrant purple/indigo, subtle gold/amber
+  const colors = [
+    '#2563eb', // Royal Blue
+    '#3b82f6', // Light Blue
+    '#06b6d4', // Cyan
+    '#6366f1', // Indigo
+    '#8b5cf6', // Violet
+    '#f59e0b', // Amber highlight
+    '#ec4899'  // Pink/magenta accent
+  ];
+
+  const cols = Math.floor(width / 34);
+  const rows = Math.floor(height / 28);
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      // Base grid position with organic scatter
+      const baseX = (i + 0.5) * (width / cols) + (Math.random() - 0.5) * 12;
+      const baseY = (j + 0.5) * (height / rows) + (Math.random() - 0.5) * 12;
+
+      // Calculate distance from center to give an orbital/spherical Antigravity dispersion feel
+      const dx = baseX - centerX;
+      const dy = baseY - centerY;
+      const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+
+      particles.push({
+        baseX,
+        baseY,
+        x: baseX,
+        y: baseY,
+        vx: 0,
+        vy: 0,
+        size: Math.random() * 2.8 + 1.8,
+        length: Math.random() * 5 + 4, // dashes/pills like Antigravity logo
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.55 + 0.35,
+        angle: Math.atan2(dy, dx),
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.0018 + Math.random() * 0.0012,
+        distFromCenter
+      });
+    }
+  }
+
+  let time = 0;
+
+  const render = () => {
+    if (!showWelcomeCard.value) return;
+    time += 1;
+    ctx.clearRect(0, 0, width, height);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      // Multi-frequency undulating wave movement
+      const waveX = Math.sin(time * p.speed * 18 + p.phase + p.baseY * 0.006) * 14;
+      const waveY = Math.cos(time * p.speed * 15 + p.phase + p.baseX * 0.006) * 12;
+
+      let targetX = p.baseX + waveX;
+      let targetY = p.baseY + waveY;
+
+      // Mouse repulsion and vortex interaction
+      if (mousePos.active) {
+        const mdx = targetX - mousePos.x;
+        const mdy = targetY - mousePos.y;
+        const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+        const maxDist = 180;
+
+        if (mdist < maxDist && mdist > 0) {
+          const force = (1 - mdist / maxDist) * 55;
+          targetX += (mdx / mdist) * force;
+          targetY += (mdy / mdist) * force;
+        }
+      }
+
+      // Smooth interpolation
+      p.x += (targetX - p.x) * 0.12;
+      p.y += (targetY - p.y) * 0.12;
+
+      // Dynamic orientation towards center curve or flow
+      const currentAngle = p.angle + Math.sin(time * 0.02 + p.phase) * 0.4;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(currentAngle);
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+
+      // Draw rounded dashes/capsules (the signature Antigravity particle look)
+      ctx.beginPath();
+      ctx.roundRect(-p.length / 2, -p.size / 2, p.length, p.size, p.size / 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    animationFrameId = requestAnimationFrame(render);
+  };
+
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  animationFrameId = requestAnimationFrame(render);
+};
+
+const openWelcomeExperience = async () => {
+  showWelcomeCard.value = true;
+  await nextTick();
+  initAntigravityParticles();
+};
 
 const closeWelcomeCard = () => {
   showWelcomeCard.value = false;
   if (welcomeTimeoutId) clearTimeout(welcomeTimeoutId);
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
 };
 
 const newsletterEmail = ref('');
@@ -1157,10 +1317,10 @@ onMounted(async () => {
   // Add resize listener
   window.addEventListener('resize', onResize);
 
-  // Welcome card setup (optional)
+  // Welcome experience setup
   welcomeTimeoutId = setTimeout(() => {
-    showWelcomeCard.value = true;
-  }, 1500);
+    openWelcomeExperience();
+  }, 1000);
 });
 
 onUnmounted(() => {
@@ -2656,117 +2816,227 @@ onUnmounted(() => {
   }
 }
 
-/* ── Welcome Pop-up Card Styles ── */
-.welcome-overlay {
+/* ── Antigravity Welcome Experience (Fluid Waves, No Box) ── */
+.antigravity-welcome-screen {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   z-index: 20000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.welcome-popup-card {
-  background: white;
-  border-radius: 20px;
+.dark .antigravity-welcome-screen {
+  background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.96) 0%, rgba(3, 7, 18, 0.98) 100%);
+}
+
+.antigravity-canvas {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: 400px;
-  padding: 2.2rem 2rem 1.8rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.antigravity-content {
   position: relative;
+  z-index: 2;
+  max-width: 820px;
+  width: 90%;
+  margin: 0 auto;
   text-align: center;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-.dark .welcome-popup-card {
-  background: #0f172a;
-  border-color: #1e293b;
-}
-
-.welcome-brand-badge {
-  margin-bottom: 1rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  pointer-events: auto;
 }
 
-.welcome-logo-img {
-  height: 48px;
+.antigravity-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 0.45rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  animation: floatBadge 4s ease-in-out infinite;
+}
+
+.dark .antigravity-pill-badge {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(51, 65, 85, 0.8);
+  color: #f1f5f9;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
+.antigravity-logo {
+  height: 22px;
   width: auto;
   object-fit: contain;
 }
 
-.welcome-close-btn {
-  position: absolute;
-  right: 1rem;
-  top: 1rem;
-  background: #f1f5f9;
-  border: none;
-  font-size: 0.85rem;
-  color: #64748b;
-  cursor: pointer;
-  border-radius: 50%;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-}
-
-.welcome-close-btn:hover {
-  background-color: #e2e8f0;
-  color: #0f172a;
-}
-
-.dark .welcome-close-btn {
-  background: #1e293b;
-  color: #cbd5e1;
-}
-
-.welcome-popup-title {
-  font-size: 1.35rem;
+.antigravity-title {
+  font-size: clamp(2.2rem, 5.5vw, 4.2rem);
   font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
   color: #0f172a;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.4rem;
 }
 
-.dark .welcome-popup-title {
-  color: #ffffff;
+.dark .antigravity-title {
+  color: #f8fafc;
 }
 
-.welcome-popup-text {
-  font-size: 0.88rem;
+.antigravity-title .gradient-text {
+  background: linear-gradient(135deg, #1d4ed8 0%, #06b6d4 50%, #4338ca 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.antigravity-subtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
   color: #64748b;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  max-width: 580px;
+  margin: 0 auto 2.5rem;
+  font-weight: 400;
 }
 
-.dark .welcome-popup-text {
+.dark .antigravity-subtitle {
   color: #94a3b8;
 }
 
-.btn-primary-royal {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 0.85rem 1.5rem;
-  font-size: 0.95rem;
-  font-weight: 800;
-  width: 100%;
+.antigravity-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.antigravity-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.95rem 2rem;
+  border-radius: 9999px;
+  font-size: 1.02rem;
+  font-weight: 600;
+  border: 1px solid #1e293b;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .antigravity-btn-primary {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.2);
+}
+
+.antigravity-btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 16px 32px -6px rgba(15, 23, 42, 0.4);
+}
+
+.antigravity-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.95rem 2rem;
+  border-radius: 9999px;
+  font-size: 1.02rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.8);
+  color: #334155;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .antigravity-btn-secondary {
+  background: rgba(30, 41, 59, 0.7);
+  color: #e2e8f0;
+  border-color: rgba(71, 85, 105, 0.7);
+}
+
+.antigravity-btn-secondary:hover {
+  background: rgba(241, 245, 249, 1);
+  transform: translateY(-2px);
+  color: #0f172a;
+}
+
+.antigravity-close-btn {
+  position: absolute;
+  top: 2rem;
+  right: 2.2rem;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  color: #64748b;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
   transition: all 0.2s ease;
 }
 
-.btn-primary-royal:hover {
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(29, 78, 216, 0.35);
+.dark .antigravity-close-btn {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(51, 65, 85, 0.8);
+  color: #94a3b8;
+}
+
+.antigravity-close-btn:hover {
+  transform: scale(1.08) rotate(90deg);
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.dark .antigravity-close-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+@keyframes floatBadge {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.fade-welcome-enter-active,
+.fade-welcome-leave-active {
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-welcome-enter-from,
+.fade-welcome-leave-to {
+  opacity: 0;
+  transform: scale(1.02);
 }
 
 /* Animations */

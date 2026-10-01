@@ -63,14 +63,15 @@
               <input 
                 type="text" 
                 id="value" 
-                :value="formatCurrency(form.estimatedValue)"
+                :value="displayEstimatedValue"
                 @input="handleValueInput"
+                @focus="handleValueFocus"
                 @blur="handleValueBlur"
                 class="form-input" 
-                placeholder="Ex: 1.000.000" 
+                placeholder="Ex: 1 000 000,00" 
                 required 
               />
-              <small class="form-hint">O sistema formata automaticamente os valores (ex: 1000000 → 1.000.000)</small>
+              <small class="form-hint">Pode digitar o valor inteiro ou com centavos (ex: 50000 ou 50000,50)</small>
             </div>
           </div>
 
@@ -114,7 +115,7 @@
           </div>
 
           <h3 class="form-section-title" style="margin-top: 2.5rem;">📷 Fotografias do Artigo</h3>
-          <p class="section-subtitle-small">Adicione até 5 fotografias nítidas para ajudar na avaliação do seu artigo.</p>
+          <p class="section-subtitle-small">Adicione até 10 fotografias nítidas para ajudar na avaliação do seu artigo.</p>
           
           <!-- Image Upload Area -->
           <div 
@@ -137,7 +138,7 @@
             <div class="upload-prompt">
               <span class="upload-icon">📤</span>
               <span class="upload-text">Arraste as fotos para aqui ou <strong>clique para escolher</strong></span>
-              <span class="upload-formats">Formatos permitidos: JPG, PNG, WEBP (máx. 5 fotos)</span>
+              <span class="upload-formats">Formatos permitidos: JPG, PNG, WEBP (máx. 10 fotos)</span>
             </div>
           </div>
 
@@ -184,7 +185,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import { useToastStore } from '../stores/toastStore';
@@ -240,8 +241,8 @@ const handleDrop = (e) => {
 
 const uploadFiles = async (files) => {
   const currentCount = form.value.images.length;
-  if (currentCount + files.length > 5) {
-    toastStore.error('Pode fazer upload de no máximo 5 imagens.');
+  if (currentCount + files.length > 10) {
+    toastStore.error('Pode fazer upload de no máximo 10 imagens.');
     return;
   }
 
@@ -304,31 +305,77 @@ const submitProposal = async () => {
   }
 };
 
-// Currency formatting functions
-const formatCurrency = (value) => {
-  if (value === null || value === undefined || value === '') {
-    return '';
+// ── Currency Formatting & Intuitive Decimal Input ──
+const isValueInputFocused = ref(false);
+const rawValueInput = ref('');
+
+const formatToMzCurrency = (num) => {
+  if (num === null || num === undefined || num === '' || isNaN(num)) return '';
+  return Number(num).toLocaleString('pt-MZ', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+const displayEstimatedValue = computed(() => {
+  if (isValueInputFocused.value) {
+    return rawValueInput.value;
   }
-  // Remove non-digit characters
-  const cleanValue = String(value).replace(/\D/g, '');
-  if (cleanValue === '') {
-    return '';
+  if (form.value.estimatedValue !== null && form.value.estimatedValue !== undefined && !isNaN(form.value.estimatedValue)) {
+    return formatToMzCurrency(form.value.estimatedValue);
   }
-  // Format with thousand separators and 2 decimal places
-  return Number(cleanValue).toLocaleString('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return '';
+});
+
+const handleValueFocus = (event) => {
+  isValueInputFocused.value = true;
+  if (form.value.estimatedValue !== null && form.value.estimatedValue !== undefined && !isNaN(form.value.estimatedValue)) {
+    // Show standard readable decimal format when focused, e.g. 15000 or 15000,50
+    const str = String(form.value.estimatedValue).replace('.', ',');
+    rawValueInput.value = str;
+  } else {
+    rawValueInput.value = '';
+  }
 };
 
 const handleValueInput = (event) => {
-  const inputValue = event.target.value;
-  // Remove non-digit characters for the actual value
-  const cleanValue = inputValue.replace(/\D/g, '');
-  form.value.estimatedValue = cleanValue === '' ? null : Number(cleanValue);
+  let val = event.target.value;
+  // Permitir apenas números e uma vírgula ou ponto para casas decimais
+  // Troca pontos por vírgula para manter padrão decimal pt-MZ
+  val = val.replace(/\./g, ',');
+  
+  // Garantir apenas uma vírgula
+  const parts = val.split(',');
+  if (parts.length > 2) {
+    val = parts[0] + ',' + parts.slice(1).join('');
+  }
+  
+  // Limpar caracteres não numéricos exceto a vírgula
+  val = val.replace(/[^0-9,]/g, '');
+
+  // Limitar casas decimais a no máximo 2 dígitos
+  if (val.includes(',')) {
+    const [intPart, decPart] = val.split(',');
+    val = intPart + ',' + (decPart || '').slice(0, 2);
+  }
+
+  rawValueInput.value = val;
+
+  // Atualizar form.value.estimatedValue com número real float
+  const numericString = val.replace(',', '.');
+  if (numericString === '' || numericString === '.') {
+    form.value.estimatedValue = null;
+  } else {
+    const parsed = parseFloat(numericString);
+    form.value.estimatedValue = isNaN(parsed) ? null : parsed;
+  }
 };
 
 const handleValueBlur = () => {
-  // Ensure the value is properly formatted when leaving the field
-  if (form.value.estimatedValue !== null && form.value.estimatedValue !== '') {
-    form.value.estimatedValue = Number(form.value.estimatedValue);
+  isValueInputFocused.value = false;
+  if (form.value.estimatedValue !== null && !isNaN(form.value.estimatedValue)) {
+    // Arredonda para 2 casas decimais no modelo final
+    form.value.estimatedValue = Math.round(form.value.estimatedValue * 100) / 100;
   }
 };
 </script>
