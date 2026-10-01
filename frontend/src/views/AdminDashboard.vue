@@ -242,11 +242,12 @@
                 <label class="form-label">Preço Inicial (MZN)</label>
                 <input 
                   type="text" 
-                  :value="formatCurrencyInput(form.startingPrice)"
+                  :value="getDisplayPrice('startingPrice')"
+                  @focus="handlePriceFocus($event, 'startingPrice')"
                   @input="handlePriceInput($event, 'startingPrice')"
                   @blur="handlePriceBlur($event, 'startingPrice')"
                   class="form-input" 
-                  placeholder="0" 
+                  placeholder="Ex: 50 000,00" 
                   required 
                 />
               </div>
@@ -254,14 +255,15 @@
 
             <div class="form-row">
               <div class="form-group half">
-                <label class="form-label">Taxa de Participação (MZN) 🎫</label>
+                <label class="form-label">Taxa de Participação (MZN)</label>
                 <input 
                   type="text" 
-                  :value="formatCurrencyInput(form.participationFee)"
+                  :value="getDisplayPrice('participationFee')"
+                  @focus="handlePriceFocus($event, 'participationFee')"
                   @input="handlePriceInput($event, 'participationFee')"
                   @blur="handlePriceBlur($event, 'participationFee')"
                   class="form-input" 
-                  placeholder="1000" 
+                  placeholder="Ex: 1 000,00" 
                   required 
                 />
               </div>
@@ -1341,11 +1343,12 @@
                 <label class="form-label">Preço Inicial (MZN)</label>
                 <input 
                   type="text" 
-                  :value="formatCurrencyInput(editForm.startingPrice)"
+                  :value="getDisplayEditPrice('startingPrice')"
+                  @focus="handleEditPriceFocus($event, 'startingPrice')"
                   @input="handleEditPriceInput($event, 'startingPrice')"
                   @blur="handleEditPriceBlur($event, 'startingPrice')"
                   class="form-input" 
-                  min="0" 
+                  placeholder="0,00" 
                   required 
                 />
               </div>
@@ -1353,23 +1356,25 @@
                 <label class="form-label">Lance Actual (MZN)</label>
                 <input 
                   type="text" 
-                  :value="formatCurrencyInput(editForm.currentPrice)"
+                  :value="getDisplayEditPrice('currentPrice')"
+                  @focus="handleEditPriceFocus($event, 'currentPrice')"
                   @input="handleEditPriceInput($event, 'currentPrice')"
                   @blur="handleEditPriceBlur($event, 'currentPrice')"
                   class="form-input" 
-                  min="0" 
+                  placeholder="0,00" 
                   required 
                 />
               </div>
               <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Taxa de Participação (MZN) 🎫</label>
+                <label class="form-label">Taxa de Participação (MZN)</label>
                 <input 
                   type="text" 
-                  :value="formatCurrencyInput(editForm.participationFee)"
+                  :value="getDisplayEditPrice('participationFee')"
+                  @focus="handleEditPriceFocus($event, 'participationFee')"
                   @input="handleEditPriceInput($event, 'participationFee')"
                   @blur="handleEditPriceBlur($event, 'participationFee')"
                   class="form-input" 
-                  min="0" 
+                  placeholder="1 000,00" 
                   required 
                 />
               </div>
@@ -1756,45 +1761,133 @@ const formatCurrency = (value) => {
   return `${formatted} MZN`;
 };
 
-// Smart currency input formatting
+// Smart currency input formatting with decimal/centavos support & smooth editing
+const priceFocusState = ref({
+  startingPrice: false,
+  participationFee: false
+});
+const rawPriceInput = ref({
+  startingPrice: '',
+  participationFee: ''
+});
+
+const editPriceFocusState = ref({
+  startingPrice: false,
+  currentPrice: false,
+  participationFee: false
+});
+const rawEditPriceInput = ref({
+  startingPrice: '',
+  currentPrice: '',
+  participationFee: ''
+});
+
 const formatCurrencyInput = (value) => {
-  if (value === null || value === undefined || value === '') {
+  if (value === null || value === undefined || value === '' || isNaN(value)) {
     return '';
   }
-  // Remove non-digit characters
-  const cleanValue = String(value).replace(/\D/g, '');
-  if (cleanValue === '') {
-    return '';
+  return Number(value).toLocaleString('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+const getDisplayPrice = (field) => {
+  if (priceFocusState.value[field]) {
+    return rawPriceInput.value[field];
   }
-  // Format with thousand separators and 2 decimal places
-  return Number(cleanValue).toLocaleString('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const val = form.value[field];
+  if (val !== null && val !== undefined && val !== '' && !isNaN(val)) {
+    return formatCurrencyInput(val);
+  }
+  return '';
+};
+
+const handlePriceFocus = (event, field) => {
+  priceFocusState.value[field] = true;
+  const val = form.value[field];
+  if (val !== null && val !== undefined && val !== '' && !isNaN(val)) {
+    rawPriceInput.value[field] = String(val).replace('.', ',');
+  } else {
+    rawPriceInput.value[field] = '';
+  }
 };
 
 const handlePriceInput = (event, field) => {
-  const inputValue = event.target.value;
-  // Remove non-digit characters for the actual value
-  const cleanValue = inputValue.replace(/\D/g, '');
-  form.value[field] = cleanValue === '' ? 0 : Number(cleanValue);
+  let val = event.target.value;
+  val = val.replace(/\./g, ',');
+  const parts = val.split(',');
+  if (parts.length > 2) {
+    val = parts[0] + ',' + parts.slice(1).join('');
+  }
+  val = val.replace(/[^0-9,]/g, '');
+  if (val.includes(',')) {
+    const [intPart, decPart] = val.split(',');
+    val = intPart + ',' + (decPart || '').slice(0, 2);
+  }
+
+  rawPriceInput.value[field] = val;
+  const numericString = val.replace(',', '.');
+  if (numericString === '' || numericString === '.') {
+    form.value[field] = 0;
+  } else {
+    const parsed = parseFloat(numericString);
+    form.value[field] = isNaN(parsed) ? 0 : parsed;
+  }
 };
 
 const handlePriceBlur = (event, field) => {
-  // Ensure the value is properly formatted when leaving the field
-  if (form.value[field] !== null && form.value[field] !== '') {
-    form.value[field] = Number(form.value[field]);
+  priceFocusState.value[field] = false;
+  if (form.value[field] !== null && !isNaN(form.value[field])) {
+    form.value[field] = Math.round(Number(form.value[field]) * 100) / 100;
+  }
+};
+
+const getDisplayEditPrice = (field) => {
+  if (editPriceFocusState.value[field]) {
+    return rawEditPriceInput.value[field];
+  }
+  const val = editForm.value[field];
+  if (val !== null && val !== undefined && val !== '' && !isNaN(val)) {
+    return formatCurrencyInput(val);
+  }
+  return '';
+};
+
+const handleEditPriceFocus = (event, field) => {
+  editPriceFocusState.value[field] = true;
+  const val = editForm.value[field];
+  if (val !== null && val !== undefined && val !== '' && !isNaN(val)) {
+    rawEditPriceInput.value[field] = String(val).replace('.', ',');
+  } else {
+    rawEditPriceInput.value[field] = '';
   }
 };
 
 const handleEditPriceInput = (event, field) => {
-  const inputValue = event.target.value;
-  // Remove non-digit characters for the actual value
-  const cleanValue = inputValue.replace(/\D/g, '');
-  editForm.value[field] = cleanValue === '' ? 0 : Number(cleanValue);
+  let val = event.target.value;
+  val = val.replace(/\./g, ',');
+  const parts = val.split(',');
+  if (parts.length > 2) {
+    val = parts[0] + ',' + parts.slice(1).join('');
+  }
+  val = val.replace(/[^0-9,]/g, '');
+  if (val.includes(',')) {
+    const [intPart, decPart] = val.split(',');
+    val = intPart + ',' + (decPart || '').slice(0, 2);
+  }
+
+  rawEditPriceInput.value[field] = val;
+  const numericString = val.replace(',', '.');
+  if (numericString === '' || numericString === '.') {
+    editForm.value[field] = 0;
+  } else {
+    const parsed = parseFloat(numericString);
+    editForm.value[field] = isNaN(parsed) ? 0 : parsed;
+  }
 };
 
 const handleEditPriceBlur = (event, field) => {
-  // Ensure the value is properly formatted when leaving the field
-  if (editForm.value[field] !== null && editForm.value[field] !== '') {
-    editForm.value[field] = Number(editForm.value[field]);
+  editPriceFocusState.value[field] = false;
+  if (editForm.value[field] !== null && !isNaN(editForm.value[field])) {
+    editForm.value[field] = Math.round(Number(editForm.value[field]) * 100) / 100;
   }
 };
 
