@@ -54,6 +54,40 @@ body {
   margin: 0;
 }
 
+/* ─── Custom Global Scrollbar ─── */
+
+/* Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111318;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3e6ae1 0%, #1a56db 60%, #6c3fc5 100%);
+  border-radius: 100px;
+  border: 2px solid #111318;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #5b84f5 0%, #3e6ae1 60%, #8b5cf6 100%);
+}
+
+::-webkit-scrollbar-corner {
+  background: #111318;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3e6ae1 #111318;
+}
+
 h1,
 h2 {
   font-family: var(--heading);
