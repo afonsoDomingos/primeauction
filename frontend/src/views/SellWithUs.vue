@@ -11,7 +11,12 @@
     <div class="container sell-content">
       <!-- Success Card -->
       <div v-if="submitted" class="success-card text-center animate-scale-in">
-        <div class="success-icon">🎉</div>
+        <div class="success-icon-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
         <h2 class="success-title">Proposta Submetida!</h2>
         <p class="success-text">A sua proposta de leilão para <strong>{{ form.title }}</strong> foi registada com sucesso.</p>
         <p class="success-note">A nossa equipa administrativa irá analisar as fotos e especificações. Entraremos em contacto brevemente.</p>
@@ -24,7 +29,15 @@
       <!-- Form Card -->
       <div v-else class="sell-card">
         <form @submit.prevent="submitProposal" class="sell-form">
-          <h3 class="form-section-title">📦 Detalhes do Artigo</h3>
+          <h3 class="form-section-title">
+            <svg class="section-svg-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m7.5 4.27 9 5.15"></path>
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+              <path d="m3.3 7 8.7 5 8.7-5"></path>
+              <path d="M12 22V12"></path>
+            </svg>
+            <span>Detalhes do Artigo</span>
+          </h3>
           
           <div class="form-grid-2">
             <div class="form-group">
@@ -86,7 +99,12 @@
             ></textarea>
           </div>
 
-          <h3 class="form-section-title" style="margin-top: 2.5rem;">📞 Informações de Contacto</h3>
+          <h3 class="form-section-title" style="margin-top: 2.5rem;">
+            <svg class="section-svg-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            <span>Informações de Contacto</span>
+          </h3>
           
           <div class="form-grid-2">
             <div class="form-group">
@@ -114,7 +132,13 @@
             </div>
           </div>
 
-          <h3 class="form-section-title" style="margin-top: 2.5rem;">📷 Fotografias do Artigo</h3>
+          <h3 class="form-section-title" style="margin-top: 2.5rem;">
+            <svg class="section-svg-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+              <circle cx="12" cy="13" r="3"></circle>
+            </svg>
+            <span>Fotografias do Artigo</span>
+          </h3>
           <p class="section-subtitle-small">Adicione até 10 fotografias nítidas para ajudar na avaliação do seu artigo.</p>
           
           <!-- Image Upload Area -->
@@ -136,7 +160,13 @@
             />
             
             <div class="upload-prompt">
-              <span class="upload-icon">📤</span>
+              <div class="upload-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" class="upload-svg-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
               <span class="upload-text">Arraste as fotos para aqui ou <strong>clique para escolher</strong></span>
               <span class="upload-formats">Formatos permitidos: JPG, PNG, WEBP (máx. 10 fotos)</span>
             </div>
@@ -445,12 +475,20 @@ const handleValueBlur = () => {
 }
 
 .form-section-title {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 1.25rem;
   border-bottom: 1px solid #f3f4f6;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.section-svg-icon {
+  color: #1a56db;
+  flex-shrink: 0;
 }
 
 .section-subtitle-small {
@@ -517,9 +555,29 @@ const handleValueBlur = () => {
   gap: 0.5rem;
 }
 
-.upload-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.25rem;
+.upload-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(26, 86, 219, 0.08) 0%, rgba(37, 99, 235, 0.15) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  color: #1a56db;
+  transition: all 0.3s ease;
+}
+
+.upload-dropzone:hover .upload-icon-wrapper,
+.upload-dropzone.dragging .upload-icon-wrapper {
+  transform: translateY(-3px) scale(1.05);
+  background: #1a56db;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(26, 86, 219, 0.25);
+}
+
+.upload-svg-icon {
+  stroke-width: 2.2;
 }
 
 .upload-text {
@@ -598,10 +656,18 @@ const handleValueBlur = () => {
   border: 1px solid #e5e7eb;
 }
 
-.success-icon {
-  font-size: 4.5rem;
-  margin-bottom: 1.5rem;
+.success-icon-badge {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.2) 100%);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
   animation: scale-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
 }
 
 @keyframes scale-up {
