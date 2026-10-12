@@ -65,7 +65,7 @@ exports.getOverview = async (req, res) => {
     const totalFeeRevenue = completedPayments[0]?.totalFees || 0;
 
     // Average bid value
-    const avgBidValue = totalBids > 0 
+    const avgBidValue = totalBids > 0
       ? await Bid.aggregate([{ $group: { _id: null, avg: { $avg: '$amount' } } }])
       : [{ avg: 0 }];
 
@@ -128,7 +128,7 @@ exports.getAuctionAnalytics = async (req, res) => {
   try {
     const { period } = req.query;
     let startDate = new Date();
-    
+
     if (period === 'week') {
       startDate.setDate(startDate.getDate() - 7);
     } else if (period === 'month') {
@@ -183,7 +183,7 @@ exports.getUserAnalytics = async (req, res) => {
   try {
     const { period } = req.query;
     let startDate = new Date();
-    
+
     if (period === 'week') {
       startDate.setDate(startDate.getDate() - 7);
     } else if (period === 'month') {
@@ -247,7 +247,7 @@ exports.getBidAnalytics = async (req, res) => {
   try {
     const { period } = req.query;
     let startDate = new Date();
-    
+
     if (period === 'week') {
       startDate.setDate(startDate.getDate() - 7);
     } else if (period === 'month') {

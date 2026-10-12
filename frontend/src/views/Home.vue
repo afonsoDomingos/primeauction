@@ -835,6 +835,7 @@ const handleNewsletterSubscribe = async () => {
 // Homepage customizable settings
 const heroTitle = ref('Prime Auctions');
 const heroSubtitle = ref('Leilões Exclusivos. Preços Competitivos. Totalmente Online.');
+// Fallback image used only when no banners are configured in Admin
 const heroImage = ref('https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 const heroImageUrls = ref([]);
 const heroMobileImageUrls = ref([]);
@@ -1287,6 +1288,26 @@ const fetchPartners = async () => {
   }
 };
 
+// Fetch hero banners from settings API
+const fetchHeroBanners = async () => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/settings/heroBanners`);
+    if (res.data && res.data.success && res.data.data) {
+      const data = res.data.data;
+      if (data.urls && data.urls.length > 0) {
+        heroImageUrls.value = data.urls;
+      }
+      if (data.mobileUrls && data.mobileUrls.length > 0) {
+        heroMobileImageUrls.value = data.mobileUrls;
+      }
+    }
+  } catch (err) {
+    // No banners configured yet — uses fallback heroImage
+    console.info('No hero banners configured, using default.');
+  }
+};
+
 // 🔧 FIXED: Complete onMounted with all necessary calls
 onMounted(async () => {
   console.log('🚀 Home component mounted');
@@ -1296,7 +1317,8 @@ onMounted(async () => {
     fetchActiveAuctions(),
     fetchUpcomingAuctions(),
     fetchWatchlist(),
-    fetchPartners()
+    fetchPartners(),
+    fetchHeroBanners()
   ]);
   
   loadingAuctions.value = false;

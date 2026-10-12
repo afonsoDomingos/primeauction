@@ -31,3 +31,15 @@ const profileStorage = new CloudinaryStorage({
 exports.uploadAuctionImage = multer({ storage: auctionStorage });
 exports.uploadProfilePhoto = multer({ storage: profileStorage });
 exports.cloudinary = cloudinary;
+
+// Storage for hero banner images
+const bannerStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'prime-auction/banners',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1920, height: 1080, crop: 'limit', quality: 'auto:best' }]
+  }
+});
+
+exports.uploadBannerImage = multer({ storage: bannerStorage });

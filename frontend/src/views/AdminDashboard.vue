@@ -626,17 +626,18 @@
                 </tr>
                 <tr v-for="prop in proposals" :key="prop._id">
                   <td>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                      <img v-if="prop.images && prop.images[0]" :src="prop.images[0]" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;" />
+                    <div style="display: flex; gap: 0.6rem; align-items: center; cursor: pointer;" @click="openPreviewProposal(prop)" title="Clique para pré-visualizar detalhes">
+                      <img v-if="prop.images && prop.images[0]" :src="prop.images[0]" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid #e5e7eb;" />
+                      <div v-else style="width: 44px; height: 44px; border-radius: 6px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">📦</div>
                       <div style="display: flex; flex-direction: column;">
-                        <span style="font-weight: 600; font-size: 0.85rem;">{{ prop.title }}</span>
+                        <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">{{ prop.title }}</span>
                         <span style="font-size: 0.75rem; color: var(--text-light)">{{ prop.category }} &bull; {{ prop.condition }}</span>
                       </div>
                     </div>
                   </td>
                   <td>
                     <div style="display: flex; flex-direction: column; font-size: 0.8rem; gap: 2px;">
-                      <span>👤 {{ prop.user?.name }}</span>
+                      <span>👤 {{ prop.user?.name || 'Utilizador' }}</span>
                       <span>📞 {{ prop.contactPhone }}</span>
                     </div>
                   </td>
@@ -647,13 +648,20 @@
                     </span>
                   </td>
                   <td>
-                    <div class="action-btns" v-if="prop.status === 'pending'">
-                      <button @click="approveProposalAndPrefill(prop)" class="btn btn-sm btn-primary">Aprovar & Criar</button>
-                      <button @click="rejectProposal(prop)" class="btn btn-sm btn-danger">Rejeitar</button>
+                    <div class="action-btns">
+                      <button @click="openPreviewProposal(prop)" class="btn btn-sm btn-secondary" title="Pré-visualizar proposta completa">
+                        👁️ Ver
+                      </button>
+                      <button v-if="prop.status === 'pending'" @click="approveProposalAndPrefill(prop)" class="btn btn-sm btn-primary">
+                        Aprovar & Criar
+                      </button>
+                      <button v-if="prop.status === 'pending'" @click="rejectProposal(prop)" class="btn btn-sm btn-danger">
+                        Rejeitar
+                      </button>
+                      <span v-else style="font-size: 0.8rem; color: var(--text-light); font-style: italic; margin-left: 4px;">
+                        {{ prop.status === 'approved' ? 'Aprovado' : 'Rejeitado' }}
+                      </span>
                     </div>
-                    <span v-else style="font-size: 0.8rem; color: var(--text-light); font-style: italic;">
-                      {{ prop.status === 'approved' ? 'Aprovado' : 'Rejeitado' }}
-                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -1500,6 +1508,165 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Proposal Preview Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showProposalPreviewModal" class="custom-modal-overlay" @click.self="closeProposalPreview">
+        <div class="custom-modal-card proposal-preview-card animate-scale-in">
+          <div class="modal-header-row">
+            <div style="display: flex; align-items: center; gap: 0.65rem; flex: 1;">
+              <span class="modal-title-icon">🔍</span>
+              <div>
+                <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Pré-visualização da Proposta</h4>
+                <span style="font-size: 0.75rem; color: var(--text-light);">Submetida em {{ formatDate(previewProposal?.createdAt) }}</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span :class="['badge', previewProposal?.status === 'approved' ? 'badge-active' : (previewProposal?.status === 'pending' ? 'badge-upcoming' : 'badge-ended')]">
+                {{ previewProposal?.status === 'pending' ? 'Pendente' : (previewProposal?.status === 'approved' ? 'Aprovado' : 'Rejeitado') }}
+              </span>
+              <button type="button" class="wizard-close-btn" @click="closeProposalPreview" aria-label="Fechar">✕</button>
+            </div>
+          </div>
+
+          <div class="modal-body proposal-preview-body" v-if="previewProposal">
+            <!-- Gallery / Media View -->
+            <div class="preview-media-section" v-if="previewProposal.images && previewProposal.images.length > 0">
+              <div class="preview-main-image-wrap">
+                <img 
+                  :src="previewProposal.images[activePreviewImageIndex]" 
+                  :alt="previewProposal.title" 
+                  class="preview-main-image"
+                />
+                <!-- Nav arrows if multiple images -->
+                <button 
+                  v-if="previewProposal.images.length > 1" 
+                  type="button" 
+                  class="preview-nav-btn prev"
+                  @click="prevPreviewImage"
+                  title="Imagem anterior"
+                >‹</button>
+                <button 
+                  v-if="previewProposal.images.length > 1" 
+                  type="button" 
+                  class="preview-nav-btn next"
+                  @click="nextPreviewImage"
+                  title="Próxima imagem"
+                >›</button>
+                <div class="preview-counter-tag">
+                  📷 {{ activePreviewImageIndex + 1 }} / {{ previewProposal.images.length }}
+                </div>
+              </div>
+
+              <!-- Thumbnails row -->
+              <div class="preview-thumbnails-row" v-if="previewProposal.images.length > 1">
+                <div 
+                  v-for="(img, idx) in previewProposal.images" 
+                  :key="idx"
+                  class="preview-thumb-box"
+                  :class="{ active: activePreviewImageIndex === idx }"
+                  @click="activePreviewImageIndex = idx"
+                >
+                  <img :src="img" :alt="previewProposal.title" />
+                </div>
+              </div>
+            </div>
+            <div v-else class="preview-no-images">
+              <span>📷 Sem fotografias submetidas para este artigo</span>
+            </div>
+
+            <!-- Header Info: Title, Category, Condition, Price -->
+            <div class="preview-title-bar">
+              <div>
+                <h3 class="preview-item-title">{{ previewProposal.title }}</h3>
+                <div class="preview-badges-row">
+                  <span class="preview-pill-badge category-pill">🏷️ {{ previewProposal.category }}</span>
+                  <span class="preview-pill-badge condition-pill">⚙️ Estado: {{ previewProposal.condition }}</span>
+                </div>
+              </div>
+              <div class="preview-price-box">
+                <span class="price-box-label">Valor Estimado / Mínimo</span>
+                <span class="price-box-value">{{ formatCurrency(previewProposal.estimatedValue) }}</span>
+              </div>
+            </div>
+
+            <!-- Detailed Description -->
+            <div class="preview-info-box">
+              <h5 class="preview-box-heading">
+                <span>📝 Descrição Detalhada do Vendedor</span>
+              </h5>
+              <div class="preview-description-content">
+                {{ previewProposal.description }}
+              </div>
+            </div>
+
+            <!-- Submitter / Contact Details Box -->
+            <div class="preview-contacts-box">
+              <h5 class="preview-box-heading">
+                <span>👤 Dados de Contacto do Vendedor</span>
+              </h5>
+              <div class="contacts-grid">
+                <div class="contact-card-item">
+                  <span class="contact-label">Nome do Utilizador:</span>
+                  <strong class="contact-val">{{ previewProposal.user?.name || 'Não especificado' }}</strong>
+                </div>
+                <div class="contact-card-item">
+                  <span class="contact-label">Telefone de Contacto:</span>
+                  <a :href="`tel:${previewProposal.contactPhone}`" class="contact-val contact-link">
+                    📞 {{ previewProposal.contactPhone }}
+                  </a>
+                </div>
+                <div class="contact-card-item">
+                  <span class="contact-label">Email de Contacto:</span>
+                  <a :href="`mailto:${previewProposal.contactEmail}`" class="contact-val contact-link">
+                    ✉️ {{ previewProposal.contactEmail }}
+                  </a>
+                </div>
+                <div class="contact-card-item" v-if="previewProposal.contactPhone">
+                  <span class="contact-label">WhatsApp Rápido:</span>
+                  <a 
+                    :href="`https://wa.me/${previewProposal.contactPhone.replace(/[^0-9]/g, '')}`" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    class="contact-val whatsapp-link"
+                  >
+                    💬 Iniciar Conversa WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin Notes if any -->
+            <div v-if="previewProposal.adminNotes" class="preview-admin-notes-box">
+              <h5 class="preview-box-heading">
+                <span>📌 Notas da Administração</span>
+              </h5>
+              <p class="admin-notes-text">{{ previewProposal.adminNotes }}</p>
+            </div>
+          </div>
+
+          <!-- Modal Footer Actions -->
+          <div class="modal-footer preview-modal-footer">
+            <button type="button" @click="closeProposalPreview" class="btn btn-secondary btn-pill">
+              Fechar
+            </button>
+            <template v-if="previewProposal?.status === 'pending'">
+              <button type="button" @click="rejectFromPreview" class="btn btn-danger btn-pill">
+                ✕ Rejeitar Proposta
+              </button>
+              <button type="button" @click="approveFromPreview" class="btn btn-primary btn-pill">
+                ✓ Aprovar & Criar Leilão
+              </button>
+            </template>
+            <template v-else-if="previewProposal?.status === 'rejected'">
+              <button type="button" @click="approveFromPreview" class="btn btn-primary btn-pill">
+                Reverter & Criar Leilão
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -1521,6 +1688,47 @@ const auctions = ref([]);
 const tickets = ref([]);
 const proposals = ref([]);
 const proposalBeingConverted = ref(null);
+
+// ── Proposal Preview Modal State ──
+const showProposalPreviewModal = ref(false);
+const previewProposal = ref(null);
+const activePreviewImageIndex = ref(0);
+
+const openPreviewProposal = (prop) => {
+  previewProposal.value = prop;
+  activePreviewImageIndex.value = 0;
+  showProposalPreviewModal.value = true;
+};
+
+const closeProposalPreview = () => {
+  showProposalPreviewModal.value = false;
+  previewProposal.value = null;
+  activePreviewImageIndex.value = 0;
+};
+
+const prevPreviewImage = () => {
+  if (!previewProposal.value?.images?.length) return;
+  const len = previewProposal.value.images.length;
+  activePreviewImageIndex.value = (activePreviewImageIndex.value - 1 + len) % len;
+};
+
+const nextPreviewImage = () => {
+  if (!previewProposal.value?.images?.length) return;
+  const len = previewProposal.value.images.length;
+  activePreviewImageIndex.value = (activePreviewImageIndex.value + 1) % len;
+};
+
+const approveFromPreview = () => {
+  const prop = previewProposal.value;
+  closeProposalPreview();
+  approveProposalAndPrefill(prop);
+};
+
+const rejectFromPreview = () => {
+  const prop = previewProposal.value;
+  closeProposalPreview();
+  rejectProposal(prop);
+};
 
 // ── Auction Filters ──
 const auctionSearchQuery = ref('');
@@ -4956,5 +5164,308 @@ const formatTicketDate = (dateString) => {
 
 .info-link-btn:hover {
   color: #1e40af;
+}
+
+/* ── Proposal Preview Modal ── */
+.proposal-preview-card {
+  max-width: 820px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.proposal-preview-body {
+  max-height: 72vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.preview-media-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.preview-main-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0b0f19;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.preview-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+}
+
+.preview-nav-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.preview-nav-btn.prev {
+  left: 12px;
+}
+
+.preview-nav-btn.next {
+  right: 12px;
+}
+
+.preview-counter-tag {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.preview-thumbnails-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px;
+}
+
+.preview-thumb-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.65;
+  transition: all 0.2s;
+  background: #0f172a;
+}
+
+.preview-thumb-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-thumb-box:hover {
+  opacity: 0.9;
+}
+
+.preview-thumb-box.active {
+  border-color: var(--btn-primary-bg, #2563eb);
+  opacity: 1;
+  transform: scale(1.04);
+}
+
+.preview-no-images {
+  background: #f1f5f9;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 2.5rem;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.preview-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.preview-item-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  margin: 0 0 0.5rem 0;
+}
+
+.preview-badges-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.preview-pill-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 99px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.preview-pill-badge.condition-pill {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.preview-price-box {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 0.6rem 1.25rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.price-box-label {
+  font-size: 0.7rem;
+  color: #1e40af;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.price-box-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1d4ed8;
+  letter-spacing: -0.5px;
+}
+
+.preview-info-box,
+.preview-contacts-box,
+.preview-admin-notes-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.1rem;
+}
+
+.preview-box-heading {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  margin: 0 0 0.75rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-description-content {
+  white-space: pre-wrap;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-secondary, #475569);
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.contact-card-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.contact-label {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.contact-val {
+  font-size: 0.9rem;
+  color: var(--text-primary, #1e293b);
+  font-weight: 600;
+}
+
+.contact-link {
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.whatsapp-link {
+  color: #16a34a;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.whatsapp-link:hover {
+  text-decoration: underline;
+  color: #15803d;
+}
+
+.preview-admin-notes-box {
+  background: #fffbeb;
+  border-color: #fef3c7;
+}
+
+.preview-admin-notes-box .preview-box-heading {
+  color: #92400e;
+}
+
+.admin-notes-text {
+  font-size: 0.9rem;
+  color: #78350f;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.preview-modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 </style>
