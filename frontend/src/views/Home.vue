@@ -2687,28 +2687,17 @@ onUnmounted(() => {
 
 /* ─── Newsletter Section ─── */
 .newsletter-section {
-  padding: clamp(60px, 8vw, 90px) 1.5rem;
-  background: linear-gradient(135deg, #1a56db 0%, #7c3aed 50%, #ec4899 100%);
-  color: white;
+  padding: clamp(50px, 6vw, 75px) 1.5rem;
+  background: #ffffff;
+  color: var(--text-primary, #0f172a);
   text-align: center;
   position: relative;
   overflow: hidden;
+  border-top: 1px solid #f1f5f9;
 }
 
 .newsletter-section::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
-  animation: pulse-glow 8s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.1); opacity: 0.8; }
+  display: none;
 }
 
 .newsletter-container {
@@ -2717,7 +2706,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
   position: relative;
   z-index: 2;
 }
@@ -2725,26 +2714,20 @@ onUnmounted(() => {
 .newsletter-icon {
   font-size: 3.5rem;
   margin-bottom: 1rem;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
 }
 
 .newsletter-title {
-  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 800;
   margin-bottom: 0.75rem;
   letter-spacing: -0.5px;
   line-height: 1.2;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  color: #0f172a;
 }
 
 .newsletter-subtitle {
   font-size: clamp(0.95rem, 2vw, 1.15rem);
-  color: rgba(255, 255, 255, 0.9);
+  color: #64748b;
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
@@ -2753,24 +2736,24 @@ onUnmounted(() => {
 
 .newsletter-form {
   width: 100%;
-  max-width: 600px;
+  max-width: 620px;
 }
 
 .newsletter-input-group {
   display: flex;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 50px;
   padding: 6px;
-  transition: focus-within 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 .newsletter-input-group:focus-within {
-  border-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12), 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .newsletter-input {
@@ -2779,17 +2762,18 @@ onUnmounted(() => {
   border: none;
   outline: none;
   padding: 0.75rem 1.5rem;
-  color: white;
+  color: #0f172a;
   font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .newsletter-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: #94a3b8;
 }
 
 .btn-newsletter-submit {
-  background-color: white;
-  color: #1a56db;
+  background-color: var(--btn-primary-bg, #1a56db);
+  color: #ffffff;
   border: none;
   padding: 0.75rem 2rem;
   border-radius: 50px;
@@ -2802,12 +2786,13 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0.5rem;
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
 }
 
 .btn-newsletter-submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
-  background-color: #f3f4f6;
+  box-shadow: 0 6px 16px rgba(26, 86, 219, 0.35);
+  background-color: #1e40af;
 }
 
 .btn-newsletter-submit:disabled {
@@ -2816,8 +2801,8 @@ onUnmounted(() => {
 }
 
 .newsletter-disclaimer {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.82rem;
+  color: #64748b;
   margin-top: 1rem;
   display: flex;
   align-items: center;
@@ -2825,26 +2810,35 @@ onUnmounted(() => {
   gap: 0.5rem;
 }
 
+.newsletter-disclaimer svg {
+  color: #94a3b8;
+}
+
 @media (max-width: 600px) {
   .newsletter-input-group {
     flex-direction: column;
     background: transparent;
     border: none;
+    box-shadow: none;
     padding: 0;
     gap: 0.75rem;
     border-radius: 0;
   }
   
   .newsletter-input {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 50px;
     padding: 0.85rem 1.5rem;
     width: 100%;
+    color: #0f172a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   .newsletter-input-group:focus-within .newsletter-input {
-    border-color: rgba(255, 255, 255, 0.6);
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   }
   
   .btn-newsletter-submit {
