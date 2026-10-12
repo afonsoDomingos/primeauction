@@ -628,7 +628,14 @@
                   <td>
                     <div style="display: flex; gap: 0.6rem; align-items: center; cursor: pointer;" @click="openPreviewProposal(prop)" title="Clique para pré-visualizar detalhes">
                       <img v-if="prop.images && prop.images[0]" :src="prop.images[0]" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid #e5e7eb;" />
-                      <div v-else style="width: 44px; height: 44px; border-radius: 6px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">📦</div>
+                      <div v-else style="width: 44px; height: 44px; border-radius: 6px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m7.5 4.27 9 5.15"/>
+                          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                          <path d="m3.3 7 8.7 5 8.7-5"/>
+                          <path d="M12 22V12"/>
+                        </svg>
+                      </div>
                       <div style="display: flex; flex-direction: column;">
                         <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">{{ prop.title }}</span>
                         <span style="font-size: 0.75rem; color: var(--text-light)">{{ prop.category }} &bull; {{ prop.condition }}</span>
@@ -636,9 +643,20 @@
                     </div>
                   </td>
                   <td>
-                    <div style="display: flex; flex-direction: column; font-size: 0.8rem; gap: 2px;">
-                      <span>👤 {{ prop.user?.name || 'Utilizador' }}</span>
-                      <span>📞 {{ prop.contactPhone }}</span>
+                    <div style="display: flex; flex-direction: column; font-size: 0.8rem; gap: 3px;">
+                      <span style="display: inline-flex; align-items: center; gap: 5px;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-light);">
+                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        {{ prop.user?.name || 'Utilizador' }}
+                      </span>
+                      <span style="display: inline-flex; align-items: center; gap: 5px;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-light);">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        {{ prop.contactPhone }}
+                      </span>
                     </div>
                   </td>
                   <td class="price-cell">{{ formatCurrency(prop.estimatedValue) }}</td>
@@ -649,13 +667,24 @@
                   </td>
                   <td>
                     <div class="action-btns">
-                      <button @click="openPreviewProposal(prop)" class="btn btn-sm btn-secondary" title="Pré-visualizar proposta completa">
-                        👁️ Ver
+                      <button @click="openPreviewProposal(prop)" class="btn btn-sm btn-secondary" title="Pré-visualizar proposta completa" style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        Ver
                       </button>
-                      <button v-if="prop.status === 'pending'" @click="approveProposalAndPrefill(prop)" class="btn btn-sm btn-primary">
+                      <button v-if="prop.status === 'pending'" @click="approveProposalAndPrefill(prop)" class="btn btn-sm btn-primary" style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
                         Aprovar & Criar
                       </button>
-                      <button v-if="prop.status === 'pending'" @click="rejectProposal(prop)" class="btn btn-sm btn-danger">
+                      <button v-if="prop.status === 'pending'" @click="rejectProposal(prop)" class="btn btn-sm btn-danger" style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18"/>
+                          <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
                         Rejeitar
                       </button>
                       <span v-else style="font-size: 0.8rem; color: var(--text-light); font-style: italic; margin-left: 4px;">
@@ -1515,7 +1544,12 @@
         <div class="custom-modal-card proposal-preview-card animate-scale-in">
           <div class="modal-header-row">
             <div style="display: flex; align-items: center; gap: 0.65rem; flex: 1;">
-              <span class="modal-title-icon">🔍</span>
+              <span class="modal-title-icon" style="display: flex; align-items: center; justify-content: center; color: var(--btn-primary-bg, #2563eb);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.3-4.3"/>
+                </svg>
+              </span>
               <div>
                 <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Pré-visualização da Proposta</h4>
                 <span style="font-size: 0.75rem; color: var(--text-light);">Submetida em {{ formatDate(previewProposal?.createdAt) }}</span>
@@ -1525,7 +1559,12 @@
               <span :class="['badge', previewProposal?.status === 'approved' ? 'badge-active' : (previewProposal?.status === 'pending' ? 'badge-upcoming' : 'badge-ended')]">
                 {{ previewProposal?.status === 'pending' ? 'Pendente' : (previewProposal?.status === 'approved' ? 'Aprovado' : 'Rejeitado') }}
               </span>
-              <button type="button" class="wizard-close-btn" @click="closeProposalPreview" aria-label="Fechar">✕</button>
+              <button type="button" class="wizard-close-btn" @click="closeProposalPreview" aria-label="Fechar" style="display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -1545,16 +1584,28 @@
                   class="preview-nav-btn prev"
                   @click="prevPreviewImage"
                   title="Imagem anterior"
-                >‹</button>
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                </button>
                 <button 
                   v-if="previewProposal.images.length > 1" 
                   type="button" 
                   class="preview-nav-btn next"
                   @click="nextPreviewImage"
                   title="Próxima imagem"
-                >›</button>
-                <div class="preview-counter-tag">
-                  📷 {{ activePreviewImageIndex + 1 }} / {{ previewProposal.images.length }}
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+                <div class="preview-counter-tag" style="display: inline-flex; align-items: center; gap: 5px;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                    <circle cx="12" cy="13" r="3"/>
+                  </svg>
+                  <span>{{ activePreviewImageIndex + 1 }} / {{ previewProposal.images.length }}</span>
                 </div>
               </div>
 
@@ -1572,7 +1623,12 @@
               </div>
             </div>
             <div v-else class="preview-no-images">
-              <span>📷 Sem fotografias submetidas para este artigo</span>
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="display: block; margin: 0 auto 8px; color: #94a3b8;">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+              <span>Sem fotografias submetidas para este artigo</span>
             </div>
 
             <!-- Header Info: Title, Category, Condition, Price -->
@@ -1580,8 +1636,19 @@
               <div>
                 <h3 class="preview-item-title">{{ previewProposal.title }}</h3>
                 <div class="preview-badges-row">
-                  <span class="preview-pill-badge category-pill">🏷️ {{ previewProposal.category }}</span>
-                  <span class="preview-pill-badge condition-pill">⚙️ Estado: {{ previewProposal.condition }}</span>
+                  <span class="preview-pill-badge category-pill" style="display: inline-flex; align-items: center; gap: 5px;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+                      <path d="M7 7h.01"/>
+                    </svg>
+                    {{ previewProposal.category }}
+                  </span>
+                  <span class="preview-pill-badge condition-pill" style="display: inline-flex; align-items: center; gap: 5px;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Estado: {{ previewProposal.condition }}
+                  </span>
                 </div>
               </div>
               <div class="preview-price-box">
@@ -1592,8 +1659,14 @@
 
             <!-- Detailed Description -->
             <div class="preview-info-box">
-              <h5 class="preview-box-heading">
-                <span>📝 Descrição Detalhada do Vendedor</span>
+              <h5 class="preview-box-heading" style="display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <span>Descrição Detalhada do Vendedor</span>
               </h5>
               <div class="preview-description-content">
                 {{ previewProposal.description }}
@@ -1602,8 +1675,12 @@
 
             <!-- Submitter / Contact Details Box -->
             <div class="preview-contacts-box">
-              <h5 class="preview-box-heading">
-                <span>👤 Dados de Contacto do Vendedor</span>
+              <h5 class="preview-box-heading" style="display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Dados de Contacto do Vendedor</span>
               </h5>
               <div class="contacts-grid">
                 <div class="contact-card-item">
@@ -1612,14 +1689,21 @@
                 </div>
                 <div class="contact-card-item">
                   <span class="contact-label">Telefone de Contacto:</span>
-                  <a :href="`tel:${previewProposal.contactPhone}`" class="contact-val contact-link">
-                    📞 {{ previewProposal.contactPhone }}
+                  <a :href="`tel:${previewProposal.contactPhone}`" class="contact-val contact-link" style="display: inline-flex; align-items: center; gap: 5px;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                    {{ previewProposal.contactPhone }}
                   </a>
                 </div>
                 <div class="contact-card-item">
                   <span class="contact-label">Email de Contacto:</span>
-                  <a :href="`mailto:${previewProposal.contactEmail}`" class="contact-val contact-link">
-                    ✉️ {{ previewProposal.contactEmail }}
+                  <a :href="`mailto:${previewProposal.contactEmail}`" class="contact-val contact-link" style="display: inline-flex; align-items: center; gap: 5px;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="20" height="16" x="2" y="4" rx="2"/>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    {{ previewProposal.contactEmail }}
                   </a>
                 </div>
                 <div class="contact-card-item" v-if="previewProposal.contactPhone">
@@ -1629,8 +1713,12 @@
                     target="_blank" 
                     rel="noopener noreferrer" 
                     class="contact-val whatsapp-link"
+                    style="display: inline-flex; align-items: center; gap: 5px;"
                   >
-                    💬 Iniciar Conversa WhatsApp
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                      <path d="M17.472 14.382c-.301-.15-1.782-.879-2.057-.98-.276-.101-.477-.15-.678.15-.2.302-.777.98-.953 1.18-.175.201-.351.226-.652.076-.3-.15-1.268-.468-2.416-1.492-.894-.798-1.498-1.783-1.674-2.084-.175-.302-.019-.465.132-.615.136-.135.301-.351.452-.527.15-.175.201-.301.301-.502.101-.201.05-.376-.025-.526-.075-.151-.678-1.633-.929-2.235-.245-.588-.493-.508-.678-.518-.175-.008-.376-.01-.577-.01-.201 0-.527.075-.803.376s-1.054 1.029-1.054 2.509c0 1.48 1.08 2.909 1.23 3.11 0.151.201 2.124 3.242 5.145 4.547.719.31 1.28.497 1.718.636.722.23 1.378.197 1.898.12.579-.087 1.782-.728 2.033-1.431.251-.703.251-1.305.176-1.431-.076-.126-.277-.201-.578-.352zM12 2a10 10 0 0 0-8.625 15.084L2 22l5.068-1.328A10 10 0 1 0 12 2zm0 18.2a8.16 8.16 0 0 1-4.162-1.137l-.298-.177-3.093.811.826-3.013-.194-.31A8.2 8.2 0 1 1 12 20.2z"/>
+                    </svg>
+                    Iniciar Conversa WhatsApp
                   </a>
                 </div>
               </div>
@@ -1638,8 +1726,12 @@
 
             <!-- Admin Notes if any -->
             <div v-if="previewProposal.adminNotes" class="preview-admin-notes-box">
-              <h5 class="preview-box-heading">
-                <span>📌 Notas da Administração</span>
+              <h5 class="preview-box-heading" style="display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"/>
+                  <path d="M15 3v5h5"/>
+                </svg>
+                <span>Notas da Administração</span>
               </h5>
               <p class="admin-notes-text">{{ previewProposal.adminNotes }}</p>
             </div>
@@ -1651,15 +1743,28 @@
               Fechar
             </button>
             <template v-if="previewProposal?.status === 'pending'">
-              <button type="button" @click="rejectFromPreview" class="btn btn-danger btn-pill">
-                ✕ Rejeitar Proposta
+              <button type="button" @click="rejectFromPreview" class="btn btn-danger btn-pill" style="display: inline-flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Rejeitar Proposta
               </button>
-              <button type="button" @click="approveFromPreview" class="btn btn-primary btn-pill">
-                ✓ Aprovar & Criar Leilão
+              <button type="button" @click="approveFromPreview" class="btn btn-primary btn-pill" style="display: inline-flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Aprovar & Criar Leilão
               </button>
             </template>
             <template v-else-if="previewProposal?.status === 'rejected'">
-              <button type="button" @click="approveFromPreview" class="btn btn-primary btn-pill">
+              <button type="button" @click="approveFromPreview" class="btn btn-primary btn-pill" style="display: inline-flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M3 21v-5h5"/>
+                </svg>
                 Reverter & Criar Leilão
               </button>
             </template>
