@@ -836,7 +836,7 @@ const handleNewsletterSubscribe = async () => {
 const heroTitle = ref('Prime Auctions');
 const heroSubtitle = ref('Leilões Exclusivos. Preços Competitivos. Totalmente Online.');
 // Fallback image used only when no banners are configured in Admin
-const heroImage = ref('https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+const heroImage = ref('');
 const heroImageUrls = ref([]);
 const heroMobileImageUrls = ref([]);
 
@@ -1116,7 +1116,7 @@ const heroImagesList = computed(() => {
   if (heroImageUrls.value.length > 0) {
     return heroImageUrls.value;
   }
-  return [heroImage.value];
+  return heroImage.value ? [heroImage.value] : [];
 });
 
 const restartSlideshow = () => {
