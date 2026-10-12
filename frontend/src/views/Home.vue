@@ -1292,14 +1292,38 @@ const fetchPartners = async () => {
 const fetchHeroBanners = async () => {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const res = await axios.get(`${apiUrl}/api/settings/heroBanners`);
-    if (res.data && res.data.success && res.data.data) {
+    // 1. Check homepage settings (configured via Admin Dashboard)
+    const homeRes = await axios.get(`${apiUrl}/api/settings/homepage`).catch(() => null);
+    if (homeRes?.data?.success && homeRes.data.data) {
+      const data = homeRes.data.data;
+      if (data.heroTitle) heroTitle.value = data.heroTitle;
+      if (data.heroSubtitle) heroSubtitle.value = data.heroSubtitle;
+      if (data.heroImageUrls && data.heroImageUrls.length > 0) {
+        heroImageUrls.value = data.heroImageUrls;
+      } else if (data.heroImageUrl) {
+        heroImageUrls.value = [data.heroImageUrl];
+      }
+      if (data.heroMobileImageUrls && data.heroMobileImageUrls.length > 0) {
+        heroMobileImageUrls.value = data.heroMobileImageUrls;
+      }
+      if (heroImageUrls.value.length > 0) {
+        restartSlideshow();
+        return;
+      }
+    }
+
+    // 2. Fallback to /api/settings/heroBanners
+    const res = await axios.get(`${apiUrl}/api/settings/heroBanners`).catch(() => null);
+    if (res?.data?.success && res.data.data) {
       const data = res.data.data;
       if (data.urls && data.urls.length > 0) {
         heroImageUrls.value = data.urls;
       }
       if (data.mobileUrls && data.mobileUrls.length > 0) {
         heroMobileImageUrls.value = data.mobileUrls;
+      }
+      if (heroImageUrls.value.length > 0) {
+        restartSlideshow();
       }
     }
   } catch (err) {
