@@ -219,6 +219,50 @@
       </div>
     </section>
 
+    <!-- Sell Section (Yellow Banner - GoBid Style) -->
+    <section class="sell-section">
+      <div class="container">
+        <div class="sell-content">
+          <div class="sell-text">
+            <h2 class="sell-title">Quer Vender o Seu Veículo?</h2>
+            <p class="sell-description">Traga o seu veículo para a Prime Auction ou venda online connosco. Rápido, fácil e seguro.</p>
+            <div class="sell-buttons">
+              <router-link to="/vender" class="btn btn-sell-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="sell-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Vender Online
+              </router-link>
+              <a href="#" class="btn btn-sell-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="sell-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Encontrar Filial
+              </a>
+            </div>
+          </div>
+          <div class="sell-features">
+            <div class="sell-feature">
+              <div class="sell-feature-icon">⚡</div>
+              <h3>Rápido</h3>
+              <p>Venda em poucos dias</p>
+            </div>
+            <div class="sell-feature">
+              <div class="sell-feature-icon">💰</div>
+              <h3>Melhor Preço</h3>
+              <p>Leilão competitivo</p>
+            </div>
+            <div class="sell-feature">
+              <div class="sell-feature-icon">🔒</div>
+              <h3>Seguro</h3>
+              <p>Pagamento garantido</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Partners Section -->
     <section class="partners-section">
       <div class="partners-marquee-wrapper">
@@ -326,7 +370,7 @@
     <section class="live-events-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">Leilões ao Vivo</h2>
+          <h2 class="section-title-premium">🔥 Junte-se aos Nossos Leilões ao Vivo</h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
         
@@ -427,7 +471,7 @@
     <section class="featured-sales-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">Vendas em Destaque</h2>
+          <h2 class="section-title-premium">⭐ Vendas em Destaque</h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
 
@@ -561,7 +605,7 @@
     <!-- What others are interested in Section (Mais Procurados) -->
     <section class="interests-section">
       <div class="container">
-        <h2 class="section-title-premium">Mais Procurados</h2>
+        <h2 class="section-title-premium">👀 O que outros estão interessados...</h2>
         
         <div v-if="loadingAuctions" class="loading-placeholder">
           <div class="loading-spinner"></div>
@@ -620,15 +664,17 @@
 
 
 
-    <!-- Newsletter Section -->
+    <!-- Newsletter Section (Green GoBid Style) -->
     <section class="newsletter-section">
       <div class="newsletter-container">
+        <h2 class="newsletter-title">📧 Subscreva, receba notificações</h2>
+        <p class="newsletter-subtitle">Seja notificado sobre novos leilões e ofertas exclusivas</p>
         <form @submit.prevent="handleNewsletterSubscribe" class="newsletter-form">
           <div class="newsletter-input-group">
-            <input 
-              type="email" 
-              v-model="newsletterEmail" 
-              placeholder="Digite o seu melhor e-mail..." 
+            <input
+              type="email"
+              v-model="newsletterEmail"
+              placeholder="Digite o seu melhor e-mail..."
               class="newsletter-input"
               required
               :disabled="subscribingNewsletter"
@@ -1377,7 +1423,7 @@ onUnmounted(() => {
   width: 100%;
 }
 
-/* ─── Hero ─── */
+/* ─── Hero (GoBid Style Black Banner) ─── */
 .hero-section {
   height: 100svh;
   min-height: 600px;
@@ -1389,6 +1435,7 @@ onUnmounted(() => {
   padding: clamp(100px, 18vh, 160px) 1.5rem clamp(40px, 6vh, 80px);
   position: relative;
   overflow: hidden;
+  background-color: var(--gobid-black);
 }
 
 .hero-bg-slides {
@@ -1445,24 +1492,24 @@ onUnmounted(() => {
 .pulse-green-dot {
   width: 8px;
   height: 8px;
-  background-color: #22c55e;
+  background-color: var(--gobid-green);
   border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  box-shadow: 0 0 0 0 rgba(0, 166, 81, 0.7);
   animation: pulse-green 1.8s infinite;
 }
 
 @keyframes pulse-green {
   0% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    box-shadow: 0 0 0 0 rgba(0, 166, 81, 0.7);
   }
   70% {
     transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+    box-shadow: 0 0 0 10px rgba(0, 166, 81, 0);
   }
   100% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    box-shadow: 0 0 0 0 rgba(0, 166, 81, 0);
   }
 }
 
@@ -1490,15 +1537,15 @@ onUnmounted(() => {
 }
 
 .hero-title-glowing {
-  background: linear-gradient(135deg, #ffffff 0%, #93c5fd 25%, #ffffff 50%, #60a5fa 75%, #ffffff 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #00a651 25%, #ffffff 50%, #00ff88 75%, #ffffff 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   opacity: 0;
   transform: translateY(45px) scale(0.92);
   filter: blur(12px);
-  transition: opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1), 
-              transform 1.1s cubic-bezier(0.16, 1, 0.3, 1), 
+  transition: opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.1s cubic-bezier(0.16, 1, 0.3, 1),
               filter 1.1s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity, filter;
   text-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
@@ -1615,11 +1662,11 @@ onUnmounted(() => {
 }
 
 .btn-primary.hero-btn {
-  background-color: #1a56db;
+  background-color: var(--gobid-green);
   color: white;
 }
 .btn-primary.hero-btn:hover {
-  background-color: #171a20;
+  background-color: #008c44;
 }
 
 .btn-secondary.hero-btn {
@@ -1649,12 +1696,143 @@ onUnmounted(() => {
   50% { transform: translateX(-50%) translateY(-10px); }
 }
 
-/* ─── Search Section (Blue Banner) ─── */
+/* ─── Search Section (Green Banner - GoBid Style) ─── */
 .search-section {
-  background-color: #1a56db;
+  background-color: var(--gobid-green);
   padding: 2.5rem 1.5rem;
   color: white;
   text-align: left;
+}
+
+/* ─── Sell Section (Yellow Banner - GoBid Style) ─── */
+.sell-section {
+  background-color: var(--gobid-yellow);
+  padding: 3rem 1.5rem;
+  color: #171a20;
+}
+
+.sell-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sell-text {
+  flex: 1;
+}
+
+.sell-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #171a20;
+}
+
+.sell-description {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  color: #4a4a4a;
+  line-height: 1.6;
+}
+
+.sell-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-sell-primary {
+  background-color: var(--gobid-black);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-sell-primary:hover {
+  background-color: #333;
+  transform: translateY(-2px);
+}
+
+.btn-sell-secondary {
+  background-color: transparent;
+  color: var(--gobid-black);
+  border: 2px solid var(--gobid-black);
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-sell-secondary:hover {
+  background-color: var(--gobid-black);
+  color: white;
+}
+
+.sell-btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.sell-features {
+  display: flex;
+  gap: 2rem;
+}
+
+.sell-feature {
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  min-width: 120px;
+}
+
+.sell-feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.sell-feature h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: #171a20;
+}
+
+.sell-feature p {
+  font-size: 0.85rem;
+  color: #4a4a4a;
+}
+
+@media (max-width: 768px) {
+  .sell-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sell-buttons {
+    justify-content: center;
+  }
+
+  .sell-features {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .sell-feature {
+    min-width: auto;
+  }
 }
 
 .search-section-title {
@@ -1696,7 +1874,7 @@ onUnmounted(() => {
   right: 12px;
   background: none;
   border: none;
-  color: #1a56db;
+  color: var(--gobid-green);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1723,7 +1901,7 @@ onUnmounted(() => {
 
 .btn-advanced-search:hover {
   background-color: white;
-  color: #1a56db;
+  color: var(--gobid-green);
 }
 
 .quick-categories {
@@ -2685,15 +2863,15 @@ onUnmounted(() => {
   }
 }
 
-/* ─── Newsletter Section ─── */
+/* ─── Newsletter Section (GoBid Green Style) ─── */
 .newsletter-section {
   padding: clamp(50px, 6vw, 75px) 1.5rem;
-  background: #ffffff;
-  color: var(--text-primary, #0f172a);
+  background: var(--gobid-green);
+  color: #ffffff;
   text-align: center;
   position: relative;
   overflow: hidden;
-  border-top: 1px solid #f1f5f9;
+  border-top: 3px solid var(--gobid-yellow);
 }
 
 .newsletter-section::before {
@@ -2722,12 +2900,12 @@ onUnmounted(() => {
   margin-bottom: 0.75rem;
   letter-spacing: -0.5px;
   line-height: 1.2;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .newsletter-subtitle {
   font-size: clamp(0.95rem, 2vw, 1.15rem);
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.9);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
@@ -2742,18 +2920,18 @@ onUnmounted(() => {
 .newsletter-input-group {
   display: flex;
   gap: 0.5rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50px;
   padding: 6px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .newsletter-input-group:focus-within {
-  border-color: #2563eb;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12), 0 4px 14px rgba(0, 0, 0, 0.06);
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2), 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 .newsletter-input {
@@ -2762,17 +2940,17 @@ onUnmounted(() => {
   border: none;
   outline: none;
   padding: 0.75rem 1.5rem;
-  color: #0f172a;
+  color: #ffffff;
   font-size: 0.95rem;
   font-weight: 500;
 }
 
 .newsletter-input::placeholder {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .btn-newsletter-submit {
-  background-color: var(--btn-primary-bg, #1a56db);
+  background-color: var(--gobid-black);
   color: #ffffff;
   border: none;
   padding: 0.75rem 2rem;
@@ -2786,13 +2964,13 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0.5rem;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .btn-newsletter-submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(26, 86, 219, 0.35);
-  background-color: #1e40af;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  background-color: #333;
 }
 
 .btn-newsletter-submit:disabled {
@@ -2802,7 +2980,7 @@ onUnmounted(() => {
 
 .newsletter-disclaimer {
   font-size: 0.82rem;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.8);
   margin-top: 1rem;
   display: flex;
   align-items: center;
@@ -2811,23 +2989,23 @@ onUnmounted(() => {
 }
 
 .newsletter-disclaimer svg {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 @media (max-width: 600px) {
   .newsletter-input-group {
     flex-direction: column;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    padding: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
     gap: 0.75rem;
-    border-radius: 0;
+    border-radius: 20px;
   }
-  
+
   .newsletter-input {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 50px;
     padding: 0.85rem 1.5rem;
     width: 100%;
@@ -2836,9 +3014,9 @@ onUnmounted(() => {
   }
 
   .newsletter-input-group:focus-within .newsletter-input {
-    border-color: #2563eb;
+    border-color: rgba(255, 255, 255, 0.8);
     background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
   }
   
   .btn-newsletter-submit {
