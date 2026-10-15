@@ -77,57 +77,85 @@
       <div class="content-side">
         <div class="content-wrapper animate-fade-in">
 
-          <!-- Status badge & Anti-Snipe Badge -->
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-            <span class="status-badge" :class="isEnded ? 'ended' : (isUpcoming ? 'upcoming' : 'active')">
-              {{ isEnded ? 'Terminado' : (isUpcoming ? 'Agendado' : 'Activo') }}
-            </span>
-            <span v-if="!isEnded" class="anti-snipe-badge" title="Lances nos últimos 3 minutos prorrogam o encerramento em +3 minutos.">
-              🛡️ Anti-Sniping Ativo
-            </span>
+          <!-- Auction Status Bar (GoBid Style) -->
+          <div class="auction-status-bar">
+            <span class="status-text">Leilão Online</span>
+            <span class="status-datetime">{{ new Date(auction.endTime).toLocaleDateString('pt-MZ', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) }} {{ new Date(auction.endTime).toLocaleTimeString('pt-MZ', { hour: '2-digit', minute: '2-digit' }) }}</span>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 0.75rem;">
-            <h1 class="title" style="margin-bottom: 0;">{{ auction.title }}</h1>
-            <button 
-              v-if="authStore.isAuthenticated && !authStore.isAdmin"
-              @click="toggleWatchlist" 
-              class="btn-detail-heart"
-              :class="{ liked: isLiked }"
-              title="Adicionar aos favoritos"
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-              <span class="heart-count" v-if="auction.likesCount > 0">{{ auction.likesCount }}</span>
-            </button>
+          <!-- Lot Title & Location -->
+          <div class="lot-header">
+            <h1 class="lot-title">Lote {{ auction.lotNumber || 1 }} - {{ auction.title }}</h1>
+            <p class="lot-location">{{ auction.location || 'Prime Auction Maputo' }} #{{ auction.lotNumber || 'LOT001' }}</p>
           </div>
 
-          <!-- Vehicle Details Grid (GoBid Style) -->
-          <div class="vehicle-details-grid">
-            <div class="vehicle-detail-item">
-              <span class="detail-label">Valor Estimado</span>
-              <span class="detail-value">{{ formatCurrency(auction.estimatedValue || auction.startingPrice * 1.5) }}</span>
+          <!-- Vehicle Details Card (Yellow Header - GoBid Style) -->
+          <div class="vehicle-details-card">
+            <div class="card-header yellow-header">
+              <span class="card-header-title">Detalhes do Veículo</span>
             </div>
-            <div class="vehicle-detail-item">
-              <span class="detail-label">Código</span>
-              <span class="detail-value">{{ auction.code || 'Code 2' }}</span>
+            <div class="card-body">
+              <div class="detail-row">
+                <span class="detail-label">Valor Estimado:</span>
+                <span class="detail-value">{{ formatCurrency(auction.estimatedValue || auction.startingPrice * 1.5) }}</span>
+              </div>
+              <div class="detail-table">
+                <div class="table-row">
+                  <span class="table-label">Código</span>
+                  <span class="table-value">{{ auction.code || 'Code 2' }}</span>
+                </div>
+                <div class="table-row">
+                  <span class="table-label">Quilometragem</span>
+                  <span class="table-value">{{ auction.vehicleSpecs?.mileage ? formatNumber(auction.vehicleSpecs.mileage) + ' km' : 'N/A' }}</span>
+                </div>
+                <div class="table-row">
+                  <span class="table-label">Chave</span>
+                  <span class="table-value">Sim</span>
+                </div>
+                <div class="table-row">
+                  <span class="table-label">Origem</span>
+                  <span class="table-value">Seguro</span>
+                </div>
+              </div>
             </div>
-            <div class="vehicle-detail-item">
-              <span class="detail-label">Quilometragem</span>
-              <span class="detail-value">{{ auction.vehicleSpecs?.mileage ? formatNumber(auction.vehicleSpecs.mileage) + ' km' : 'N/A' }}</span>
+          </div>
+
+          <!-- Lot Status/Bidding Card (Yellow Header - GoBid Style) -->
+          <div class="bidding-card">
+            <div class="card-header yellow-header">
+              <span class="card-header-title">Lote {{ auction.lotNumber || 1 }} de 50</span>
             </div>
-            <div class="vehicle-detail-item">
-              <span class="detail-label">Chave</span>
-              <span class="detail-value">Sim</span>
-            </div>
-            <div class="vehicle-detail-item">
-              <span class="detail-label">Motor Arranca</span>
-              <span class="detail-value">Sim</span>
-            </div>
-            <div class="vehicle-detail-item">
-              <span class="detail-label">Origem</span>
-              <span class="detail-value">Seguro</span>
+            <div class="card-body">
+              <div class="bid-row">
+                <span class="bid-label">Lance Mínimo:</span>
+                <span class="bid-value asking-bid">{{ formatCurrency(auction.startingPrice) }}</span>
+              </div>
+              <div class="bid-row">
+                <span class="bid-label">Lance Mais Alto:</span>
+                <span class="bid-value highest-bid">{{ bids.length > 0 ? formatCurrency(bids[bids.length - 1].amount) : 'Nenhum' }}</span>
+              </div>
+              <div class="bid-row">
+                <span class="bid-label">Incremento:</span>
+                <span class="bid-value increment">{{ formatCurrency(auction.bidIncrement || 1000) }}</span>
+              </div>
+              
+              <div class="bidding-actions">
+                <div v-if="!authStore.isAuthenticated" class="auth-message">
+                  <p>Faça login para colocar o seu lance.</p>
+                  <div class="auth-buttons">
+                    <router-link to="/login" class="btn btn-login">Login</router-link>
+                    <router-link to="/register" class="btn btn-signup">Sign Up</router-link>
+                  </div>
+                </div>
+                <div v-else class="bid-form">
+                  <button class="btn btn-bid-calculator" @click="showBidCalculator = true">Calculadora de Lances</button>
+                </div>
+              </div>
+
+              <div class="bid-timestamp">
+                <span class="timestamp-label">Última atualização:</span>
+                <span class="timestamp-value">{{ new Date().toLocaleString('pt-MZ') }}</span>
+              </div>
             </div>
           </div>
 
@@ -1107,6 +1135,25 @@ const existingReview = ref(null);
 const showBidCalculator = ref(false);
 const showHowAuctionsWork = ref(false);
 
+// --- Related Auctions ---
+const relatedAuctions = ref([]);
+
+const fetchRelatedAuctions = async () => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/auctions`, {
+      params: { limit: 5, exclude: auction.value?._id }
+    });
+    relatedAuctions.value = res.data.filter(a => a._id !== auction.value?._id).slice(0, 3);
+  } catch (err) {
+    console.error('Error fetching related auctions:', err);
+  }
+};
+
+const goToAuction = (id) => {
+  router.push(`/auction/${id}`);
+};
+
 const canReview = computed(() => {
   if (!auction.value || !authStore.isAuthenticated || !authStore.user || !auction.value.winner) {
     return false;
@@ -1997,6 +2044,7 @@ onMounted(() => {
   fetchAuctionData();
   fetchUserWatchlist();
   fetchComments();
+  fetchRelatedAuctions();
   
   // Add keyboard event listener for gallery navigation
   window.addEventListener('keydown', handleKeydown);
@@ -4429,5 +4477,320 @@ onUnmounted(() => {
 .lightbox-enter-from,
 .lightbox-leave-to {
   opacity: 0;
+}
+
+/* ─── GoBid Style Auction Detail ─── */
+.auction-status-bar {
+  background: var(--gobid-green);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lot-header {
+  margin-bottom: 1.5rem;
+}
+
+.lot-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #171a20;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.lot-location {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.vehicle-details-card,
+.bidding-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.yellow-header {
+  background: var(--gobid-yellow);
+  color: #171a20;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #171a20;
+  font-weight: 700;
+}
+
+.detail-table {
+  margin-top: 0.5rem;
+}
+
+.table-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.85rem;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.table-value {
+  color: #171a20;
+  font-weight: 600;
+}
+
+.bid-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.bid-row:last-child {
+  border-bottom: none;
+}
+
+.bid-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.bid-value {
+  color: #171a20;
+  font-weight: 700;
+}
+
+.bid-value.asking-bid {
+  color: var(--gobid-green);
+}
+
+.bid-value.highest-bid {
+  color: #ef4444;
+}
+
+.bid-value.increment {
+  color: #3b82f6;
+}
+
+.bidding-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.auth-message {
+  text-align: center;
+  padding: 1rem;
+}
+
+.auth-message p {
+  color: #6b7280;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.btn-login {
+  background: var(--gobid-green);
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  background: #008c44;
+}
+
+.btn-signup {
+  background: transparent;
+  color: var(--gobid-green);
+  border: 2px solid var(--gobid-green);
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-signup:hover {
+  background: var(--gobid-green);
+  color: white;
+}
+
+.btn-bid-calculator {
+  width: 100%;
+  background: transparent;
+  color: var(--gobid-green);
+  border: 2px solid var(--gobid-green);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-bid-calculator:hover {
+  background: var(--gobid-green);
+  color: white;
+}
+
+.bid-timestamp {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.timestamp-label {
+  font-weight: 500;
+}
+
+.timestamp-value {
+  font-weight: 600;
+}
+
+.coming-up-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #171a20;
+}
+
+.coming-up-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.coming-up-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.coming-up-image {
+  width: 120px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.coming-up-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coming-up-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.coming-up-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #171a20;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.coming-up-price {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gobid-green);
+  margin-bottom: 0.5rem;
+}
+
+.btn-view {
+  background: #171a20;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-view:hover {
+  background: #000000;
 }
 </style>
