@@ -219,44 +219,101 @@
       </div>
     </section>
 
+    <!-- Timed Auction Banner (GoBid Style) -->
+    <section class="timed-auction-banner">
+      <div class="container">
+        <div class="timed-banner-content">
+          <div class="timed-banner-text">
+            <span class="timed-badge">⏰ LEILÃO TEMPORIZADO</span>
+            <h2 class="timed-banner-title">Veículos & Automóveis Online Auction</h2>
+            <p class="timed-banner-subtitle">Licite agora - os melhores preços garantidos!</p>
+          </div>
+          <router-link to="/auctions" class="btn btn-timed-bid">
+            LICITAR AGORA
+          </router-link>
+        </div>
+      </div>
+    </section>
+
     <!-- Sell Section (Yellow Banner - GoBid Style) -->
     <section class="sell-section">
       <div class="container">
         <div class="sell-content">
           <div class="sell-text">
-            <h2 class="sell-title">Quer Vender o Seu Veículo?</h2>
-            <p class="sell-description">Traga o seu veículo para a Prime Auction ou venda online connosco. Rápido, fácil e seguro.</p>
+            <h2 class="sell-title">Sell Your Vehicle</h2>
+            <p class="sell-description">Bring your car to a Prime Auction branch for immediate purchase or sell online with us. Fast, easy and secure.</p>
             <div class="sell-buttons">
               <router-link to="/vender" class="btn btn-sell-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="sell-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                Vender Online
+                Sell Online
               </router-link>
               <a href="#" class="btn btn-sell-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="sell-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                Encontrar Filial
+                Find Branch
               </a>
             </div>
           </div>
           <div class="sell-features">
             <div class="sell-feature">
               <div class="sell-feature-icon">⚡</div>
-              <h3>Rápido</h3>
-              <p>Venda em poucos dias</p>
+              <h3>Fast</h3>
+              <p>Sell in days</p>
             </div>
             <div class="sell-feature">
               <div class="sell-feature-icon">💰</div>
-              <h3>Melhor Preço</h3>
-              <p>Leilão competitivo</p>
+              <h3>Best Price</h3>
+              <p>Competitive auction</p>
             </div>
             <div class="sell-feature">
               <div class="sell-feature-icon">🔒</div>
-              <h3>Seguro</h3>
-              <p>Pagamento garantido</p>
+              <h3>Secure</h3>
+              <p>Guaranteed payment</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bring Your Car to Branch Section -->
+    <section class="branch-section">
+      <div class="container">
+        <div class="branch-content">
+          <div class="branch-text">
+            <h2 class="branch-title">Bring Your Car to a Prime Auction Branch</h2>
+            <p class="branch-description">Get an immediate cash offer or consign your vehicle for auction. Professional valuation and fast processing.</p>
+            <div class="branch-features">
+              <div class="branch-feature-item">
+                <div class="branch-feature-icon">📍</div>
+                <h4>Multiple Locations</h4>
+                <p>Convenient branches across Mozambique</p>
+              </div>
+              <div class="branch-feature-item">
+                <div class="branch-feature-icon">📋</div>
+                <h4>Free Valuation</h4>
+                <p>Professional assessment at no cost</p>
+              </div>
+              <div class="branch-feature-item">
+                <div class="branch-feature-icon">💵</div>
+                <h4>Immediate Cash</h4>
+                <p>Get paid on the spot if you accept</p>
+              </div>
+            </div>
+            <router-link to="/vender" class="btn btn-branch-primary">
+              Book Valuation
+            </router-link>
+          </div>
+          <div class="branch-image">
+            <div class="branch-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" class="branch-car-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+              </svg>
+              <p>Bring Your Vehicle</p>
             </div>
           </div>
         </div>
@@ -370,7 +427,7 @@
     <section class="live-events-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">🔥 Junte-se aos Nossos Leilões ao Vivo</h2>
+          <h2 class="section-title-premium">🔥 Join Our Live Auctions</h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
         
@@ -467,11 +524,11 @@
       </div>
     </section>
 
-    <!-- Featured Sales Section (Vendas em Destaque) -->
+    <!-- Daily Timed Auctions Section -->
     <section class="featured-sales-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">⭐ Vendas em Destaque</h2>
+          <h2 class="section-title-premium">⏰ Daily Timed Auctions</h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
 
@@ -602,10 +659,10 @@
       </div>
     </section>
 
-    <!-- What others are interested in Section (Mais Procurados) -->
+    <!-- What others are interested in Section -->
     <section class="interests-section">
       <div class="container">
-        <h2 class="section-title-premium">👀 O que outros estão interessados...</h2>
+        <h2 class="section-title-premium">👀 What others are interested in...</h2>
         
         <div v-if="loadingAuctions" class="loading-placeholder">
           <div class="loading-spinner"></div>
@@ -1704,6 +1761,90 @@ onUnmounted(() => {
   text-align: left;
 }
 
+/* ─── Timed Auction Banner (GoBid Style) ─── */
+.timed-auction-banner {
+  background-color: #000000;
+  padding: 2rem 1.5rem;
+  color: white;
+  border-bottom: 3px solid var(--gobid-yellow);
+}
+
+.timed-banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.timed-banner-text {
+  flex: 1;
+}
+
+.timed-badge {
+  display: inline-block;
+  background-color: var(--gobid-yellow);
+  color: #000000;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+}
+
+.timed-banner-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.timed-banner-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0;
+}
+
+.btn-timed-bid {
+  background-color: var(--gobid-green);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-timed-bid:hover {
+  background-color: #008c44;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 166, 81, 0.4);
+}
+
+@media (max-width: 768px) {
+  .timed-banner-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .timed-banner-title {
+    font-size: 1.25rem;
+  }
+
+  .btn-timed-bid {
+    width: 100%;
+  }
+}
+
 /* ─── Sell Section (Yellow Banner - GoBid Style) ─── */
 .sell-section {
   background-color: var(--gobid-yellow);
@@ -1832,6 +1973,144 @@ onUnmounted(() => {
 
   .sell-feature {
     min-width: auto;
+  }
+}
+
+/* ─── Branch Section (Bring Your Car to Branch) ─── */
+.branch-section {
+  background-color: #000000;
+  padding: 4rem 1.5rem;
+  color: white;
+  border-top: 3px solid var(--gobid-green);
+}
+
+.branch-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4rem;
+}
+
+.branch-text {
+  flex: 1;
+}
+
+.branch-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.branch-description {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.branch-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.branch-feature-item {
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.branch-feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.branch-feature-item h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.branch-feature-item p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+.btn-branch-primary {
+  background-color: var(--gobid-green);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-branch-primary:hover {
+  background-color: #008c44;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 166, 81, 0.4);
+}
+
+.branch-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.branch-placeholder {
+  width: 100%;
+  max-width: 400px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(0, 166, 81, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.branch-car-icon {
+  width: 80px;
+  height: 80px;
+  color: var(--gobid-green);
+}
+
+.branch-placeholder p {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 768px) {
+  .branch-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .branch-features {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-placeholder {
+    max-width: 100%;
+    height: 200px;
   }
 }
 
