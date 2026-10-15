@@ -17,44 +17,40 @@
     </section>
 
     <!-- Next Auction Section -->
-    <section class="next-auction-section">
+    <section class="next-auction-section" v-if="nextAuction">
       <div class="container">
         <div class="next-auction-card">
-          <div class="next-auction-image">
-            <div class="auction-image-placeholder">
-              <svg xmlns="http://www.w3.org/2000/svg" class="car-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </div>
+          <div class="next-auction-image" @click="goToAuction(nextAuction._id)" style="cursor: pointer;">
+            <img :src="nextAuction.imageUrl" :alt="nextAuction.title" class="auction-main-image" />
           </div>
           <div class="next-auction-info">
             <div class="auction-label">PRÓXIMO LEILÃO</div>
-            <h2 class="auction-title">Leilão de Veículos Premium</h2>
+            <h2 class="auction-title">{{ nextAuction.title }}</h2>
             <div class="auction-details">
               <div class="detail-item">
                 <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>Qui, 15 Out 2026</span>
+                <span>{{ formatDate(nextAuction.startTime) }}</span>
               </div>
               <div class="detail-item">
                 <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>19:00</span>
+                <span>{{ formatTime(nextAuction.startTime) }}</span>
               </div>
               <div class="detail-item">
                 <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>Maputo, Moçambique</span>
+                <span>{{ nextAuction.location || 'Maputo, Moçambique' }}</span>
               </div>
               <div class="detail-item">
                 <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <span>50 Lotes</span>
+                <span>{{ nextAuction.category || 'Veículos Diversos' }}</span>
               </div>
             </div>
             <div class="countdown">
@@ -75,7 +71,7 @@
                 <span class="countdown-label">Seg</span>
               </div>
             </div>
-            <button class="btn btn-view-catalogue">Ver Catálogo</button>
+            <button class="btn btn-view-catalogue" @click="goToAuction(nextAuction._id)">Ver Catálogo</button>
           </div>
         </div>
       </div>
@@ -97,22 +93,28 @@
           </button>
         </div>
 
-        <div class="auction-cards-grid">
-          <div v-for="auction in filteredAuctions" :key="auction.id" class="auction-card">
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>A carregar leilões...</p>
+        </div>
+        <div v-else-if="auctions.length === 0" class="empty-state">
+          <div class="empty-icon">🏷️</div>
+          <h3>Nenhum leilão disponível</h3>
+          <p>De momento não existem leilões agendados. Volte mais tarde.</p>
+        </div>
+        <div v-else class="auction-cards-grid">
+          <div v-for="auction in filteredAuctions" :key="auction._id" class="auction-card" @click="goToAuction(auction._id)">
             <div class="auction-card-image">
-              <div class="card-image-placeholder">
-                <svg xmlns="http://www.w3.org/2000/svg" class="card-car-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              </div>
+              <img :src="auction.imageUrl" :alt="auction.title" class="card-main-image" />
             </div>
             <div class="auction-card-content">
-              <div class="card-date">{{ auction.date }}</div>
-              <div class="card-time">{{ auction.time }}</div>
-              <div class="card-lots">{{ auction.lots }} Lotes</div>
-              <div class="card-category">{{ auction.category }}</div>
-              <p class="card-description">{{ auction.description }}</p>
-              <button class="btn btn-catalogue">Catálogo</button>
+              <div class="card-date">{{ formatDate(auction.startTime) }}</div>
+              <div class="card-time">{{ formatTime(auction.startTime) }}</div>
+              <div class="card-title">{{ auction.title }}</div>
+              <div class="card-category">{{ auction.category || 'Veículos Diversos' }}</div>
+              <div class="card-price">{{ formatCurrency(auction.startingPrice) }}</div>
+              <p class="card-description">{{ auction.description?.slice(0, 80) }}{{ auction.description?.length > 80 ? '…' : '' }}</p>
+              <button class="btn btn-catalogue">Ver Detalhes</button>
             </div>
           </div>
         </div>
@@ -168,84 +170,106 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const activeTab = ref('today')
 const countdown = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+const auctions = ref([])
+const loading = ref(true)
+const nextAuction = ref(null)
 
-const tabs = [
-  { id: 'today', label: 'A Começar Hoje', count: 1 },
-  { id: 'tomorrow', label: 'Amanhã', count: 2 },
-  { id: 'upcoming', label: 'Agendados', count: 25 }
-]
+const tabs = computed(() => {
+  const todayCount = auctions.value.filter(a => isToday(a.startTime)).length
+  const tomorrowCount = auctions.value.filter(a => isTomorrow(a.startTime)).length
+  const upcomingCount = auctions.value.filter(a => isUpcoming(a.startTime)).length
 
-const auctions = ref([
-  {
-    id: 1,
-    date: 'Qui, 15 Out 2026',
-    time: '19:00',
-    lots: 50,
-    category: 'Pick-ups Apenas',
-    description: 'Pré-lances abertos. Coloque o seu lance agora.',
-    tab: 'today'
-  },
-  {
-    id: 2,
-    date: 'Sex, 16 Out 2026',
-    time: '18:00',
-    lots: 35,
-    category: 'Sedans',
-    description: 'Pré-lances abertos. Coloque o seu lance agora.',
-    tab: 'tomorrow'
-  },
-  {
-    id: 3,
-    date: 'Sáb, 17 Out 2026',
-    time: '10:00',
-    lots: 40,
-    category: 'SUVs',
-    description: 'Pré-lances abertos. Coloque o seu lance agora.',
-    tab: 'tomorrow'
-  },
-  {
-    id: 4,
-    date: 'Seg, 19 Out 2026',
-    time: '14:00',
-    lots: 25,
-    category: 'Carrinhas',
-    description: 'Ainda por começar.',
-    tab: 'upcoming'
-  },
-  {
-    id: 5,
-    date: 'Ter, 20 Out 2026',
-    time: '15:00',
-    lots: 30,
-    category: 'Pick-ups',
-    description: 'Ainda por começar.',
-    tab: 'upcoming'
-  },
-  {
-    id: 6,
-    date: 'Qua, 21 Out 2026',
-    time: '16:00',
-    lots: 45,
-    category: 'Veículos Diversos',
-    description: 'Ainda por começar.',
-    tab: 'upcoming'
-  }
-])
+  return [
+    { id: 'today', label: 'A Começar Hoje', count: todayCount },
+    { id: 'tomorrow', label: 'Amanhã', count: tomorrowCount },
+    { id: 'upcoming', label: 'Agendados', count: upcomingCount }
+  ]
+})
 
 const filteredAuctions = computed(() => {
   if (activeTab.value === 'upcoming') {
-    return auctions.value.filter(a => a.tab === 'upcoming').slice(0, 6)
+    return auctions.value.filter(a => isUpcoming(a.startTime)).slice(0, 6)
   }
-  return auctions.value.filter(a => a.tab === activeTab.value)
+  if (activeTab.value === 'tomorrow') {
+    return auctions.value.filter(a => isTomorrow(a.startTime))
+  }
+  return auctions.value.filter(a => isToday(a.startTime))
 })
+
+const isToday = (dateStr) => {
+  const date = new Date(dateStr)
+  const today = new Date()
+  return date.toDateString() === today.toDateString()
+}
+
+const isTomorrow = (dateStr) => {
+  const date = new Date(dateStr)
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return date.toDateString() === tomorrow.toDateString()
+}
+
+const isUpcoming = (dateStr) => {
+  const date = new Date(dateStr)
+  const today = new Date()
+  today.setDate(today.getDate() + 2)
+  return date > today
+}
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('pt-MZ', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+const formatTime = (dateStr) => {
+  const date = new Date(dateStr)
+  return date.toLocaleTimeString('pt-MZ', { hour: '2-digit', minute: '2-digit' })
+}
+
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('pt-MZ', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value) + ' MZN'
+}
+
+const goToAuction = (id) => {
+  router.push(`/auction/${id}`)
+}
+
+const fetchAuctions = async () => {
+  try {
+    loading.value = true
+    const response = await axios.get('http://localhost:5000/api/auctions')
+    const allAuctions = response.data.filter(a => a.status === 'upcoming' || a.status === 'active')
+    
+    auctions.value = allAuctions
+    
+    // Set next auction (soonest upcoming or active)
+    if (allAuctions.length > 0) {
+      const sorted = [...allAuctions].sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+      nextAuction.value = sorted[0]
+      
+      // Update countdown target
+      const targetDate = new Date(nextAuction.value.startTime)
+      updateCountdown(targetDate)
+    }
+  } catch (error) {
+    console.error('Erro ao buscar leilões:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 let countdownInterval = null
 
-const updateCountdown = () => {
-  const targetDate = new Date('2026-10-15T19:00:00')
+const updateCountdown = (targetDate) => {
   const now = new Date()
   const diff = targetDate - now
 
@@ -254,12 +278,17 @@ const updateCountdown = () => {
     countdown.value.hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
     countdown.value.minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
     countdown.value.seconds = Math.floor((diff % (1000 * 60)) / 1000)
+  } else {
+    countdown.value = { days: 0, hours: 0, minutes: 0, seconds: 0 }
   }
 }
 
 onMounted(() => {
-  updateCountdown()
-  countdownInterval = setInterval(updateCountdown, 1000)
+  fetchAuctions().then(() => {
+    if (nextAuction.value) {
+      countdownInterval = setInterval(() => updateCountdown(new Date(nextAuction.value.startTime)), 1000)
+    }
+  })
 })
 
 onUnmounted(() => {
@@ -343,6 +372,13 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   min-height: 400px;
+  overflow: hidden;
+}
+
+.auction-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .auction-image-placeholder {
@@ -498,6 +534,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.card-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .card-image-placeholder {
@@ -528,8 +571,8 @@ onUnmounted(() => {
   margin-bottom: 0.5rem;
 }
 
-.card-lots {
-  font-size: 0.9rem;
+.card-title {
+  font-size: 1rem;
   font-weight: 700;
   color: #171a20;
   margin-bottom: 0.25rem;
@@ -538,6 +581,13 @@ onUnmounted(() => {
 .card-category {
   font-size: 0.85rem;
   color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.card-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gobid-green);
   margin-bottom: 0.75rem;
 }
 
@@ -599,6 +649,48 @@ onUnmounted(() => {
   font-size: 0.9rem;
   color: #6b7280;
   line-height: 1.5;
+}
+
+/* Loading & Empty States */
+.loading-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f3f4f6;
+  border-top-color: var(--gobid-green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #171a20;
+}
+
+.empty-state p {
+  color: #6b7280;
+  font-size: 1rem;
 }
 
 /* Buttons */
