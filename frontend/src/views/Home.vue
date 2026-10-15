@@ -225,7 +225,7 @@
         <div class="timed-banner-content">
           <div class="timed-banner-text">
             <span class="timed-badge">⏰ LEILÃO TEMPORIZADO</span>
-            <h2 class="timed-banner-title">Veículos & Automóveis Online Auction</h2>
+            <h2 class="timed-banner-title">Veículos & Automóveis Leilão Online</h2>
             <p class="timed-banner-subtitle">Licite agora - os melhores preços garantidos!</p>
           </div>
           <router-link to="/auctions" class="btn btn-timed-bid">
@@ -240,39 +240,39 @@
       <div class="container">
         <div class="sell-content">
           <div class="sell-text">
-            <h2 class="sell-title">Sell Your Vehicle</h2>
-            <p class="sell-description">Bring your car to a Prime Auction branch for immediate purchase or sell online with us. Fast, easy and secure.</p>
+            <h2 class="sell-title">Venda o Seu Veículo</h2>
+            <p class="sell-description">Traga o seu carro para uma filial Prime Auction para compra imediata ou venda online connosco. Rápido, fácil e seguro.</p>
             <div class="sell-buttons">
               <router-link to="/vender" class="btn btn-sell-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="sell-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                Sell Online
+                Vender Online
               </router-link>
               <a href="#" class="btn btn-sell-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="sell-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                Find Branch
+                Encontrar Filial
               </a>
             </div>
           </div>
           <div class="sell-features">
             <div class="sell-feature">
               <div class="sell-feature-icon">⚡</div>
-              <h3>Fast</h3>
-              <p>Sell in days</p>
+              <h3>Rápido</h3>
+              <p>Venda em poucos dias</p>
             </div>
             <div class="sell-feature">
               <div class="sell-feature-icon">💰</div>
-              <h3>Best Price</h3>
-              <p>Competitive auction</p>
+              <h3>Melhor Preço</h3>
+              <p>Leilão competitivo</p>
             </div>
             <div class="sell-feature">
               <div class="sell-feature-icon">🔒</div>
-              <h3>Secure</h3>
-              <p>Guaranteed payment</p>
+              <h3>Seguro</h3>
+              <p>Pagamento garantido</p>
             </div>
           </div>
         </div>
@@ -284,27 +284,27 @@
       <div class="container">
         <div class="branch-content">
           <div class="branch-text">
-            <h2 class="branch-title">Bring Your Car to a Prime Auction Branch</h2>
-            <p class="branch-description">Get an immediate cash offer or consign your vehicle for auction. Professional valuation and fast processing.</p>
+            <h2 class="branch-title">Traga o Seu Carro para uma Filial Prime Auction</h2>
+            <p class="branch-description">Obtenha uma oferta em dinheiro imediata ou consigne o seu veículo para leilão. Avaliação profissional e processamento rápido.</p>
             <div class="branch-features">
               <div class="branch-feature-item">
                 <div class="branch-feature-icon">📍</div>
-                <h4>Multiple Locations</h4>
-                <p>Convenient branches across Mozambique</p>
+                <h4>Múltiplas Localizações</h4>
+                <p>Filiais convenientes em todo Moçambique</p>
               </div>
               <div class="branch-feature-item">
                 <div class="branch-feature-icon">📋</div>
-                <h4>Free Valuation</h4>
-                <p>Professional assessment at no cost</p>
+                <h4>Avaliação Gratuita</h4>
+                <p>Avaliação profissional sem custo</p>
               </div>
               <div class="branch-feature-item">
                 <div class="branch-feature-icon">💵</div>
-                <h4>Immediate Cash</h4>
-                <p>Get paid on the spot if you accept</p>
+                <h4>Dinheiro Imediato</h4>
+                <p>Receba no local se aceitar</p>
               </div>
             </div>
             <router-link to="/vender" class="btn btn-branch-primary">
-              Book Valuation
+              Agendar Avaliação
             </router-link>
           </div>
           <div class="branch-image">
@@ -313,7 +313,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
               </svg>
-              <p>Bring Your Vehicle</p>
+              <p>Traga o Seu Veículo</p>
             </div>
           </div>
         </div>
@@ -427,7 +427,7 @@
     <section class="live-events-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">🔥 Join Our Live Auctions</h2>
+          <h2 class="section-title-premium">🔥 Junte-se aos Nossos Leilões ao Vivo</h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
         
@@ -528,7 +528,7 @@
     <section class="featured-sales-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">⏰ Daily Timed Auctions</h2>
+          <h2 class="section-title-premium">⏰ Leilões Temporizados Diários</h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
 
@@ -662,7 +662,7 @@
     <!-- What others are interested in Section -->
     <section class="interests-section">
       <div class="container">
-        <h2 class="section-title-premium">👀 What others are interested in...</h2>
+        <h2 class="section-title-premium">👀 O que outros estão interessados...</h2>
         
         <div v-if="loadingAuctions" class="loading-placeholder">
           <div class="loading-spinner"></div>
