@@ -14,7 +14,10 @@
 
               <!-- Image Counter Badge -->
               <div v-if="allImages.length > 1" class="image-counter-badge">
-                🖼️ {{ currentImageIndex + 1 }} / {{ allImages.length }}
+                <svg xmlns="http://www.w3.org/2000/svg" class="badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ currentImageIndex + 1 }} / {{ allImages.length }}
               </div>
             </div>
 
@@ -100,6 +103,34 @@
             </button>
           </div>
 
+          <!-- Vehicle Details Grid (GoBid Style) -->
+          <div class="vehicle-details-grid">
+            <div class="vehicle-detail-item">
+              <span class="detail-label">Valor Estimado</span>
+              <span class="detail-value">{{ formatCurrency(auction.estimatedValue || auction.startingPrice * 1.5) }}</span>
+            </div>
+            <div class="vehicle-detail-item">
+              <span class="detail-label">Código</span>
+              <span class="detail-value">{{ auction.code || 'Code 2' }}</span>
+            </div>
+            <div class="vehicle-detail-item">
+              <span class="detail-label">Quilometragem</span>
+              <span class="detail-value">{{ auction.vehicleSpecs?.mileage ? formatNumber(auction.vehicleSpecs.mileage) + ' km' : 'N/A' }}</span>
+            </div>
+            <div class="vehicle-detail-item">
+              <span class="detail-label">Chave</span>
+              <span class="detail-value">Sim</span>
+            </div>
+            <div class="vehicle-detail-item">
+              <span class="detail-label">Motor Arranca</span>
+              <span class="detail-value">Sim</span>
+            </div>
+            <div class="vehicle-detail-item">
+              <span class="detail-label">Origem</span>
+              <span class="detail-value">Seguro</span>
+            </div>
+          </div>
+
           <!-- Quick Info Metadata Grid -->
           <div class="quick-meta-grid">
             <div class="meta-item">
@@ -134,7 +165,38 @@
           </div>
 
           <p class="description">{{ auction.description }}</p>
-          
+
+          <!-- Bidding Information (GoBid Style) -->
+          <div class="bidding-info-box">
+            <div class="bidding-info-header">
+              <div class="lot-info">
+                <span class="lot-label">Lot</span>
+                <span class="lot-number">{{ auction.lotNumber || Math.floor(Math.random() * 100) + 1 }}</span>
+              </div>
+              <div class="auction-date">
+                <svg xmlns="http://www.w3.org/2000/svg" class="date-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ new Date(auction.endTime).toLocaleDateString('pt-MZ', { weekday: 'short', day: 'numeric', month: 'short' }) }}
+              </div>
+            </div>
+
+            <div class="bidding-info-grid">
+              <div class="bid-info-item">
+                <span class="bid-label">Lance Mínimo</span>
+                <span class="bid-value asking-bid">{{ formatCurrency(auction.startingPrice) }}</span>
+              </div>
+              <div class="bid-info-item">
+                <span class="bid-label">Lance Mais Alto</span>
+                <span class="bid-value highest-bid">{{ bids.length > 0 ? formatCurrency(bids[bids.length - 1].amount) : 'Nenhum' }}</span>
+              </div>
+              <div class="bid-info-item">
+                <span class="bid-label">Incremento</span>
+                <span class="bid-value increment">{{ formatCurrency(auction.bidIncrement || 1000) }}</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Price & Timer -->
           <div class="status-box">
             <div class="info-col">
@@ -159,7 +221,11 @@
             </div>
             <div v-else-if="!authStore.isAuthenticated" class="auth-warning">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <router-link to="/login">Faça login</router-link> para licitar.
+              Faça login para licitar.
+              <div class="auth-buttons">
+                <router-link to="/login" class="btn btn-login">Login</router-link>
+                <router-link to="/register" class="btn btn-signup">Sign Up</router-link>
+              </div>
             </div>
             <div v-else-if="authStore.isAdmin" class="auth-warning">
               Administradores não podem participar nos leilões.
@@ -277,6 +343,22 @@
             <div class="winner-info" v-else>
               <p class="ended-text">Este leilão terminou sem lances.</p>
             </div>
+          </div>
+
+          <!-- Action Buttons (GoBid Style) -->
+          <div class="action-buttons">
+            <button class="btn-action" @click="showBidCalculator = true">
+              <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Calculadora de Lances
+            </button>
+            <button class="btn-action" @click="showHowAuctionsWork = true">
+              <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Como Funcionam os Leilões?
+            </button>
           </div>
 
           <!-- Structured Information Tabs Container -->
@@ -860,6 +942,104 @@
     </div>
   </Transition>
 
+  <!-- Bid Calculator Modal (GoBid Style) -->
+  <Transition name="modal-fade">
+    <div v-if="showBidCalculator" class="custom-modal-overlay" @click.self="showBidCalculator = false">
+      <div class="custom-modal-card animate-scale-in" style="max-width: 500px;">
+        <div class="modal-header-row">
+          <span class="modal-title-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </span>
+          <h4>Calculadora de Lances</h4>
+          <button type="button" class="wizard-close-btn" @click="showBidCalculator = false">✕</button>
+        </div>
+
+        <div style="padding: 1.5rem;">
+          <div class="calculator-info">
+            <p style="margin-bottom: 1rem; color: #6b7280;">Use esta calculadora para determinar o valor do seu próximo lance:</p>
+            <div class="calc-row">
+              <span class="calc-label">Lance Actual:</span>
+              <span class="calc-value">{{ formatCurrency(auction.currentPrice) }}</span>
+            </div>
+            <div class="calc-row">
+              <span class="calc-label">Incremento:</span>
+              <span class="calc-value">{{ formatCurrency(auction.bidIncrement || 1000) }}</span>
+            </div>
+            <div class="calc-row">
+              <span class="calc-label">Próximo Lance Mínimo:</span>
+              <span class="calc-value highlight">{{ formatCurrency(auction.currentPrice + (auction.bidIncrement || 1000)) }}</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-pill btn-sm" @click="showBidCalculator = false" style="width: 100%; margin-top: 1rem;">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
+  <!-- How Auctions Work Modal (GoBid Style) -->
+  <Transition name="modal-fade">
+    <div v-if="showHowAuctionsWork" class="custom-modal-overlay" @click.self="showHowAuctionsWork = false">
+      <div class="custom-modal-card animate-scale-in" style="max-width: 600px;">
+        <div class="modal-header-row">
+          <span class="modal-title-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+          <h4>Como Funcionam os Leilões</h4>
+          <button type="button" class="wizard-close-btn" @click="showHowAuctionsWork = false">✕</button>
+        </div>
+
+        <div style="padding: 1.5rem;">
+          <div class="steps-list">
+            <div class="step-item">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h5 style="font-weight: 700; margin-bottom: 0.25rem;">Registre-se</h5>
+                <p style="color: #6b7280; font-size: 0.9rem;">Crie uma conta gratuita para participar nos leilões.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h5 style="font-weight: 700; margin-bottom: 0.25rem;">Verifique o Perfil</h5>
+                <p style="color: #6b7280; font-size: 0.9rem;">Complete o seu perfil para aumentar a confiança.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h5 style="font-weight: 700; margin-bottom: 0.25rem;">Faça o Login</h5>
+                <p style="color: #6b7280; font-size: 0.9rem;">Faça login para poder licitar nos leilões.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">4</div>
+              <div class="step-content">
+                <h5 style="font-weight: 700; margin-bottom: 0.25rem;">Licite</h5>
+                <p style="color: #6b7280; font-size: 0.9rem;">Coloque o seu lance e siga o leilão em tempo real.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">5</div>
+              <div class="step-content">
+                <h5 style="font-weight: 700; margin-bottom: 0.25rem;">Ganhe</h5>
+                <p style="color: #6b7280; font-size: 0.9rem;">Se for o maior lance no final, você ganha o leilão!</p>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-pill btn-sm" @click="showHowAuctionsWork = false" style="width: 100%; margin-top: 1.5rem;">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
   <!-- Lightbox for full-screen image viewing -->
   <Transition name="lightbox">
     <div v-if="showLightbox" class="lightbox-overlay" @click="closeLightbox" @keydown.esc="closeLightbox">
@@ -922,6 +1102,10 @@ const reviewRating = ref(5);
 const reviewComment = ref('');
 const submittingReview = ref(false);
 const existingReview = ref(null);
+
+// --- GoBid Style Modals ---
+const showBidCalculator = ref(false);
+const showHowAuctionsWork = ref(false);
 
 const canReview = computed(() => {
   if (!auction.value || !authStore.isAuthenticated || !authStore.user || !auction.value.winner) {
@@ -2172,6 +2356,277 @@ onUnmounted(() => {
   line-height: 1.7;
   margin-bottom: 2rem;
   font-size: 0.95rem;
+}
+
+/* ─── Vehicle Details Grid (GoBid Style) ─── */
+.vehicle-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(0, 166, 81, 0.05) 0%, rgba(0, 0, 0, 0.02) 100%);
+  border: 1px solid rgba(0, 166, 81, 0.2);
+  border-radius: 12px;
+}
+
+.vehicle-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #171a20;
+}
+
+/* ─── Bidding Info Box (GoBid Style) ─── */
+.bidding-info-box {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 2px solid var(--gobid-green);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 166, 81, 0.1);
+}
+
+.bidding-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.lot-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lot-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lot-number {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--gobid-green);
+}
+
+.auction-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.date-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--gobid-green);
+}
+
+.bidding-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.bid-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.bid-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bid-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #171a20;
+}
+
+.bid-value.asking-bid {
+  color: var(--gobid-green);
+}
+
+.bid-value.highest-bid {
+  color: #ef4444;
+}
+
+.bid-value.increment {
+  color: #3b82f6;
+}
+
+/* ─── Action Buttons (GoBid Style) ─── */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: transparent;
+  border: 2px solid var(--gobid-green);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--gobid-green);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+  background: var(--gobid-green);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 166, 81, 0.3);
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* ─── Auth Buttons (GoBid Style) ─── */
+.auth-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn-login {
+  background: var(--gobid-green);
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  background: #008c44;
+}
+
+.btn-signup {
+  background: transparent;
+  color: var(--gobid-green);
+  border: 2px solid var(--gobid-green);
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-signup:hover {
+  background: var(--gobid-green);
+  color: white;
+}
+
+/* ─── Calculator & How Auctions Work Styles ─── */
+.calculator-info {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.calc-row:last-child {
+  border-bottom: none;
+}
+
+.calc-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.calc-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #171a20;
+}
+
+.calc-value.highlight {
+  color: var(--gobid-green);
+  font-size: 1.1rem;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--gobid-green);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
 }
 
 /* ─── Status Box ─── */
