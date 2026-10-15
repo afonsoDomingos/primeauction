@@ -20,58 +20,43 @@
     <section class="next-auction-section" v-if="nextAuction">
       <div class="container">
         <div class="next-auction-card">
+          <div class="next-auction-content">
+            <div class="auction-label-bar">
+              <span class="auction-label">PRÓXIMO LEILÃO</span>
+            </div>
+            <div class="auction-datetime">
+              {{ formatDate(nextAuction.startTime) }} {{ formatTime(nextAuction.startTime) }}
+            </div>
+            <div class="auction-meta">
+              <span>{{ nextAuction.category || 'Veículos Diversos' }}</span>
+              <span class="separator">|</span>
+              <span>Online Apenas</span>
+            </div>
+            <div class="auction-status-badge">{{ nextAuction.status === 'upcoming' ? 'Pré-lances abertos. Coloque o seu lance agora.' : 'Leilão activo. Lance agora!' }}</div>
+            <div class="countdown-wrapper">
+              <span class="countdown-label">Começa Em</span>
+              <div class="countdown">
+                <div class="countdown-item">
+                  <span class="countdown-value">{{ countdown.days }}</span>
+                  <span class="countdown-label">Dias</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-value">{{ countdown.hours }}</span>
+                  <span class="countdown-label">Horas</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-value">{{ countdown.minutes }}</span>
+                  <span class="countdown-label">Min</span>
+                </div>
+              </div>
+            </div>
+            <div class="auction-buttons">
+              <button class="btn btn-catalogue-outline" @click="goToAuction(nextAuction._id)">Ver Catálogo</button>
+              <button class="btn btn-join-auction" @click="goToAuction(nextAuction._id)">Participar</button>
+            </div>
+          </div>
           <div class="next-auction-image" @click="goToAuction(nextAuction._id)" style="cursor: pointer;">
             <img :src="nextAuction.imageUrl" :alt="nextAuction.title" class="auction-main-image" />
-          </div>
-          <div class="next-auction-info">
-            <div class="auction-label">PRÓXIMO LEILÃO</div>
-            <h2 class="auction-title">{{ nextAuction.title }}</h2>
-            <div class="auction-details">
-              <div class="detail-item">
-                <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{{ formatDate(nextAuction.startTime) }}</span>
-              </div>
-              <div class="detail-item">
-                <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{{ formatTime(nextAuction.startTime) }}</span>
-              </div>
-              <div class="detail-item">
-                <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>{{ nextAuction.location || 'Maputo, Moçambique' }}</span>
-              </div>
-              <div class="detail-item">
-                <svg xmlns="http://www.w3.org/2000/svg" class="detail-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span>{{ nextAuction.category || 'Veículos Diversos' }}</span>
-              </div>
-            </div>
-            <div class="countdown">
-              <div class="countdown-item">
-                <span class="countdown-value">{{ countdown.days }}</span>
-                <span class="countdown-label">Dias</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">{{ countdown.hours }}</span>
-                <span class="countdown-label">Horas</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">{{ countdown.minutes }}</span>
-                <span class="countdown-label">Min</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">{{ countdown.seconds }}</span>
-                <span class="countdown-label">Seg</span>
-              </div>
-            </div>
-            <button class="btn btn-view-catalogue" @click="goToAuction(nextAuction._id)">Ver Catálogo</button>
           </div>
         </div>
       </div>
@@ -103,18 +88,22 @@
           <p>De momento não existem leilões agendados. Volte mais tarde.</p>
         </div>
         <div v-else class="auction-cards-grid">
-          <div v-for="auction in filteredAuctions" :key="auction._id" class="auction-card" @click="goToAuction(auction._id)">
-            <div class="auction-card-image">
+          <div v-for="auction in filteredAuctions" :key="auction._id" class="auction-card">
+            <div class="auction-card-image" @click="goToAuction(auction._id)" style="cursor: pointer;">
               <img :src="auction.imageUrl" :alt="auction.title" class="card-main-image" />
             </div>
             <div class="auction-card-content">
-              <div class="card-date">{{ formatDate(auction.startTime) }}</div>
-              <div class="card-time">{{ formatTime(auction.startTime) }}</div>
-              <div class="card-title">{{ auction.title }}</div>
-              <div class="card-category">{{ auction.category || 'Veículos Diversos' }}</div>
-              <div class="card-price">{{ formatCurrency(auction.startingPrice) }}</div>
-              <p class="card-description">{{ auction.description?.slice(0, 80) }}{{ auction.description?.length > 80 ? '…' : '' }}</p>
-              <button class="btn btn-catalogue">Ver Detalhes</button>
+              <div class="card-datetime">{{ formatDate(auction.startTime) }} {{ formatTime(auction.startTime) }}</div>
+              <div class="card-meta">
+                <span>{{ auction.category || 'Veículos Diversos' }}</span>
+                <span class="separator">|</span>
+                <span>Online</span>
+              </div>
+              <div class="card-status">{{ auction.status === 'upcoming' ? 'Pré-lances abertos. Coloque o seu lance agora.' : 'Leilão activo.' }}</div>
+              <div class="card-buttons">
+                <button class="btn btn-catalogue-small" @click="goToAuction(auction._id)">Catálogo</button>
+                <button class="btn btn-join-small" @click="goToAuction(auction._id)">Participar</button>
+              </div>
             </div>
           </div>
         </div>
@@ -350,20 +339,117 @@ onUnmounted(() => {
 
 /* Next Auction Section */
 .next-auction-section {
-  padding: 4rem 1.5rem;
+  padding: 3rem 1.5rem;
   background-color: #f9fafb;
 }
 
 .next-auction-card {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: 0;
   max-width: 1200px;
   margin: 0 auto;
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.next-auction-content {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auction-label-bar {
+  margin-bottom: 1rem;
+}
+
+.auction-label {
+  display: inline-block;
+  background: #003d1f;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.auction-datetime {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #171a20;
+  margin-bottom: 0.75rem;
+}
+
+.auction-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.separator {
+  color: #d1d5db;
+}
+
+.auction-status-badge {
+  background: #e8f5e9;
+  color: #003d1f;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.countdown-wrapper {
+  margin-bottom: 2rem;
+}
+
+.countdown-wrapper .countdown-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+}
+
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.countdown-item {
+  text-align: center;
+  padding: 0.75rem;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.countdown-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--gobid-green);
+}
+
+.countdown-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.auction-buttons {
+  display: flex;
+  gap: 1rem;
 }
 
 .next-auction-image {
@@ -379,88 +465,6 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.auction-image-placeholder {
-  text-align: center;
-}
-
-.car-icon {
-  width: 80px;
-  height: 80px;
-  color: #9ca3af;
-}
-
-.next-auction-info {
-  padding: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.auction-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--gobid-green);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
-}
-
-.auction-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: #171a20;
-}
-
-.auction-details {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #6b7280;
-}
-
-.detail-icon {
-  width: 18px;
-  height: 18px;
-  color: var(--gobid-green);
-}
-
-.countdown {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.countdown-item {
-  text-align: center;
-  padding: 1rem;
-  background: #f3f4f6;
-  border-radius: 8px;
-}
-
-.countdown-value {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--gobid-green);
-}
-
-.countdown-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
 }
 
 /* Auction Listings Section */
@@ -481,29 +485,43 @@ onUnmounted(() => {
 .tab-btn {
   padding: 0.875rem 1.5rem;
   background: transparent;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
   font-weight: 600;
   font-size: 0.9rem;
   color: #6b7280;
   cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .tab-btn:hover {
-  border-color: var(--gobid-green);
   color: var(--gobid-green);
 }
 
 .tab-btn.active {
-  background: var(--gobid-green);
-  color: white;
-  border-color: var(--gobid-green);
+  color: var(--gobid-green);
+  border-bottom-color: var(--gobid-green);
 }
 
 .tab-count {
   margin-left: 0.25rem;
   font-weight: 700;
+  position: relative;
+}
+
+.tab-btn.active .tab-count {
+  background: var(--gobid-green);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  padding: 0;
 }
 
 .auction-cards-grid {
@@ -517,15 +535,16 @@ onUnmounted(() => {
 .auction-card {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  display: grid;
+  grid-template-columns: 200px 1fr;
 }
 
 .auction-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
 }
 
 .auction-card-image {
@@ -543,59 +562,42 @@ onUnmounted(() => {
   object-fit: cover;
 }
 
-.card-image-placeholder {
-  text-align: center;
-}
-
-.card-car-icon {
-  width: 48px;
-  height: 48px;
-  color: #9ca3af;
-}
-
 .auction-card-content {
-  padding: 1.5rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.card-date {
+.card-datetime {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--gobid-green);
-  margin-bottom: 0.25rem;
+  color: #171a20;
+  margin-bottom: 0.5rem;
 }
 
-.card-time {
-  font-size: 0.85rem;
-  font-weight: 600;
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
   color: #6b7280;
   margin-bottom: 0.5rem;
 }
 
-.card-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #171a20;
-  margin-bottom: 0.25rem;
-}
-
-.card-category {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-}
-
-.card-price {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--gobid-green);
-  margin-bottom: 0.75rem;
-}
-
-.card-description {
-  font-size: 0.85rem;
-  color: #6b7280;
+.card-status {
+  background: #e8f5e9;
+  color: #003d1f;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
   margin-bottom: 1rem;
-  line-height: 1.5;
+}
+
+.card-buttons {
+  display: flex;
+  gap: 0.75rem;
 }
 
 /* Features Section */
@@ -695,37 +697,58 @@ onUnmounted(() => {
 
 /* Buttons */
 .btn {
-  padding: 0.875rem 1.5rem;
-  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
 }
 
-.btn-view-catalogue {
-  background: var(--gobid-green);
-  color: white;
-  width: 100%;
+.btn-catalogue-outline {
+  background: transparent;
+  color: var(--gobid-green);
+  border: 2px solid var(--gobid-green);
+  flex: 1;
 }
 
-.btn-view-catalogue:hover {
+.btn-catalogue-outline:hover {
+  background: var(--gobid-green);
+  color: white;
+}
+
+.btn-join-auction {
+  background: var(--gobid-green);
+  color: white;
+  flex: 1;
+}
+
+.btn-join-auction:hover {
   background: #008c44;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 166, 81, 0.3);
 }
 
-.btn-catalogue {
-  background: transparent;
-  color: var(--gobid-green);
-  border: 2px solid var(--gobid-green);
-  width: 100%;
+.btn-catalogue-small {
+  background: white;
+  color: #171a20;
+  border: 1px solid #171a20;
+  flex: 1;
 }
 
-.btn-catalogue:hover {
-  background: var(--gobid-green);
+.btn-catalogue-small:hover {
+  background: #f3f4f6;
+}
+
+.btn-join-small {
+  background: #171a20;
   color: white;
+  flex: 1;
+}
+
+.btn-join-small:hover {
+  background: #000000;
 }
 
 @media (max-width: 768px) {
@@ -739,14 +762,15 @@ onUnmounted(() => {
 
   .next-auction-image {
     min-height: 250px;
+    order: -1;
   }
 
-  .auction-details {
-    grid-template-columns: 1fr;
+  .auction-buttons {
+    flex-direction: column;
   }
 
   .countdown {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .tabs-container {
@@ -755,10 +779,23 @@ onUnmounted(() => {
 
   .tab-btn {
     width: 100%;
+    border-bottom: 2px solid #e5e7eb;
   }
 
-  .auction-cards-grid {
+  .tab-btn.active {
+    border-bottom-color: var(--gobid-green);
+  }
+
+  .auction-card {
     grid-template-columns: 1fr;
+  }
+
+  .auction-card-image {
+    height: 180px;
+  }
+
+  .card-buttons {
+    flex-direction: column;
   }
 
   .features-grid {
