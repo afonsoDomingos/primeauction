@@ -10,6 +10,7 @@ const routes = [
   { path: '/auctions', name: 'Auctions', component: () => import('../views/Auctions.vue') },
   { path: '/auction/:id', name: 'AuctionDetail', component: () => import('../views/AuctionDetail.vue') },
   { path: '/calendario', name: 'Calendar', component: () => import('../views/Calendar.vue') },
+  { path: '/contacto', name: 'Contact', component: () => import('../views/Contact.vue') },
   {
     path: '/vender',
     name: 'SellWithUs',
