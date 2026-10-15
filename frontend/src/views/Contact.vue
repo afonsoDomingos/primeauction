@@ -45,6 +45,18 @@
               <a href="tel:+258841234567" class="contact-link">+258 84 123 4567</a>
             </div>
           </div>
+          <div class="contact-info-item">
+            <div class="contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div class="contact-text">
+              <h3>Localização</h3>
+              <p class="contact-link">Maputo, Moçambique</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -111,32 +123,32 @@ import { ref, computed } from 'vue'
 const provinces = ref([
   { id: 'maputo', name: 'Maputo', branches: [
     { id: 1, name: 'Prime Auction Maputo Centro', address: 'Av. 25 de Setembro, 1234', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-17h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Maputo' },
-    { id: 2, name: 'Prime Auction Maputo Sul', address: 'Av. Marginal, 5678', phone: '+258 84 123 4568', hours: 'Seg-Sex: 8h-17h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Maputo+Sul' },
-    { id: 3, name: 'Prime Auction Matola', address: 'Rua da Liberdade, 234', phone: '+258 84 123 4569', hours: 'Seg-Sex: 9h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Matola' }
+    { id: 2, name: 'Prime Auction Maputo Sul', address: 'Av. Marginal, 5678', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-17h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Maputo+Sul' },
+    { id: 3, name: 'Prime Auction Matola', address: 'Rua da Liberdade, 234', phone: '+258 84 123 4567', hours: 'Seg-Sex: 9h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Matola' }
   ]},
   { id: 'gaza', name: 'Gaza', branches: [
-    { id: 4, name: 'Prime Auction Xai-Xai', address: 'Av. da Independência, 456', phone: '+258 84 123 4570', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Xai-Xai' }
+    { id: 4, name: 'Prime Auction Xai-Xai', address: 'Av. da Independência, 456', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Xai-Xai' }
   ]},
   { id: 'inhambane', name: 'Inhambane', branches: [
-    { id: 5, name: 'Prime Auction Beira', address: 'Rua da Mozambique, 789', phone: '+258 84 123 4571', hours: 'Seg-Sex: 8h-17h', mapUrl: 'https://maps.mapUrl/?q=Prime+Auction+Beira' }
+    { id: 5, name: 'Prime Auction Beira', address: 'Rua da Mozambique, 789', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-17h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Beira' }
   ]},
-  { 'id': 'manica', name: 'Manica', branches: [
-    { id: 6, name: 'Prime Auction Chimoio', address: 'Av. Eduardo Mondlane, 123', phone: '+258 84 123 4572', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Chimoio' }
+  { id: 'manica', name: 'Manica', branches: [
+    { id: 6, name: 'Prime Auction Chimoio', address: 'Av. Eduardo Mondlane, 123', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Chimoio' }
   ]},
   { id: 'nampula', name: 'Nampula', branches: [
-    { id: 7, name: 'Prime Auction Nampula', address: 'Rua da Frequentação, 345', phone: '+258 84 123 4573', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Nampula' }
+    { id: 7, name: 'Prime Auction Nampula', address: 'Rua da Frequentação, 345', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Nampula' }
   ]},
   { id: 'niassa', name: 'Niassa', branches: [
-    { id: 8, name: 'Prime Auction Nampula', address: 'Av. 25 de Setembro, 567', phone: '+258 84 123 4574', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Nampula' }
+    { id: 8, name: 'Prime Auction Lichinga', address: 'Av. 25 de Setembro, 567', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Lichinga' }
   ]},
   { id: 'sofala', name: 'Sofala', branches: [
-    { id: 9, name: 'Prime Auction Beira', address: 'Rua da Mozambique, 789', phone: '+258 84 123 4571', hours: 'Seg-Sex: 8h-17h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Beira' }
+    { id: 9, name: 'Prime Auction Beira', address: 'Rua da Mozambique, 789', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-17h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Beira' }
   ]},
   { id: 'tete', name: 'Tete', branches: [
-    { id: 10, name: 'Prime Auction Tete', address: 'Av. Samora Machel, 234', phone: '+258 84 123 4575', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Tete' }
+    { id: 10, name: 'Prime Auction Tete', address: 'Av. Samora Machel, 234', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Tete' }
   ]},
   { id: 'zambezia', name: 'Zambézia', branches: [
-    { id: 11, name: 'Prime Auction Quelimane', address: 'Av. da FRELIMO, 1234', phone: '+258 84 123 4576', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Quelimane' }
+    { id: 11, name: 'Prime Auction Quelimane', address: 'Av. da FRELIMO, 1234', phone: '+258 84 123 4567', hours: 'Seg-Sex: 8h-16h', mapUrl: 'https://maps.google.com/?q=Prime+Auction+Quelimane' }
   ]}
 ])
 
