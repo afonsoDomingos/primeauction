@@ -224,7 +224,12 @@
       <div class="container">
         <div class="timed-banner-content">
           <div class="timed-banner-text">
-            <span class="timed-badge">⏰ LEILÃO TEMPORIZADO</span>
+            <span class="timed-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" class="timed-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              LEILÃO TEMPORIZADO
+            </span>
             <h2 class="timed-banner-title">Veículos & Automóveis Leilão Online</h2>
             <p class="timed-banner-subtitle">Licite agora - os melhores preços garantidos!</p>
           </div>
@@ -260,17 +265,29 @@
           </div>
           <div class="sell-features">
             <div class="sell-feature">
-              <div class="sell-feature-icon">⚡</div>
+              <div class="sell-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
               <h3>Rápido</h3>
               <p>Venda em poucos dias</p>
             </div>
             <div class="sell-feature">
-              <div class="sell-feature-icon">💰</div>
+              <div class="sell-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
               <h3>Melhor Preço</h3>
               <p>Leilão competitivo</p>
             </div>
             <div class="sell-feature">
-              <div class="sell-feature-icon">🔒</div>
+              <div class="sell-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
               <h3>Seguro</h3>
               <p>Pagamento garantido</p>
             </div>
@@ -288,17 +305,30 @@
             <p class="branch-description">Obtenha uma oferta em dinheiro imediata ou consigne o seu veículo para leilão. Avaliação profissional e processamento rápido.</p>
             <div class="branch-features">
               <div class="branch-feature-item">
-                <div class="branch-feature-icon">📍</div>
+                <div class="branch-feature-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
                 <h4>Múltiplas Localizações</h4>
                 <p>Filiais convenientes em todo Moçambique</p>
               </div>
               <div class="branch-feature-item">
-                <div class="branch-feature-icon">📋</div>
+                <div class="branch-feature-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                </div>
                 <h4>Avaliação Gratuita</h4>
                 <p>Avaliação profissional sem custo</p>
               </div>
               <div class="branch-feature-item">
-                <div class="branch-feature-icon">💵</div>
+                <div class="branch-feature-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
                 <h4>Dinheiro Imediato</h4>
                 <p>Receba no local se aceitar</p>
               </div>
@@ -427,7 +457,13 @@
     <section class="live-events-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">🔥 Junte-se aos Nossos Leilões ao Vivo</h2>
+          <h2 class="section-title-premium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="section-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+            </svg>
+            Junte-se aos Nossos Leilões ao Vivo
+          </h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
         
@@ -528,7 +564,12 @@
     <section class="featured-sales-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title-premium">⏰ Leilões Temporizados Diários</h2>
+          <h2 class="section-title-premium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="section-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Leilões Temporizados Diários
+          </h2>
           <router-link to="/auctions" class="view-all-link">Ver todos</router-link>
         </div>
 
@@ -662,7 +703,13 @@
     <!-- What others are interested in Section -->
     <section class="interests-section">
       <div class="container">
-        <h2 class="section-title-premium">👀 O que outros estão interessados...</h2>
+        <h2 class="section-title-premium">
+          <svg xmlns="http://www.w3.org/2000/svg" class="section-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          O que outros estão interessados...
+        </h2>
         
         <div v-if="loadingAuctions" class="loading-placeholder">
           <div class="loading-spinner"></div>
@@ -724,7 +771,12 @@
     <!-- Newsletter Section (Green GoBid Style) -->
     <section class="newsletter-section">
       <div class="newsletter-container">
-        <h2 class="newsletter-title">📧 Subscreva, receba notificações</h2>
+        <h2 class="newsletter-title">
+          <svg xmlns="http://www.w3.org/2000/svg" class="newsletter-title-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Subscreva, receba notificações
+        </h2>
         <p class="newsletter-subtitle">Seja notificado sobre novos leilões e ofertas exclusivas</p>
         <form @submit.prevent="handleNewsletterSubscribe" class="newsletter-form">
           <div class="newsletter-input-group">
@@ -1942,6 +1994,15 @@ onUnmounted(() => {
 .sell-feature-icon {
   font-size: 2rem;
   margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sell-feature-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--gobid-black);
 }
 
 .sell-feature h3 {
@@ -1954,6 +2015,72 @@ onUnmounted(() => {
 .sell-feature p {
   font-size: 0.85rem;
   color: #4a4a4a;
+}
+
+/* Section Icons */
+.section-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  color: var(--gobid-green);
+}
+
+/* Timed Badge Icon */
+.timed-badge-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  color: #000000;
+}
+
+.timed-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--gobid-yellow);
+  color: #000000;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+}
+
+/* Newsletter Title Icon */
+.newsletter-title-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  color: #ffffff;
+}
+
+.newsletter-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Branch Feature Icons */
+.branch-feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.branch-feature-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--gobid-green);
 }
 
 @media (max-width: 768px) {
