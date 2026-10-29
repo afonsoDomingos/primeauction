@@ -28,35 +28,54 @@
         <!-- STEP 1: Phone / Payment Entry -->
         <div v-if="step === 'phone'" class="mpesa-step-content">
 
-          <!-- Card de Transparência Financeira: Taxa Reembolsável (Requisito 1) -->
-          <div class="transparency-guarantee-card">
-            <div class="tg-header">
-              <span class="tg-badge">🛡️ Garantia Reembolsável</span>
-              <span class="tg-status-tag">Taxa de Inscrição</span>
-            </div>
-            <p class="tg-body">
-              Ao participar neste leilão, deverá pagar uma taxa de inscrição de <strong>{{ formatCurrency(customAmount) }}</strong>. 
-              Este montante funciona como uma <strong>garantia de participação reembolsável</strong> e <strong>será disponibilizado para reembolso</strong> após o encerramento do leilão, conforme as condições aplicáveis.
-            </p>
-            <div class="tg-options-grid">
-              <div class="tg-opt-item">
-                <span class="tg-opt-icon">👛</span>
-                <div>
-                  <strong>Opção A — Manter o Saldo:</strong>
-                  <p>Mantenha o saldo na sua carteira digital para participar em futuros leilões sem novo pagamento.</p>
-                </div>
+          <!-- Card de Transparência Financeira: Taxa Reembolsável (Colapsável) -->
+          <div class="transparency-guarantee-card" :class="{ 'is-expanded': showGuaranteeDetails }">
+            <div 
+              class="tg-header" 
+              @click="showGuaranteeDetails = !showGuaranteeDetails"
+              role="button"
+              tabindex="0"
+              @keydown.enter.prevent="showGuaranteeDetails = !showGuaranteeDetails"
+              @keydown.space.prevent="showGuaranteeDetails = !showGuaranteeDetails"
+              title="Clique para ver ou ocultar as regras de reembolso"
+            >
+              <div class="tg-header-left">
+                <span class="tg-badge">🛡️ Garantia Reembolsável</span>
+                <span class="tg-amount-preview">{{ formatCurrency(customAmount) }}</span>
               </div>
-              <div class="tg-opt-item">
-                <span class="tg-opt-icon">🏦</span>
-                <div>
-                  <strong>Opção B — Solicitar Levantamento:</strong>
-                  <p>Transfira o saldo disponível para a sua conta bancária ou M-Pesa quando o leilão terminar.</p>
-                </div>
+              <div class="tg-toggle-action">
+                <span class="tg-toggle-text">{{ showGuaranteeDetails ? 'Ocultar regras' : 'Como funciona?' }}</span>
+                <span class="tg-chevron" :class="{ 'rotated': showGuaranteeDetails }">▼</span>
               </div>
             </div>
-            <div class="tg-footer-note">
-              ℹ️ Não se trata de uma taxa administrativa não reembolsável, mas de um valor seguro que poderá recuperar de acordo com as regras de participação.
-            </div>
+
+            <Transition name="expand-fade">
+              <div v-if="showGuaranteeDetails" class="tg-collapsible-content">
+                <p class="tg-body">
+                  Ao participar neste leilão, deverá pagar uma taxa de inscrição de <strong>{{ formatCurrency(customAmount) }}</strong>. 
+                  Este montante funciona como uma <strong>garantia de participação reembolsável</strong> e <strong>será disponibilizado para reembolso</strong> após o encerramento do leilão, conforme as condições aplicáveis.
+                </p>
+                <div class="tg-options-grid">
+                  <div class="tg-opt-item">
+                    <span class="tg-opt-icon">👛</span>
+                    <div>
+                      <strong>Opção A — Manter o Saldo:</strong>
+                      <p>Mantenha o saldo na sua carteira digital para participar em futuros leilões sem novo pagamento.</p>
+                    </div>
+                  </div>
+                  <div class="tg-opt-item">
+                    <span class="tg-opt-icon">🏦</span>
+                    <div>
+                      <strong>Opção B — Solicitar Levantamento:</strong>
+                      <p>Transfira o saldo disponível para a sua conta bancária ou M-Pesa quando o leilão terminar.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="tg-footer-note">
+                  ℹ️ Não se trata de uma taxa administrativa não reembolsável, mas de um valor seguro que poderá recuperar de acordo com as regras de participação.
+                </div>
+              </div>
+            </Transition>
           </div>
           
           <!-- Payment Method Selector Tabs: M-Pesa | eMola | Visa | Carteira Digital -->
@@ -488,6 +507,7 @@ const phoneNumber = ref('');
 const phoneError = ref('');
 const loading = ref(false);
 const customAmount = ref(props.amount);
+const showGuaranteeDetails = ref(false);
 
 const paymentData = ref(null);
 const pinInput = ref('');
@@ -612,6 +632,7 @@ watch(() => props.amount, (newVal) => {
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
     customAmount.value = props.amount || 0;
+    showGuaranteeDetails.value = false;
     step.value = 'phone';
     phoneError.value = '';
     pinInput.value = '';
@@ -1104,40 +1125,86 @@ const closeModal = () => {
   font-size: 1.25rem;
 }
 
-/* Card de Transparência Financeira (Requisito 1) */
+/* Card de Transparência Financeira (Requisito 1 - Colapsável) */
 .transparency-guarantee-card {
   background: #f0fdf4;
   border: 1.5px solid #bbf7d0;
-  border-radius: 14px;
-  padding: 0.9rem;
-  margin-bottom: 1.15rem;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 0.95rem;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.06);
+  transition: all 0.25s ease;
+}
+
+.transparency-guarantee-card.is-expanded {
+  padding: 0.75rem 0.85rem 0.85rem 0.85rem;
 }
 
 .tg-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+}
+
+.tg-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .tg-badge {
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: #15803d;
   background: #dcfce7;
-  padding: 0.15rem 0.5rem;
+  padding: 0.18rem 0.55rem;
   border-radius: 99px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.tg-status-tag {
-  font-size: 0.68rem;
+.tg-amount-preview {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.tg-toggle-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #15803d;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
+  background: rgba(21, 128, 61, 0.08);
+  padding: 0.22rem 0.55rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tg-toggle-action:hover {
+  background: rgba(21, 128, 61, 0.16);
+}
+
+.tg-chevron {
+  font-size: 0.65rem;
+  transition: transform 0.25s ease;
+  display: inline-block;
+}
+
+.tg-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.tg-collapsible-content {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed #bbf7d0;
 }
 
 .tg-body {
@@ -1186,6 +1253,19 @@ const closeModal = () => {
   color: #15803d;
   font-weight: 600;
   line-height: 1.35;
+}
+
+/* Accordion Animation */
+.expand-fade-enter-active,
+.expand-fade-leave-active {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.expand-fade-enter-from,
+.expand-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 /* Wallet Form Styles */
