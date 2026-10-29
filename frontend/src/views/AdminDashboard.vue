@@ -1,15 +1,234 @@
 <template>
   <div class="admin-container">
     <div class="container animate-fade-in" style="padding-top: 105px; padding-bottom: 80px;">
-      <div class="page-header">
-        <h2 class="page-title">Painel de Administração</h2>
-        <p class="page-subtitle">Gerencie leilões, utilizadores e toda a plataforma</p>
+      <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 class="page-title">Painel de Administração</h2>
+          <p class="page-subtitle">Gerencie leilões, utilizadores e toda a plataforma com facilidade</p>
+        </div>
+        <div class="header-action-group" style="display: flex; align-items: center; gap: 0.75rem;">
+          <button 
+            type="button" 
+            class="mobile-menu-toggle btn btn-sm btn-secondary" 
+            @click="mobileMenuOpen = !mobileMenuOpen"
+            style="border-radius: 9999px; padding: 0.45rem 0.9rem;"
+          >
+            ☰ {{ mobileMenuOpen ? 'Fechar Menu' : 'Menu Lateral' }}
+          </button>
+          <button 
+            v-if="activeTab !== 'create-auction'"
+            type="button" 
+            class="btn btn-sm btn-primary btn-pill"
+            @click="setActiveTab('create-auction')"
+            style="display: flex; align-items: center; gap: 0.35rem;"
+          >
+            ➕ Novo Leilão
+          </button>
+        </div>
       </div>
 
+      <!-- Layout com Sidebar Lateral -->
+      <div class="admin-layout">
+        <!-- SIDEBAR DE NAVEGAÇÃO -->
+        <aside class="admin-sidebar" :class="{ 'collapsed': isSidebarCollapsed, 'mobile-open': mobileMenuOpen }">
+          <div class="sidebar-header">
+            <span class="sidebar-title" v-if="!isSidebarCollapsed">NAVEGAÇÃO</span>
+            <button 
+              type="button" 
+              class="sidebar-toggle-btn" 
+              @click="isSidebarCollapsed = !isSidebarCollapsed"
+              :title="isSidebarCollapsed ? 'Expandir Menu' : 'Recolher Menu'"
+            >
+              {{ isSidebarCollapsed ? '▶' : '◀' }}
+            </button>
+          </div>
 
+          <nav class="sidebar-menu">
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'overview' }" 
+              @click="setActiveTab('overview')"
+              title="Visão Geral & Métricas"
+            >
+              <span class="sidebar-icon">📊</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Visão Geral</span>
+            </button>
 
-      <!-- KPI Stats Row -->
-      <div class="kpi-row">
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'auctions' }" 
+              @click="setActiveTab('auctions')"
+              title="Gerir Todos os Leilões"
+            >
+              <span class="sidebar-icon">🏷️</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Leilões</span>
+              <span class="sidebar-badge" v-if="!isSidebarCollapsed">{{ auctions.length }}</span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item highlight-create" 
+              :class="{ 'active': activeTab === 'create-auction' }" 
+              @click="setActiveTab('create-auction')"
+              title="Criar Novo Leilão"
+            >
+              <span class="sidebar-icon">➕</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Criar Leilão</span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'proposals' }" 
+              @click="setActiveTab('proposals')"
+              title="Propostas de Venda"
+            >
+              <span class="sidebar-icon">📥</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Propostas</span>
+              <span class="sidebar-badge badge-warning" v-if="!isSidebarCollapsed && pendingProposalsCount > 0">
+                {{ pendingProposalsCount }}
+              </span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'users' }" 
+              @click="setActiveTab('users')"
+              title="Utilizadores Registados"
+            >
+              <span class="sidebar-icon">👥</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Utilizadores</span>
+              <span class="sidebar-badge" v-if="!isSidebarCollapsed">{{ users.length }}</span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'payments' }" 
+              @click="setActiveTab('payments')"
+              title="Pagamentos M-Pesa"
+            >
+              <span class="sidebar-icon">💳</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Pagamentos</span>
+              <span class="sidebar-badge" v-if="!isSidebarCollapsed">{{ mpesaPayments.length }}</span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'withdrawals' }" 
+              @click="setActiveTab('withdrawals')"
+              title="Gestão de Levantamentos & Carteira"
+            >
+              <span class="sidebar-icon">🏦</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Levantamentos</span>
+              <span class="sidebar-badge badge-warning" v-if="!isSidebarCollapsed && pendingWithdrawalsCount > 0">
+                {{ pendingWithdrawalsCount }}
+              </span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'homepage' }" 
+              @click="setActiveTab('homepage')"
+              title="Página Inicial & Banners"
+            >
+              <span class="sidebar-icon">🖼️</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Página Inicial</span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'partners' }" 
+              @click="setActiveTab('partners')"
+              title="Parceiros Oficiais"
+            >
+              <span class="sidebar-icon">🤝</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Parceiros</span>
+              <span class="sidebar-badge" v-if="!isSidebarCollapsed">{{ partnersForm.length }}</span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'support' }" 
+              @click="setActiveTab('support')"
+              title="Suporte & Tickets"
+            >
+              <span class="sidebar-icon">🎫</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Suporte</span>
+              <span class="sidebar-badge badge-danger" v-if="!isSidebarCollapsed && pendingTicketsCount > 0">
+                {{ pendingTicketsCount }}
+              </span>
+            </button>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'newsletter' }" 
+              @click="setActiveTab('newsletter')"
+              title="Subscritores da Newsletter"
+            >
+              <span class="sidebar-icon">📧</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Newsletter</span>
+              <span class="sidebar-badge" v-if="!isSidebarCollapsed">{{ subscribers.length }}</span>
+            </button>
+
+            <div class="sidebar-divider"></div>
+
+            <button 
+              type="button"
+              class="sidebar-item" 
+              :class="{ 'active': activeTab === 'all' }" 
+              @click="setActiveTab('all')"
+              title="Ver Todas as Secções em Modo Contínuo"
+            >
+              <span class="sidebar-icon">👁️</span>
+              <span class="sidebar-text" v-if="!isSidebarCollapsed">Ver Tudo</span>
+            </button>
+          </nav>
+        </aside>
+
+        <!-- ÁREA PRINCIPAL DE CONTEÚDO -->
+        <main class="admin-content-area">
+          <!-- BREADCRUMB / INDICADOR DA SECÇÃO ACTIVA -->
+          <div class="section-breadcrumb-bar">
+            <div class="breadcrumb-left">
+              <span class="breadcrumb-icon" style="font-size: 1.35rem;">{{ activeTabMeta.icon }}</span>
+              <div>
+                <span class="breadcrumb-tag">Secção Actual</span>
+                <h3 class="breadcrumb-title">{{ activeTabMeta.title }}</h3>
+              </div>
+            </div>
+            <div class="breadcrumb-right" style="display: flex; align-items: center; gap: 0.5rem;">
+              <button 
+                v-if="activeTab !== 'create-auction'"
+                type="button" 
+                class="btn btn-sm btn-primary btn-pill" 
+                @click="setActiveTab('create-auction')"
+              >
+                ➕ Criar Leilão
+              </button>
+              <button 
+                v-if="activeTab !== 'overview'"
+                type="button" 
+                class="btn btn-sm btn-secondary btn-pill" 
+                @click="setActiveTab('overview')"
+              >
+                📊 Visão Geral
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Visão Geral (KPIs & Gráficos) ── -->
+          <div v-show="activeTab === 'all' || activeTab === 'overview'" class="tab-overview-pane">
+            <!-- KPI Stats Row -->
+            <div class="kpi-row">
         <div class="kpi-card">
           <div class="kpi-icon-wrap user-kpi">
             <svg xmlns="http://www.w3.org/2000/svg" class="kpi-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -207,12 +426,13 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> <!-- end charts-row -->
+    </div> <!-- end tab-overview-pane -->
 
-      <div class="dashboard-grid">
+    <div class="dashboard-grid">
 
         <!-- ── Criar Leilão ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'create-auction'" class="card admin-card">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -275,6 +495,30 @@
                     {{ cat.name }}
                   </option>
                 </select>
+              </div>
+            </div>
+
+            <!-- Configurações Fiscais / IVA -->
+            <div class="form-row" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
+              <div class="form-group half" style="margin-bottom: 0;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+                  <input type="checkbox" v-model="form.applyTax" style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;" />
+                  <span>Aplicar Taxa de IVA neste Leilão</span>
+                </label>
+                <small style="color: #64748b; font-size: 12px; display: block; margin-top: 4px;">Ative para discriminar imposto sobre os lances e liquidação final.</small>
+              </div>
+              <div class="form-group half" v-if="form.applyTax" style="margin-bottom: 0; display: flex; gap: 12px;">
+                <div style="flex: 1;">
+                  <label class="form-label">Taxa de IVA (%)</label>
+                  <input type="number" v-model.number="form.taxRate" min="0" max="100" class="form-input" placeholder="15" />
+                </div>
+                <div style="flex: 1.5;">
+                  <label class="form-label">Regime de IVA</label>
+                  <select v-model="form.taxInclusive" class="form-input">
+                    <option :value="false">+ IVA Adicionado ao lance</option>
+                    <option :value="true">IVA Já Incluído no lance</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -563,16 +807,34 @@
               </button>
             </div>
 
+            <!-- Opção Disponível de Imediato (Começar Agora) -->
+            <div class="start-immediately-banner" style="margin-bottom: 1.25rem; padding: 0.85rem 1.1rem; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.4rem;">⚡</span>
+                <div>
+                  <div style="font-weight: 700; color: #166534; font-size: 0.95rem;">Disponível de Imediato (Activo Agora)</div>
+                  <div style="font-size: 0.8rem; color: #15803d;">O leilão fica imediatamente activo no site para receber lances logo após a criação.</div>
+                </div>
+              </div>
+              <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; user-select: none;">
+                <input type="checkbox" v-model="formStartImmediately" @change="handleStartImmediatelyToggle" style="width: 1.25rem; height: 1.25rem; accent-color: #16a34a; cursor: pointer;" />
+                <span style="font-weight: 700; font-size: 0.85rem; color: #166534;">{{ formStartImmediately ? '✓ Sim (Imediato)' : 'Agendar Data' }}</span>
+              </label>
+            </div>
+
             <div class="form-group-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
               <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Data e Hora de Início (opcional)</label>
+                <label class="form-label">Data e Hora de Início</label>
                 <input 
                   type="datetime-local" 
                   v-model="form.startTime" 
                   class="form-input"
+                  :disabled="formStartImmediately"
+                  :style="formStartImmediately ? 'background: #f3f4f6; color: #6b7280; cursor: not-allowed;' : ''"
                   :min="getMinDateTime()"
                 />
-                <small class="form-help" style="font-size: 0.75rem; color: #666; margin-top: 0.25rem; display: block;">Vazio = Inicia imediatamente</small>
+                <small class="form-help" style="font-size: 0.75rem; color: #15803d; margin-top: 0.25rem; display: block;" v-if="formStartImmediately">🟢 Inicia imediatamente ao criar (status: Activo)</small>
+                <small class="form-help" style="font-size: 0.75rem; color: #666; margin-top: 0.25rem; display: block;" v-else>Defina a data futura para agendar</small>
               </div>
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Data e Hora de Fim</label>
@@ -599,7 +861,7 @@
         </div>
 
         <!-- ── Propostas de Venda ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'proposals'" class="card admin-card">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -699,7 +961,7 @@
         </div>
 
         <!-- ── Utilizadores ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'users'" class="card admin-card">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -757,7 +1019,7 @@
         </div>
 
         <!-- ── Pagamentos M-Pesa ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'payments'" class="card admin-card">
           <div class="card-header-row" style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" style="background: #e60000; color: white; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 4px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -821,7 +1083,7 @@
         </div>
 
         <!-- ── Leilões ── -->
-        <div class="card admin-card" style="grid-column: 1 / -1;">
+        <div v-show="activeTab === 'all' || activeTab === 'auctions'" class="card admin-card" style="grid-column: 1 / -1;">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -905,7 +1167,15 @@
                     </span>
                   </td>
                   <td class="price-cell">{{ formatCurrency(auction.startingPrice) }}</td>
-                  <td class="price-cell">{{ formatCurrency(auction.currentPrice) }}</td>
+                  <td class="price-cell">
+                    {{ formatCurrency(auction.currentPrice) }}
+                    <span v-if="auction.applyTax !== false" style="display: block; font-size: 11px; color: #0284c7; font-weight: 600;">
+                      {{ auction.taxInclusive ? 'IVA ' + (auction.taxRate || 15) + '% incl.' : '+ ' + (auction.taxRate || 15) + '% IVA' }}
+                    </span>
+                    <span v-else style="display: block; font-size: 11px; color: #94a3b8;">
+                      Isento IVA
+                    </span>
+                  </td>
                   <td class="price-cell" style="color: #059669; font-weight: 700;">{{ formatCurrency(auction.participationFee || 1000) }}</td>
                   <td class="date-cell">{{ formatDate(auction.startTime) }}</td>
                   <td class="date-cell">{{ formatDate(auction.endTime) }}</td>
@@ -917,6 +1187,13 @@
                         class="btn btn-sm btn-primary"
                         title="Editar leilão"
                       >✏️</button>
+                      <button
+                        v-if="auction.status === 'upcoming'"
+                        @click="activateAuctionImmediately(auction._id)"
+                        class="btn btn-sm"
+                        style="background: #16a34a; color: white; font-weight: 600; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.25rem;"
+                        title="Tornar disponível de imediato"
+                      >⚡ Activar</button>
                       <button
                         v-if="auction.status === 'active'"
                         @click="openExtendModal(auction)"
@@ -943,7 +1220,7 @@
         </div>
 
         <!-- ── Gerir Página Inicial ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'homepage'" class="card admin-card">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -1067,10 +1344,8 @@
           </div>
         </div>
 
-      </div>
-
         <!-- ── Gerir Parceiros ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'partners'" class="card admin-card">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -1119,7 +1394,7 @@
         </div>
 
         <!-- ── Gerir Suporte (Tickets) ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'support'" class="card admin-card">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -1188,7 +1463,7 @@
         </div>
 
         <!-- ── Subscritores da Newsletter ── -->
-        <div class="card admin-card">
+        <div v-show="activeTab === 'all' || activeTab === 'newsletter'" class="card admin-card">
           <div class="card-header-row">
             <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -1256,10 +1531,225 @@
                 </tr>
               </tbody>
             </table>
+          </div> <!-- end table-container -->
+        </div> <!-- end newsletter card -->
+
+        <!-- ── Pagamentos M-Pesa & Operadoras ── -->
+        <div v-show="activeTab === 'all' || activeTab === 'payments'" class="card admin-card">
+          <div class="card-header-row">
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <h3 class="section-title">Pagamentos M-Pesa & Operadoras</h3>
+            <span class="record-count">{{ mpesaPayments.length }}</span>
+          </div>
+          <p class="settings-hint">Histórico completo de pagamentos recebidos via M-Pesa C2B e eMola para taxas de inscrição e liquidações.</p>
+
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Utilizador / Contacto</th>
+                  <th>ID Transação</th>
+                  <th>Referência</th>
+                  <th>Leilão</th>
+                  <th>Montante</th>
+                  <th>Estado</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="mpesaPayments.length === 0">
+                  <td colspan="7" class="empty-row">Nenhum pagamento registado.</td>
+                </tr>
+                <tr v-for="pay in mpesaPayments" :key="pay._id">
+                  <td>
+                    <div style="display: flex; flex-direction: column;">
+                      <strong style="font-size: 0.85rem;">{{ pay.user?.name || 'Cliente' }}</strong>
+                      <span style="font-size: 0.75rem; color: var(--text-light);">{{ pay.phoneNumber }}</span>
+                    </div>
+                  </td>
+                  <td><code style="color: #e60000; font-weight: 700;">{{ pay.mpesaTransactionId }}</code></td>
+                  <td>{{ pay.reference }}</td>
+                  <td>{{ pay.auction?.title || '—' }}</td>
+                  <td><strong style="color: #16a34a;">{{ formatCurrency(pay.amount) }}</strong></td>
+                  <td>
+                    <span :class="['badge', pay.status === 'completed' ? 'badge-active' : 'badge-ended']">
+                      {{ pay.status === 'completed' ? 'Completado' : 'Pendente' }}
+                    </span>
+                  </td>
+                  <td style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap;">
+                    {{ formatDate(pay.createdAt) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-    </div>
+        <!-- ── Gestão de Levantamentos & Finanças ── -->
+        <div v-show="activeTab === 'all' || activeTab === 'withdrawals'" class="card admin-card">
+          <div class="card-header-row">
+            <svg xmlns="http://www.w3.org/2000/svg" class="card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="section-title">Gestão de Levantamentos & Saldo em Carteiras</h3>
+            <span class="record-count">{{ filteredAdminWithdrawals.length }} / {{ adminWithdrawals.length }}</span>
+          </div>
+          <p class="settings-hint">Aprove ou processe pedidos de levantamento para M-Pesa e contas bancárias com auditoria de saldo.</p>
+
+          <!-- Financial Circulation Totals -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.85rem;">
+              <span style="font-size: 0.72rem; color: #166534; font-weight: 700; text-transform: uppercase;">Total em Saldo Disponível</span>
+              <div style="font-size: 1.35rem; font-weight: 900; color: #15803d;">{{ formatCurrency(adminFinancialKpis.totalAvailable || 0) }}</div>
+            </div>
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 0.85rem;">
+              <span style="font-size: 0.72rem; color: #1e40af; font-weight: 700; text-transform: uppercase;">Total Retido em Leilões Ativos</span>
+              <div style="font-size: 1.35rem; font-weight: 900; color: #2563eb;">{{ formatCurrency(adminFinancialKpis.totalReserved || 0) }}</div>
+            </div>
+            <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 0.85rem;">
+              <span style="font-size: 0.72rem; color: #6b21a8; font-weight: 700; text-transform: uppercase;">Total Acumulado Devolvido</span>
+              <div style="font-size: 1.35rem; font-weight: 900; color: #7e22ce;">{{ formatCurrency(adminFinancialKpis.totalRefunded || 0) }}</div>
+            </div>
+          </div>
+
+          <!-- Status Filter -->
+          <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button 
+              type="button" 
+              class="btn btn-sm" 
+              :class="withdrawalStatusFilter === '' ? 'btn-primary' : 'btn-secondary'"
+              @click="withdrawalStatusFilter = ''"
+            >
+              Todos ({{ adminWithdrawals.length }})
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-sm" 
+              :class="withdrawalStatusFilter === 'pending' ? 'btn-primary' : 'btn-secondary'"
+              @click="withdrawalStatusFilter = 'pending'"
+            >
+              Pendentes ({{ pendingWithdrawalsCount }})
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-sm" 
+              :class="withdrawalStatusFilter === 'processing' ? 'btn-primary' : 'btn-secondary'"
+              @click="withdrawalStatusFilter = 'processing'"
+            >
+              Em Processamento
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-sm" 
+              :class="withdrawalStatusFilter === 'completed' ? 'btn-primary' : 'btn-secondary'"
+              @click="withdrawalStatusFilter = 'completed'"
+            >
+              Concluídos
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-sm" 
+              :class="withdrawalStatusFilter === 'rejected' ? 'btn-primary' : 'btn-secondary'"
+              @click="withdrawalStatusFilter = 'rejected'"
+            >
+              Rejeitados
+            </button>
+          </div>
+
+          <!-- Withdrawals Table -->
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Utilizador</th>
+                  <th>Valor</th>
+                  <th>Método</th>
+                  <th>Conta / Destino</th>
+                  <th>Data</th>
+                  <th>Estado</th>
+                  <th>Notas Admin</th>
+                  <th>Ações de Processamento</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="filteredAdminWithdrawals.length === 0">
+                  <td colspan="8" class="empty-row">Nenhum pedido de levantamento encontrado.</td>
+                </tr>
+                <tr v-for="w in filteredAdminWithdrawals" :key="w._id">
+                  <td>
+                    <div style="display: flex; flex-direction: column;">
+                      <strong style="font-size: 0.85rem;">{{ w.user?.name || 'Cliente' }}</strong>
+                      <span style="font-size: 0.75rem; color: var(--text-light);">{{ w.user?.email }}</span>
+                    </div>
+                  </td>
+                  <td><strong style="color: #0f172a; font-size: 0.95rem;">{{ formatCurrency(w.amount) }}</strong></td>
+                  <td>
+                    <span :class="['badge', w.method === 'bank' ? 'badge-active' : 'badge-ended']">
+                      {{ w.method === 'mpesa' ? 'M-Pesa' : w.method === 'emola' ? 'eMola' : 'Banco' }}
+                    </span>
+                  </td>
+                  <td style="font-size: 0.8rem;">
+                    <div v-if="w.method === 'bank'">
+                      <strong>{{ w.destinationAccount?.bankName }}</strong>
+                      <div>Conta: {{ w.destinationAccount?.accountNumber }}</div>
+                      <div>Titular: {{ w.destinationAccount?.holderName }}</div>
+                    </div>
+                    <div v-else>
+                      <strong>+258 {{ w.destinationAccount?.phoneNumber }}</strong>
+                    </div>
+                  </td>
+                  <td style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap;">
+                    {{ formatDate(w.createdAt) }}
+                  </td>
+                  <td>
+                    <span :class="['badge', w.status === 'completed' ? 'badge-active' : w.status === 'pending' ? 'badge-warning' : 'badge-ended']">
+                      {{ w.status === 'completed' ? 'Concluído' : w.status === 'pending' ? 'Pendente' : w.status === 'processing' ? 'Processando' : 'Rejeitado' }}
+                    </span>
+                  </td>
+                  <td style="font-size: 0.75rem; color: var(--text-light); max-width: 150px;">
+                    <span v-if="w.rejectionReason" style="color: #b91c1c;">Motivo: {{ w.rejectionReason }}</span>
+                    <span v-else>{{ w.adminNotes || '—' }}</span>
+                  </td>
+                  <td>
+                    <div class="action-btns" v-if="w.status === 'pending' || w.status === 'processing'">
+                      <button 
+                        @click="handleProcessWithdrawal(w._id, 'completed')" 
+                        class="btn btn-sm btn-primary"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #15803d;"
+                        title="Marcar como transferido para o cliente"
+                      >
+                        ✓ Concluir
+                      </button>
+                      <button 
+                        v-if="w.status === 'pending'"
+                        @click="handleProcessWithdrawal(w._id, 'processing')" 
+                        class="btn btn-sm btn-secondary"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                        title="Marcar em processamento bancário"
+                      >
+                        ⏳ Processar
+                      </button>
+                      <button 
+                        @click="handleProcessWithdrawal(w._id, 'rejected')" 
+                        class="btn btn-sm btn-danger"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                        title="Rejeitar e devolver saldo ao cliente"
+                      >
+                        ✕ Rejeitar
+                      </button>
+                    </div>
+                    <span v-else style="font-size: 0.75rem; color: var(--text-light);">Finalizado</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- end dashboard-grid -->
+    </main> <!-- end admin-content-area -->
+  </div> <!-- end admin-layout -->
 
     <!-- Custom Confirmation Modal -->
     <Transition name="modal-fade">
@@ -1414,6 +1904,26 @@
                   placeholder="1 000,00" 
                   required 
                 />
+              </div>
+            </div>
+
+            <!-- Configurações Fiscais / IVA -->
+            <div class="form-row" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 10px 14px; margin-bottom: 0.75rem;">
+              <div class="form-group" style="margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+                <label class="form-label" style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin-bottom: 0;">
+                  <input type="checkbox" v-model="editForm.applyTax" style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;" />
+                  <span>Aplicar IVA</span>
+                </label>
+                <div v-if="editForm.applyTax" style="display: flex; gap: 8px; align-items: center;">
+                  <div style="width: 90px;">
+                    <input type="number" v-model.number="editForm.taxRate" min="0" max="100" class="form-input" style="padding: 4px 8px; font-size: 13px;" placeholder="15" />
+                  </div>
+                  <span style="font-size: 13px; font-weight: 600;">%</span>
+                  <select v-model="editForm.taxInclusive" class="form-input" style="padding: 4px 8px; font-size: 13px;">
+                    <option :value="false">+ IVA Adicionado</option>
+                    <option :value="true">IVA Já Incluído</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -1772,7 +2282,8 @@
         </div>
       </div>
     </Transition>
-  </div>
+    </div> <!-- end container animate-fade-in -->
+  </div> <!-- end admin-container -->
 </template>
 
 <script setup>
@@ -1964,6 +2475,58 @@ const showAlert = (message, type = 'success', duration = 4000) => {
   toastStore.add(message, type, duration);
 };
 
+const formStartImmediately = ref(true);
+
+// ── Sidebar Navigation State ──
+const activeTab = ref('overview');
+const isSidebarCollapsed = ref(false);
+const mobileMenuOpen = ref(false);
+
+const pendingProposalsCount = computed(() => {
+  return (proposals.value || []).filter(p => p.status === 'pending').length;
+});
+
+const pendingTicketsCount = computed(() => {
+  return (tickets.value || []).filter(t => t.status === 'open' || t.status === 'pending').length;
+});
+
+const activeTabMeta = computed(() => {
+  const map = {
+    'overview': { title: 'Visão Geral & Métricas da Plataforma', icon: '📊' },
+    'auctions': { title: 'Gestão de Todos os Leilões', icon: '🏷️' },
+    'create-auction': { title: 'Criar Novo Leilão', icon: '➕' },
+    'proposals': { title: 'Propostas de Venda Recebidas', icon: '📥' },
+    'users': { title: 'Gestão de Utilizadores e Contas', icon: '👥' },
+    'payments': { title: 'Transações e Pagamentos M-Pesa', icon: '💳' },
+    'homepage': { title: 'Banners e Personalização da Página Inicial', icon: '🖼️' },
+    'partners': { title: 'Gestão de Parceiros Oficiais', icon: '🤝' },
+    'support': { title: 'Tickets e Pedidos de Suporte', icon: '🎫' },
+    'newsletter': { title: 'Subscritores da Newsletter', icon: '📧' },
+    'all': { title: 'Visão Completa da Plataforma', icon: '👁️' }
+  };
+  return map[activeTab.value] || { title: 'Painel de Administração', icon: '⚙️' };
+});
+
+const setActiveTab = (tab) => {
+  activeTab.value = tab;
+  mobileMenuOpen.value = false;
+  window.scrollTo({ top: 110, behavior: 'smooth' });
+};
+
+const handleStartImmediatelyToggle = () => {
+  if (formStartImmediately.value) {
+    form.value.startTime = '';
+  } else {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    form.value.startTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+};
+
 const form = ref({
   title: '',
   description: '',
@@ -1971,6 +2534,9 @@ const form = ref({
   images: [],
   startingPrice: 0,
   participationFee: 1000,
+  applyTax: true,
+  taxRate: 15,
+  taxInclusive: false,
   startTime: '',
   endTime: '',
   category: 'Veículos',
@@ -2227,6 +2793,64 @@ const getMinDateTime = () => {
 };
 
 const mpesaPayments = ref([]);
+const adminWithdrawals = ref([]);
+const adminTransactions = ref([]);
+const adminFinancialKpis = ref({ totalAvailable: 0, totalReserved: 0, totalRefunded: 0 });
+const withdrawalStatusFilter = ref('');
+
+const pendingWithdrawalsCount = computed(() => {
+  return (adminWithdrawals.value || []).filter(w => w.status === 'pending').length;
+});
+
+const filteredAdminWithdrawals = computed(() => {
+  if (!withdrawalStatusFilter.value) return adminWithdrawals.value || [];
+  return (adminWithdrawals.value || []).filter(w => w.status === withdrawalStatusFilter.value);
+});
+
+const fetchAdminFinancials = async () => {
+  try {
+    const [withRes, txRes] = await Promise.all([
+      axios.get(`${apiUrl}/api/wallet/admin/withdrawals`, { headers: { Authorization: `Bearer ${authStore.token}` } }).catch(() => ({ data: { data: [] } })),
+      axios.get(`${apiUrl}/api/wallet/admin/transactions`, { headers: { Authorization: `Bearer ${authStore.token}` } }).catch(() => ({ data: { data: [], kpis: {} } }))
+    ]);
+    adminWithdrawals.value = withRes.data?.data || [];
+    adminTransactions.value = txRes.data?.data || [];
+    if (txRes.data?.kpis) {
+      adminFinancialKpis.value = txRes.data.kpis;
+    }
+  } catch (err) {
+    console.error('Error fetching admin financials:', err);
+  }
+};
+
+const handleProcessWithdrawal = async (id, status) => {
+  let notes = '';
+  let reason = '';
+  if (status === 'rejected') {
+    reason = prompt('Por favor, indique o motivo da rejeição (o saldo será imediatamente devolvido ao utilizador):');
+    if (!reason) return;
+  } else if (status === 'completed') {
+    notes = prompt('Notas administrativas ou código de transferência (opcional):', 'Transferência bancária/M-Pesa liquidada com sucesso.');
+    if (notes === null) return;
+  }
+
+  try {
+    const res = await axios.put(`${apiUrl}/api/wallet/admin/withdrawals/${id}/process`, {
+      status,
+      adminNotes: notes,
+      rejectionReason: reason
+    }, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+
+    if (res.data?.success) {
+      showAlert(res.data.message || 'Pedido de levantamento atualizado!');
+      await fetchAdminFinancials();
+    }
+  } catch (err) {
+    showAlert('Erro ao processar levantamento: ' + (err.response?.data?.message || err.message), 'error');
+  }
+};
 
 const fetchData = async () => {
   try {
@@ -2246,6 +2870,9 @@ const fetchData = async () => {
     subscribers.value = subscribersRes.data.data;
     proposals.value = proposalsRes.data.data;
     mpesaPayments.value = paymentsRes.data?.data || [];
+    
+    // Also load financials
+    await fetchAdminFinancials();
   } catch (err) {
     console.error('Error fetching admin data:', err);
   }
@@ -2273,6 +2900,10 @@ const approveProposalAndPrefill = (prop) => {
   form.value.startingPrice = prop.estimatedValue;
   form.value.images = [...prop.images];
   form.value.imageUrl = prop.images.length > 0 ? prop.images[0] : '';
+  
+  // Switch to create auction tab immediately
+  setActiveTab('create-auction');
+  showAlert('Dados da proposta preenchidos no formulário! ✓');
   
   // Set default dates to avoid format issues
   const now = new Date();
@@ -3163,7 +3794,9 @@ const handleCreate = async () => {
     }
 
     // Convert string dates to Date objects for validation
-    const startTime = form.value.startTime ? new Date(form.value.startTime) : new Date();
+    const startTime = formStartImmediately.value 
+      ? new Date(Date.now() - 2000) 
+      : (form.value.startTime ? new Date(form.value.startTime) : new Date());
     const endTime = new Date(form.value.endTime);
 
     if (endTime <= startTime) {
@@ -3176,10 +3809,12 @@ const handleCreate = async () => {
       form.value.images.unshift(form.value.imageUrl);
     }
     
-    // Prepare data with proper date formatting
+    // Prepare data with proper date formatting and immediate flag
     const auctionData = {
       ...form.value,
-      startTime: form.value.startTime || new Date().toISOString(),
+      startImmediately: formStartImmediately.value,
+      status: formStartImmediately.value ? 'active' : 'upcoming',
+      startTime: formStartImmediately.value ? new Date(Date.now() - 2000).toISOString() : (form.value.startTime ? new Date(form.value.startTime).toISOString() : new Date().toISOString()),
       endTime: form.value.endTime
     };
     
@@ -3197,13 +3832,27 @@ const handleCreate = async () => {
       proposalBeingConverted.value = null;
     }
 
-    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, participationFee: 1000, startTime: '', endTime: '', category: 'Veículos', location: 'Maputo', vehicleSpecs: { make: null, model: null, year: null, mileage: null, fuelType: null, transmission: null, color: null, bodyType: null, condition: null, conditionLevel: null, features: [] } };
+    form.value = { title: '', description: '', imageUrl: '', images: [], startingPrice: 0, participationFee: 1000, applyTax: true, taxRate: 15, taxInclusive: false, startTime: '', endTime: '', category: 'Veículos', location: 'Maputo', vehicleSpecs: { make: null, model: null, year: null, mileage: null, fuelType: null, transmission: null, color: null, bodyType: null, condition: null, conditionLevel: null, features: [] } };
+    formStartImmediately.value = true;
     showAlert('Leilão criado com sucesso! ✓');
     fetchData();
   } catch (err) {
     showAlert('Erro ao criar leilão: ' + (err.response?.data?.error || err.message), 'error');
   } finally {
     creating.value = false;
+  }
+};
+
+const activateAuctionImmediately = async (id) => {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    await axios.put(`${apiUrl}/api/auctions/${id}/activate`, {}, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    showAlert('Leilão activado de imediato com sucesso! Já está visível como Activo. 🚀');
+    fetchData();
+  } catch (err) {
+    showAlert('Erro ao activar leilão: ' + (err.response?.data?.error || err.message), 'error');
   }
 };
 
@@ -3357,6 +4006,9 @@ const editForm = ref({
   startingPrice: 0,
   currentPrice: 0,
   participationFee: 1000,
+  applyTax: true,
+  taxRate: 15,
+  taxInclusive: false,
   imageUrl: '',
   images: [],
   startTime: '',
@@ -3385,6 +4037,9 @@ const openEditModal = (auction) => {
     startingPrice: auction.startingPrice || 0,
     currentPrice: auction.currentPrice || 0,
     participationFee: auction.participationFee !== undefined && auction.participationFee !== null ? auction.participationFee : 1000,
+    applyTax: auction.applyTax !== undefined ? auction.applyTax : true,
+    taxRate: auction.taxRate !== undefined ? auction.taxRate : 15,
+    taxInclusive: auction.taxInclusive !== undefined ? auction.taxInclusive : false,
     imageUrl: auction.imageUrl || (imgs.length > 0 ? imgs[0] : ''),
     images: imgs,
     startTime: formatDateForInput(auction.startTime),
@@ -3474,12 +4129,19 @@ const submitEditAuction = async () => {
       startingPrice: Number(editForm.value.startingPrice),
       currentPrice: Number(editForm.value.currentPrice),
       participationFee: Number(editForm.value.participationFee || 1000),
+      applyTax: editForm.value.applyTax !== false,
+      taxRate: Number(editForm.value.taxRate ?? 15),
+      taxInclusive: !!editForm.value.taxInclusive,
       imageUrl: editForm.value.imageUrl,
       images: editForm.value.images,
       status: editForm.value.status,
       endTime: editForm.value.endTime ? new Date(editForm.value.endTime).toISOString() : editTargetAuction.value.endTime
     };
-    if (editForm.value.startTime) {
+
+    if (editForm.value.status === 'active') {
+      payload.startTime = new Date(Date.now() - 2000).toISOString();
+      payload.startImmediately = true;
+    } else if (editForm.value.startTime) {
       payload.startTime = new Date(editForm.value.startTime).toISOString();
     }
 
@@ -3846,8 +4508,258 @@ const formatTicketDate = (dateString) => {
   background-color: #f5f6fa;
 }
 
+/* ── Admin Layout with Sidebar ── */
+.admin-layout {
+  display: flex;
+  gap: 1.75rem;
+  align-items: flex-start;
+  position: relative;
+}
+
+.admin-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  padding: 1.25rem 0.85rem;
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 40;
+}
+
+.admin-sidebar.collapsed {
+  width: 72px;
+  padding: 1.25rem 0.5rem;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem 0.85rem 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.sidebar-toggle-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #64748b;
+  transition: all 0.15s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.admin-sidebar.collapsed .sidebar-item {
+  justify-content: center;
+  padding: 0.65rem;
+}
+
+.sidebar-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.sidebar-item.active {
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 700;
+}
+
+.sidebar-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 4px;
+  background: #10b981;
+  border-radius: 0 4px 4px 0;
+}
+
+.sidebar-item.highlight-create {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px dashed #86efac;
+}
+
+.sidebar-item.highlight-create:hover {
+  background: #dcfce7;
+  border-color: #4ade80;
+}
+
+.sidebar-item.highlight-create.active {
+  background: #16a34a;
+  color: white;
+  border-color: #16a34a;
+}
+
+.sidebar-icon {
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.sidebar-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.sidebar-item.active .sidebar-badge {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.sidebar-badge.badge-warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.sidebar-badge.badge-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0.5rem 0;
+}
+
+.admin-content-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Breadcrumb Header Bar for Section */
+.section-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: white;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.breadcrumb-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.breadcrumb-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.breadcrumb-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Mobile responsive styles */
+.mobile-menu-toggle {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .mobile-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    position: static;
+    max-height: none;
+    display: none;
+  }
+
+  .admin-sidebar.mobile-open {
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+}
+
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .page-title {

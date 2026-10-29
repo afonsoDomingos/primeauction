@@ -6,7 +6,8 @@ const {
   updateAuction,
   deleteAuction,
   uploadAuctionImage,
-  uploadAuctionImages
+  uploadAuctionImages,
+  activateAuctionNow
 } = require('../controllers/auctionController');
 const { protect, authorize, optionalAuth } = require('../middlewares/auth');
 const { uploadAuctionImage: uploadMiddleware } = require('../config/cloudinary');
@@ -29,6 +30,9 @@ router.post(
   uploadMiddleware.array('images', 10),
   uploadAuctionImages
 );
+
+// Instant activate route
+router.put('/:id/activate', protect, authorize('admin'), activateAuctionNow);
 
 router.route('/')
   .get(optionalAuth, getAuctions)

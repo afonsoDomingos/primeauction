@@ -249,7 +249,7 @@
           @click="goToAuction(auction._id)"
         >
           <div class="card-img-wrapper">
-            <img :src="auction.imageUrl" :alt="auction.title" class="card-img" loading="lazy" />
+            <img :src="getCardImageUrl(auction.imageUrl)" :alt="auction.title" class="card-img" loading="lazy" decoding="async" />
             <div class="card-status" :class="auction.status">
               {{ auction.status === 'active' ? 'Activo' : (auction.status === 'upcoming' ? 'Agendado' : 'Terminado') }}
             </div>
@@ -264,6 +264,9 @@
               <div class="price-col">
                 <span class="price-label">{{ auction.status === 'upcoming' ? 'Preço inicial' : 'Lance actual' }}</span>
                 <span class="price-value">{{ formatCurrency(auction.status === 'upcoming' ? auction.startingPrice : auction.currentPrice) }}</span>
+                <span v-if="auction.applyTax !== false" style="display: block; font-size: 10.5px; color: #0284c7; font-weight: 600; margin-top: 1px;">
+                  {{ auction.taxInclusive ? 'IVA (' + (auction.taxRate || 15) + '%) incl.' : '+ ' + (auction.taxRate || 15) + '% IVA' }}
+                </span>
               </div>
               <div class="time-col">
                 <span class="price-label">{{ auction.status === 'upcoming' ? 'Começa em' : (auction.status === 'active' ? 'Termina em' : 'Terminado') }}</span>
@@ -287,6 +290,7 @@ import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
+import { getCardImageUrl } from '../utils/imageOptimizer';
 
 const auctions = ref([]);
 const categories = ref([]);

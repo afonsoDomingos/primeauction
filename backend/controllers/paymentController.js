@@ -1,6 +1,9 @@
 const Payment = require('../models/Payment');
 const Auction = require('../models/Auction');
 const Bid = require('../models/Bid');
+const User = require('../models/User');
+const WalletTransaction = require('../models/WalletTransaction');
+const Notification = require('../models/Notification');
 const axios = require('axios');
 const crypto = require('crypto');
 
@@ -25,6 +28,46 @@ const fulfillSuccessfulPayment = async (payment, io) => {
         paidAt: payment.completedAt || new Date()
       });
       await auction.save();
+
+      // Update user wallet reserved balance atomically
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { 'wallet.reservedBalance': payment.amount } },
+        { new: true }
+      );
+
+      // Create WalletTransaction record for audit trail & receipts
+      await WalletTransaction.create({
+        user: userId,
+        auction: auction._id,
+        type: 'fee_reservation',
+        amount: payment.amount,
+        balanceAfter: {
+          available: updatedUser?.wallet?.availableBalance || 0,
+          reserved: updatedUser?.wallet?.reservedBalance || payment.amount
+        },
+        status: 'completed',
+        isRefundableFee: true,
+        description: `Garantia de participação reservada via ${payment.paymentMethod || 'M-Pesa'} para o leilão: ${auction.title}`,
+        reference: payment.reference || `REF-${Date.now()}`,
+        relatedPayment: payment._id,
+        mpesaTransactionId: payment.mpesaTransactionId,
+        metadata: {
+          phoneNumber: payment.phoneNumber,
+          paymentMethod: payment.paymentMethod,
+          auctionTitle: auction.title,
+          refundableNotice: 'Garantia reembolsável após encerramento do leilão conforme regras contratuais'
+        }
+      });
+
+      // Send in-app notification explaining refundable guarantee
+      await Notification.create({
+        user: userId,
+        title: 'Taxa de Inscrição Registada',
+        message: `Pagamento de ${payment.amount.toLocaleString('pt-MZ')} MZN confirmado como garantia reembolsável para o leilão "${auction.title}". O valor será libertado para a sua carteira após o encerramento.`,
+        type: 'payment',
+        link: `/auction/${auction._id}`
+      });
     }
 
     // 2. If an initial bid was proposed and auction is still active, register it!

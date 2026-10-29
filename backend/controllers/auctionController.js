@@ -90,10 +90,12 @@ exports.getAuctions = async (req, res) => {
       queryObj['vehicleSpecs.mileage'] = { $lte: parseInt(maxMileage) };
     }
 
-    const auctions = await Auction.find(queryObj).sort('-createdAt').populate('bids');
-    console.log('[getAuctions] Found', auctions.length, 'auctions');
-    console.log('[getAuctions] Auctions statuses:', auctions.map(a => a.status));
+    const auctions = await Auction.find(queryObj)
+      .sort('-createdAt')
+      .populate({ path: 'bids', select: '_id amount' })
+      .lean({ virtuals: true });
     
+    console.log('[getAuctions] Found', auctions.length, 'auctions');
     res.status(200).json({ success: true, count: auctions.length, data: auctions });
   } catch (err) {
     console.error('[getAuctions] Error:', err);
@@ -157,9 +159,18 @@ exports.getAuction = async (req, res) => {
       select: 'name email profilePhoto averageRating ratingsCount'
     });
 
-    // Ensure participationFee fallback
+    // Ensure participationFee and tax fallbacks
     if (auction.participationFee === undefined || auction.participationFee === null) {
       auction.participationFee = 1000;
+    }
+    if (auction.applyTax === undefined || auction.applyTax === null) {
+      auction.applyTax = true;
+    }
+    if (auction.taxRate === undefined || auction.taxRate === null) {
+      auction.taxRate = 15;
+    }
+    if (auction.taxInclusive === undefined || auction.taxInclusive === null) {
+      auction.taxInclusive = false;
     }
 
     // Check if authenticated user has already paid the participation fee
@@ -202,11 +213,30 @@ exports.createAuction = async (req, res) => {
       req.body.participationFee = 1000;
     }
 
-    // Handle date formatting from datetime-local input
-    if (req.body.startTime) {
+    if (req.body.applyTax !== undefined) {
+      req.body.applyTax = String(req.body.applyTax) === 'true' || req.body.applyTax === true;
+    }
+    if (req.body.taxRate !== undefined) {
+      req.body.taxRate = Number(req.body.taxRate);
+    }
+    if (req.body.taxInclusive !== undefined) {
+      req.body.taxInclusive = String(req.body.taxInclusive) === 'true' || req.body.taxInclusive === true;
+    }
+
+    // Support immediate start
+    if (req.body.startImmediately || req.body.status === 'active') {
+      req.body.startTime = new Date(Date.now() - 2000);
+      req.body.status = 'active';
+    } else if (req.body.startTime) {
       req.body.startTime = new Date(req.body.startTime);
+      if (req.body.startTime <= new Date()) {
+        req.body.status = 'active';
+      } else {
+        req.body.status = 'upcoming';
+      }
     } else {
-      req.body.startTime = new Date();
+      req.body.startTime = new Date(Date.now() - 2000);
+      req.body.status = 'active';
     }
     
     if (req.body.endTime) {
@@ -245,8 +275,21 @@ exports.updateAuction = async (req, res) => {
       req.body.participationFee = Number(req.body.participationFee);
     }
 
-    // Handle date formatting from datetime-local input
-    if (req.body.startTime) {
+    if (req.body.applyTax !== undefined) {
+      req.body.applyTax = String(req.body.applyTax) === 'true' || req.body.applyTax === true;
+    }
+    if (req.body.taxRate !== undefined) {
+      req.body.taxRate = Number(req.body.taxRate);
+    }
+    if (req.body.taxInclusive !== undefined) {
+      req.body.taxInclusive = String(req.body.taxInclusive) === 'true' || req.body.taxInclusive === true;
+    }
+
+    // Handle immediate start or date formatting
+    if (req.body.startImmediately || req.body.status === 'active') {
+      req.body.startTime = new Date(Date.now() - 2000);
+      req.body.status = 'active';
+    } else if (req.body.startTime) {
       req.body.startTime = new Date(req.body.startTime);
     }
     
@@ -268,6 +311,14 @@ exports.updateAuction = async (req, res) => {
       new: true,
       runValidators: true
     });
+
+    if (auction.status === 'finished') {
+      const io = req.app.get('io');
+      const Bid = require('../models/Bid');
+      const highestBid = await Bid.findOne({ auction: auction._id }).sort('-amount');
+      const { releaseAuctionGuarantees } = require('../utils/financialReconciler');
+      await releaseAuctionGuarantees(auction, highestBid ? highestBid.user : null, io);
+    }
 
     res.status(200).json({ success: true, data: auction });
   } catch (err) {
@@ -323,4 +374,44 @@ exports.uploadAuctionImages = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+// @desc    Activate an auction immediately
+// @route   PUT /api/auctions/:id/activate
+// @access  Private/Admin
+exports.activateAuctionNow = async (req, res) => {
+  try {
+    let auction = await Auction.findById(req.params.id);
+    if (!auction) {
+      return res.status(404).json({ success: false, error: 'Leilão não encontrado' });
+    }
+
+    const now = new Date();
+    auction.startTime = new Date(now.getTime() - 2000);
+    auction.status = 'active';
+
+    // If current endTime is in the past or less than 1 hour away, ensure it has at least 24 hours
+    if (new Date(auction.endTime) <= now) {
+      auction.endTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    await auction.save();
+
+    if (req.io) {
+      req.io.to(auction._id.toString()).emit('auction_started', {
+        auctionId: auction._id,
+        status: 'active'
+      });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Leilão activado de imediato com sucesso!', 
+      data: auction 
+    });
+  } catch (err) {
+    console.error('[activateAuctionNow] Error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 

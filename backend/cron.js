@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Auction = require('./models/Auction');
 const Bid = require('./models/Bid');
+const { releaseAuctionGuarantees } = require('./utils/financialReconciler');
 
 const startCronJobs = (io) => {
   // Run every 10 seconds to detect expired auctions immediately
@@ -55,6 +56,9 @@ const startCronJobs = (io) => {
             winningBid: highestBid ? highestBid.amount : 0
           });
         }
+
+        // Automatic financial guarantee release & settlement retention
+        await releaseAuctionGuarantees(auction, highestBid ? highestBid.user._id : null, io);
       }
     } catch (err) {
       console.error('[CRON] Error in auction expiration checker:', err);

@@ -5,31 +5,77 @@
         <!-- Close Button -->
         <button class="mpesa-close-btn" @click="closeModal" aria-label="Fechar">✕</button>
 
-        <!-- Brand Header (Dynamic Brand Theme for M-Pesa, eMola & Visa) -->
+        <!-- Brand Header (Dynamic Brand Theme for M-Pesa, eMola, Visa & Wallet) -->
         <div 
           class="mpesa-brand-header" 
           :class="{
             'header-mpesa': selectedMethod === 'mpesa',
             'header-emola': selectedMethod === 'emola',
-            'header-visa': selectedMethod === 'visa'
+            'header-visa': selectedMethod === 'visa',
+            'header-wallet': selectedMethod === 'wallet'
           }"
         >
           <div class="mpesa-logo-wrap">
             <img v-if="selectedMethod === 'mpesa'" src="/mpesa-logo.png" alt="Vodacom M-Pesa" class="checkout-brand-logo-img" />
             <img v-else-if="selectedMethod === 'emola'" src="/emola-logo.png" alt="Movitel eMola" class="checkout-brand-logo-img" />
             <img v-else-if="selectedMethod === 'visa'" src="/visa-logo.png" alt="Visa" class="checkout-brand-logo-img" />
-            <span class="mpesa-sub-tag">{{ selectedMethod === 'mpesa' ? 'Vodacom C2B' : selectedMethod === 'emola' ? 'Movitel eMola' : 'Visa Secure' }}</span>
+            <div v-else-if="selectedMethod === 'wallet'" class="wallet-header-icon-box">👛</div>
+            <span class="mpesa-sub-tag">{{ selectedMethod === 'mpesa' ? 'Vodacom C2B' : selectedMethod === 'emola' ? 'Movitel eMola' : selectedMethod === 'visa' ? 'Visa Secure' : 'Carteira Digital' }}</span>
           </div>
           <p class="mpesa-merchant">Pagamento seguro para <strong>Prime Auction</strong></p>
         </div>
 
         <!-- STEP 1: Phone / Payment Entry -->
         <div v-if="step === 'phone'" class="mpesa-step-content">
+
+          <!-- Card de Transparência Financeira: Taxa Reembolsável (Requisito 1) -->
+          <div class="transparency-guarantee-card">
+            <div class="tg-header">
+              <span class="tg-badge">🛡️ Garantia Reembolsável</span>
+              <span class="tg-status-tag">Taxa de Inscrição</span>
+            </div>
+            <p class="tg-body">
+              Ao participar neste leilão, deverá pagar uma taxa de inscrição de <strong>{{ formatCurrency(customAmount) }}</strong>. 
+              Este montante funciona como uma <strong>garantia de participação reembolsável</strong> e <strong>será disponibilizado para reembolso</strong> após o encerramento do leilão, conforme as condições aplicáveis.
+            </p>
+            <div class="tg-options-grid">
+              <div class="tg-opt-item">
+                <span class="tg-opt-icon">👛</span>
+                <div>
+                  <strong>Opção A — Manter o Saldo:</strong>
+                  <p>Mantenha o saldo na sua carteira digital para participar em futuros leilões sem novo pagamento.</p>
+                </div>
+              </div>
+              <div class="tg-opt-item">
+                <span class="tg-opt-icon">🏦</span>
+                <div>
+                  <strong>Opção B — Solicitar Levantamento:</strong>
+                  <p>Transfira o saldo disponível para a sua conta bancária ou M-Pesa quando o leilão terminar.</p>
+                </div>
+              </div>
+            </div>
+            <div class="tg-footer-note">
+              ℹ️ Não se trata de uma taxa administrativa não reembolsável, mas de um valor seguro que poderá recuperar de acordo com as regras de participação.
+            </div>
+          </div>
           
-          <!-- Payment Method Selector Tabs: M-Pesa | eMola | Visa -->
+          <!-- Payment Method Selector Tabs: M-Pesa | eMola | Visa | Carteira Digital -->
           <div class="method-selector-section">
             <label class="method-section-title">Método de Pagamento</label>
             <div class="method-tabs-grid">
+              <!-- Carteira Tab -->
+              <button 
+                type="button" 
+                class="method-tab-btn" 
+                :class="{ active: selectedMethod === 'wallet' }"
+                @click="selectedMethod = 'wallet'"
+              >
+                <div class="method-badge wallet-bg">
+                  <span style="font-size: 1.15rem;">👛</span>
+                </div>
+                <span class="method-tab-label">Carteira ({{ formatCurrencyCompact(userWallet?.availableBalance || 0) }})</span>
+              </button>
+
               <!-- M-Pesa Tab -->
               <button 
                 type="button" 
@@ -66,7 +112,7 @@
                 <div class="method-badge visa-bg">
                   <img src="/visa-logo.png" alt="Visa" class="method-logo-img" />
                 </div>
-                <span class="method-tab-label">Cartão de Crédito</span>
+                <span class="method-tab-label">Cartão</span>
               </button>
             </div>
           </div>
@@ -210,6 +256,73 @@
               <span>{{ proposedBidAmount ? 'Pagar Taxa & Ativar Lance com Cartão' : 'Pagar Taxa com Cartão' }}</span>
             </button>
           </form>
+
+          <!-- WALLET FORM (Reserva com Saldo da Carteira) -->
+          <div v-else-if="selectedMethod === 'wallet'" class="wallet-form-pane">
+            <div class="wallet-balance-box">
+              <div class="wb-icon-col">👛</div>
+              <div class="wb-text-col">
+                <span class="wb-label">Saldo Disponível na Carteira</span>
+                <div class="wb-amount">{{ formatCurrency(userWallet?.availableBalance || 0) }}</div>
+              </div>
+              <span 
+                class="wb-status-pill"
+                :class="(userWallet?.availableBalance || 0) >= customAmount ? 'pill-ok' : 'pill-low'"
+              >
+                {{ (userWallet?.availableBalance || 0) >= customAmount ? '✓ Saldo Suficiente' : 'Saldo Insuficiente' }}
+              </span>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="checkout-summary-box">
+              <h5 class="summary-box-title">Resumo da Reserva via Carteira</h5>
+              <div class="summary-line">
+                <span>Leilão:</span>
+                <span class="summary-auction-title">{{ auctionTitle }}</span>
+              </div>
+              <div class="summary-line">
+                <span>Garantia Reembolsável:</span>
+                <span style="font-weight: 700; color: #10b981;">{{ formatCurrency(customAmount) }}</span>
+              </div>
+              <div v-if="proposedBidAmount" class="summary-line" style="background: rgba(59, 130, 246, 0.08); padding: 6px 10px; border-radius: 8px; margin: 6px 0;">
+                <span style="color: #1e40af; font-weight: 600;">Lance a Ativar:</span>
+                <span style="font-weight: 700; color: #1e40af;">{{ formatCurrency(proposedBidAmount) }}</span>
+              </div>
+              <div class="summary-line total-line">
+                <strong>Saldo Restante após Reserva</strong>
+                <strong :style="{ color: (userWallet?.availableBalance || 0) >= customAmount ? '#10b981' : '#ef4444' }">
+                  {{ formatCurrency(Math.max(0, (userWallet?.availableBalance || 0) - customAmount)) }}
+                </strong>
+              </div>
+            </div>
+
+            <div v-if="(userWallet?.availableBalance || 0) >= customAmount">
+              <p class="banking-security-note">
+                ⚡ <strong>1-Clique Sem Custos Adicionais:</strong> O montante será reservado do seu saldo e libertado de volta para a sua carteira assim que o leilão terminar.
+              </p>
+
+              <button 
+                type="button" 
+                @click="handlePayWithWallet" 
+                class="btn btn-vibrant-pay wallet-btn-style"
+                :disabled="loading"
+              >
+                <span v-if="loading" class="spinner-inline"></span>
+                <span>{{ loading ? 'A reservar garantia...' : (proposedBidAmount ? 'Pagar com Carteira & Ativar Lance' : 'Confirmar Reserva com Saldo da Carteira') }}</span>
+              </button>
+            </div>
+
+            <div v-else class="wallet-insufficient-alert">
+              <span class="alert-icon">⚠️</span>
+              <div>
+                <strong style="color: #991b1b; display: block; margin-bottom: 2px;">Saldo Insuficiente</strong>
+                <p style="margin: 0; color: #7f1d1d; font-size: 0.8rem; line-height: 1.35;">
+                  O seu saldo de {{ formatCurrency(userWallet?.availableBalance || 0) }} é inferior ao valor da garantia ({{ formatCurrency(customAmount) }}).
+                  Por favor, escolha <strong>M-Pesa</strong> ou <strong>eMola</strong> acima para pagar diretamente pelo telemóvel.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- STEP 2: Waiting for Mobile Phone USSD Push PIN Entry -->
@@ -289,19 +402,27 @@
             <div class="receipt-body">
               <div class="receipt-item">
                 <span class="item-lbl">Transação ID:</span>
-                <strong class="item-val code-val">{{ receiptData?.mpesaTransactionId }}</strong>
+                <strong class="item-val code-val">{{ receiptData?.mpesaTransactionId || receiptData?.receiptNumber }}</strong>
               </div>
               <div class="receipt-item">
                 <span class="item-lbl">Referência:</span>
                 <span class="item-val">{{ receiptData?.reference }}</span>
               </div>
               <div class="receipt-item">
-                <span class="item-lbl">Número Pagador:</span>
-                <span class="item-val">{{ receiptData?.phoneNumber }}</span>
+                <span class="item-lbl">Método:</span>
+                <span class="item-val">{{ receiptData?.paymentMethod || 'M-Pesa (Vodacom)' }}</span>
               </div>
               <div class="receipt-item">
-                <span class="item-lbl">Valor Pago:</span>
+                <span class="item-lbl">Valor da Garantia:</span>
                 <strong class="item-val highlight-val">{{ formatCurrency(receiptData?.amount) }}</strong>
+              </div>
+              <div class="receipt-item">
+                <span class="item-lbl">Natureza da Taxa:</span>
+                <span class="item-val" style="color: #059669; font-weight: 700;">Garantia Reembolsável ✓</span>
+              </div>
+              <div class="receipt-item">
+                <span class="item-lbl">Reembolso / Carteira:</span>
+                <span class="item-val" style="font-size: 0.75rem; color: #1e40af;">Disponível na sua carteira após encerramento do leilão</span>
               </div>
               <div class="receipt-item">
                 <span class="item-lbl">Data & Hora:</span>
@@ -361,7 +482,8 @@ const toastStore = useToastStore();
 const authStore = useAuthStore();
 
 const step = ref('phone'); // 'phone' | 'ussd' | 'success'
-const selectedMethod = ref('mpesa'); // 'mpesa' | 'emola' | 'visa'
+const selectedMethod = ref('mpesa'); // 'mpesa' | 'emola' | 'visa' | 'wallet'
+const userWallet = ref({ availableBalance: 0, reservedBalance: 0, totalRefunded: 0 });
 const phoneNumber = ref('');
 const phoneError = ref('');
 const loading = ref(false);
@@ -503,6 +625,9 @@ watch(() => props.isOpen, (newVal) => {
         phoneNumber.value = raw.slice(-9);
       }
     }
+
+    // Fetch user wallet summary to check available balance
+    fetchWalletSummary();
   } else {
     stopStatusChecking();
   }
@@ -521,9 +646,72 @@ const formatCurrency = (val) => {
   return new Intl.NumberFormat('pt-MZ', { minimumFractionDigits: 2 }).format(val) + ' MZN';
 };
 
+const formatCurrencyCompact = (val) => {
+  if (!val) return '0 MZN';
+  if (val >= 1000) {
+    return (val / 1000).toFixed(val % 1000 === 0 ? 0 : 1) + 'k MZN';
+  }
+  return Number(val).toLocaleString('pt-MZ') + ' MZN';
+};
+
 const formatDate = (dateStr) => {
   if (!dateStr) return new Date().toLocaleString('pt-MZ');
   return new Date(dateStr).toLocaleString('pt-MZ');
+};
+
+const fetchWalletSummary = async () => {
+  if (!authStore.isAuthenticated) return;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.get(`${apiUrl}/api/wallet/summary`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+    if (res.data?.success) {
+      userWallet.value = res.data.data;
+      // If user has enough available balance, prioritize wallet payment!
+      if (res.data.data.availableBalance >= (props.amount || 0)) {
+        selectedMethod.value = 'wallet';
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching wallet summary:', err);
+  }
+};
+
+const handlePayWithWallet = async () => {
+  loading.value = true;
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const res = await axios.post(`${apiUrl}/api/wallet/pay-fee`, {
+      auctionId: props.auctionId
+    }, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    });
+
+    if (res.data && res.data.success) {
+      receiptData.value = {
+        receiptNumber: res.data.data.transaction?._id,
+        reference: res.data.data.transaction?.reference,
+        amount: res.data.data.transaction?.amount || customAmount.value,
+        phoneNumber: authStore.user?.phone || 'Carteira Digital Prime',
+        status: 'CONCLUÍDO (VALOR RESERVADO)',
+        isRefundableFee: true,
+        auctionTitle: props.auctionTitle,
+        userName: authStore.user?.name,
+        date: new Date(),
+        paymentMethod: 'Carteira Digital Prime Auction'
+      };
+      step.value = 'success';
+      stopStatusChecking();
+      toastStore.success('Garantia reservada com sucesso da sua carteira! 🎉');
+      emit('success', receiptData.value);
+    }
+  } catch (err) {
+    console.error('Error paying fee with wallet:', err);
+    toastStore.error(err.response?.data?.message || 'Erro ao processar reserva com a carteira');
+  } finally {
+    loading.value = false;
+  }
 };
 
 const handleInitiatePayment = async () => {
@@ -715,21 +903,37 @@ const closeModal = () => {
 
 .method-tabs-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 
 .method-tab-btn {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 12px;
-  padding: 0.6rem 0.4rem;
+  padding: 0.5rem 0.3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.method-tab-btn .method-tab-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.wallet-bg {
+  background: #f5f3ff !important;
+  border-color: #ddd6fe !important;
 }
 
 .method-tab-btn:hover {
@@ -883,6 +1087,186 @@ const closeModal = () => {
 
 .mpesa-brand-header.header-visa {
   background: linear-gradient(135deg, #1d4ed8 0%, #172554 100%);
+}
+
+.mpesa-brand-header.header-wallet {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+}
+
+.wallet-header-icon-box {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+/* Card de Transparência Financeira (Requisito 1) */
+.transparency-guarantee-card {
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 0.9rem;
+  margin-bottom: 1.15rem;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+}
+
+.tg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.tg-badge {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tg-status-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.tg-body {
+  font-size: 0.75rem;
+  color: #14532d;
+  line-height: 1.45;
+  margin-bottom: 0.6rem;
+}
+
+.tg-options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+  border-radius: 10px;
+  padding: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.tg-opt-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #1e293b;
+  line-height: 1.35;
+}
+
+.tg-opt-item strong {
+  color: #0f172a;
+}
+
+.tg-opt-item p {
+  margin: 1px 0 0 0;
+  color: #64748b;
+}
+
+.tg-opt-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.tg-footer-note {
+  font-size: 0.68rem;
+  color: #15803d;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* Wallet Form Styles */
+.wallet-form-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.wallet-balance-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.wb-icon-col {
+  font-size: 1.6rem;
+}
+
+.wb-text-col {
+  flex: 1;
+}
+
+.wb-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.wb-amount {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #1e293b;
+}
+
+.wb-status-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 99px;
+}
+
+.wb-status-pill.pill-ok {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.wb-status-pill.pill-low {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.wallet-btn-style {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
+}
+
+.wallet-btn-style:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45) !important;
+}
+
+.wallet-insufficient-alert {
+  display: flex;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.wallet-insufficient-alert .alert-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
 .checkout-brand-logo-img {

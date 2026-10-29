@@ -90,6 +90,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['local', 'google'],
     default: 'local'
+  },
+  wallet: {
+    availableBalance: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    reservedBalance: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    totalRefunded: {
+      type: Number,
+      default: 0,
+      min: 0
+    }
   }
 }, {
   timestamps: true

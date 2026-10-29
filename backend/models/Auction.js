@@ -30,6 +30,20 @@ const auctionSchema = new mongoose.Schema({
     default: 1000,
     min: 0
   },
+  applyTax: {
+    type: Boolean,
+    default: true
+  },
+  taxRate: {
+    type: Number,
+    default: 15,
+    min: 0,
+    max: 100
+  },
+  taxInclusive: {
+    type: Boolean,
+    default: false
+  },
   participants: [{
     user: {
       type: mongoose.Schema.ObjectId,
@@ -170,6 +184,17 @@ const auctionSchema = new mongoose.Schema({
 
 // Pre-save middleware to dynamically update status based on dates (Mongoose 9 middleware)
 auctionSchema.pre('save', function() {
+  if (this.status === 'active') {
+    // If explicitly marked active (e.g. Iniciar Imediatamente), ensure startTime is not in the future
+    if (this.startTime && new Date(this.startTime) > new Date()) {
+      this.startTime = new Date(Date.now() - 1000);
+    }
+    if (this.endTime && new Date(this.endTime) < new Date()) {
+      this.status = 'finished';
+    }
+    return;
+  }
+
   if (this.status !== 'finished') {
     if (this.startTime && new Date(this.startTime) > new Date()) {
       this.status = 'upcoming';
@@ -192,5 +217,14 @@ auctionSchema.virtual('bids', {
   localField: '_id',
   foreignField: 'auction'
 });
+
+// Indexes for fast queries, listings, and cron filters
+auctionSchema.index({ status: 1, createdAt: -1 });
+auctionSchema.index({ status: 1, startTime: 1 });
+auctionSchema.index({ status: 1, endTime: 1 });
+auctionSchema.index({ category: 1, status: 1 });
+auctionSchema.index({ startingPrice: 1 });
+auctionSchema.index({ createdAt: -1 });
+auctionSchema.index({ 'vehicleSpecs.make': 1, 'vehicleSpecs.model': 1 });
 
 module.exports = mongoose.model('Auction', auctionSchema);

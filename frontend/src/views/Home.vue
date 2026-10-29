@@ -358,11 +358,11 @@
           <div class="partners-marquee-group">
             <div v-for="partner in partnersList" :key="'a-' + partner._id" class="partner-logo" :title="partner.name">
               <a v-if="partner.website" :href="partner.website" target="_blank" rel="noopener noreferrer" class="partner-link">
-                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <img v-if="partner.logoUrl" :src="getThumbnailUrl(partner.logoUrl)" :alt="partner.name" class="partner-logo-img-dynamic" loading="lazy" decoding="async" />
                 <span v-else class="logo-text">{{ partner.name }}</span>
               </a>
               <template v-else>
-                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <img v-if="partner.logoUrl" :src="getThumbnailUrl(partner.logoUrl)" :alt="partner.name" class="partner-logo-img-dynamic" loading="lazy" decoding="async" />
                 <span v-else class="logo-text">{{ partner.name }}</span>
               </template>
               <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
@@ -372,11 +372,11 @@
           <div class="partners-marquee-group" aria-hidden="true">
             <div v-for="partner in partnersList" :key="'b-' + partner._id" class="partner-logo" :title="partner.name">
               <a v-if="partner.website" :href="partner.website" target="_blank" rel="noopener noreferrer" class="partner-link">
-                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <img v-if="partner.logoUrl" :src="getThumbnailUrl(partner.logoUrl)" :alt="partner.name" class="partner-logo-img-dynamic" loading="lazy" decoding="async" />
                 <span v-else class="logo-text">{{ partner.name }}</span>
               </a>
               <template v-else>
-                <img v-if="partner.logoUrl" :src="partner.logoUrl" :alt="partner.name" class="partner-logo-img-dynamic" />
+                <img v-if="partner.logoUrl" :src="getThumbnailUrl(partner.logoUrl)" :alt="partner.name" class="partner-logo-img-dynamic" loading="lazy" decoding="async" />
                 <span v-else class="logo-text">{{ partner.name }}</span>
               </template>
               <span v-if="partner.description" class="logo-desc">{{ partner.description }}</span>
@@ -506,7 +506,7 @@
               <!-- Event Body -->
               <div class="event-card-body">
                 <div class="event-img-container" @click="goToAuction(event.id)" style="cursor: pointer;">
-                  <img :src="event.image" alt="Imagem do Evento" class="event-img" />
+                  <img :src="event.image" alt="Imagem do Evento" class="event-img" loading="lazy" decoding="async" />
                 </div>
                 
                 <div class="event-details">
@@ -598,7 +598,7 @@
             @click="goToAuction(auction._id)"
           >
             <div class="sales-card-img-wrapper">
-              <img :src="auction.imageUrl" :alt="auction.title" class="sales-card-img" />
+              <img :src="getCardImageUrl(auction.imageUrl)" :alt="auction.title" class="sales-card-img" loading="lazy" decoding="async" />
               
               <!-- M-Pesa Badge Tag Overlay -->
               <div class="card-mpesa-tag">
@@ -680,7 +680,7 @@
               style="cursor: pointer;"
             >
               <div class="upcoming-img-wrapper">
-                <img :src="auction.imageUrl" :alt="auction.title" class="upcoming-img" />
+                <img :src="getCardImageUrl(auction.imageUrl)" :alt="auction.title" class="upcoming-img" loading="lazy" decoding="async" />
                 <span class="upcoming-badge-time">⏱️ Começa em: {{ getCountdownText(auction.startTime) }}</span>
               </div>
               <div class="upcoming-info">
@@ -729,7 +729,7 @@
             style="cursor: pointer;"
           >
             <div class="interest-img-wrapper">
-              <img :src="item.imageUrl" :alt="item.title" class="interest-img" />
+              <img :src="getCardImageUrl(item.imageUrl)" :alt="item.title" class="interest-img" loading="lazy" decoding="async" />
               <span class="coming-soon-badge" style="background-color: #e31b23;">
                 <svg xmlns="http://www.w3.org/2000/svg" class="badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
@@ -813,6 +813,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useToastStore } from '../stores/toastStore';
 import { useAuthStore } from '../stores/authStore';
+import { getCardImageUrl, getThumbnailUrl, getBannerImageUrl, optimizeImageUrl } from '../utils/imageOptimizer';
 
 const router = useRouter();
 const toastStore = useToastStore();
@@ -1389,7 +1390,7 @@ const fetchActiveAuctions = async () => {
           dateObj: date,
           startTime: auction.startTime,
           endTime: auction.endTime,
-          image: auction.imageUrl,
+          image: getCardImageUrl(auction.imageUrl),
           lots: auction.images?.length || 1,
           location: 'Nacional',
           code: `Lote #${auction._id.substring(auction._id.length - 4).toUpperCase()}`,
@@ -1487,20 +1488,22 @@ const fetchHeroBanners = async () => {
   }
 };
 
-// 🔧 FIXED: Complete onMounted with all necessary calls
+// 🔧 FAST LOADING: Prioritize auction queries so cards display instantly
 onMounted(async () => {
   console.log('🚀 Home component mounted');
   
-  // Fetch all data in parallel
-  await Promise.all([
+  // 1. Fetch auction data immediately to unblock view
+  Promise.all([
     fetchActiveAuctions(),
-    fetchUpcomingAuctions(),
-    fetchWatchlist(),
-    fetchPartners(),
-    fetchHeroBanners()
-  ]);
-  
-  loadingAuctions.value = false;
+    fetchUpcomingAuctions()
+  ]).finally(() => {
+    loadingAuctions.value = false;
+  });
+
+  // 2. Fetch auxiliary data in parallel without blocking main auction cards
+  fetchWatchlist();
+  fetchPartners();
+  fetchHeroBanners();
 
   // Start countdown timer
   countdownInterval = setInterval(() => {

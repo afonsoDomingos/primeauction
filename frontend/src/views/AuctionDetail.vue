@@ -230,6 +230,17 @@
             <div class="info-col">
               <span class="label">{{ isUpcoming ? 'Preço Inicial' : 'Lance Actual' }}</span>
               <span class="price highlight">{{ formatCurrency(isUpcoming ? auction.startingPrice : auction.currentPrice) }}</span>
+              <!-- IVA Transparency breakdown -->
+              <div v-if="auction.applyTax !== false" class="tax-transparency-badge">
+                <template v-if="!auction.taxInclusive">
+                  <span class="tax-tag">+ IVA ({{ auction.taxRate || 15 }}%): {{ formatCurrency((isUpcoming ? auction.startingPrice : auction.currentPrice) * ((auction.taxRate || 15) / 100)) }}</span>
+                  <span class="tax-total">Total Estimado c/ IVA: <strong>{{ formatCurrency((isUpcoming ? auction.startingPrice : auction.currentPrice) * (1 + (auction.taxRate || 15) / 100)) }}</strong></span>
+                </template>
+                <template v-else>
+                  <span class="tax-tag-inclusive">✓ IVA ({{ auction.taxRate || 15 }}%) incluído</span>
+                  <span class="tax-subtext">Base: {{ formatCurrency((isUpcoming ? auction.startingPrice : auction.currentPrice) / (1 + (auction.taxRate || 15) / 100)) }} | IVA: {{ formatCurrency((isUpcoming ? auction.startingPrice : auction.currentPrice) - ((isUpcoming ? auction.startingPrice : auction.currentPrice) / (1 + (auction.taxRate || 15) / 100))) }}</span>
+                </template>
+              </div>
             </div>
             <div class="info-col info-col-right">
               <span class="label">{{ isEnded ? 'Terminado Em' : (isUpcoming ? 'Começa Em' : 'Termina Em') }}</span>
@@ -284,7 +295,17 @@
               </div>
               <div v-else-if="bidAmount > auction.currentPrice" class="bid-validation-success animate-fade-in">
                 <span class="val-success-icon">✅</span>
-                <span>Lance Válido! Proposta de <strong>+{{ formatCurrency(bidAmount - auction.currentPrice) }}</strong> acima do valor atual.</span>
+                <div class="val-success-body">
+                  <span>Lance Válido! Proposta de <strong>+{{ formatCurrency(bidAmount - auction.currentPrice) }}</strong> acima do valor atual.</span>
+                  <div v-if="auction.applyTax !== false" class="bid-tax-note">
+                    <span v-if="!auction.taxInclusive">
+                      Detalhamento: <strong>{{ formatCurrency(bidAmount) }}</strong> + IVA ({{ auction.taxRate || 15 }}%): <strong>{{ formatCurrency(bidAmount * ((auction.taxRate || 15) / 100)) }}</strong> = <strong>Total: {{ formatCurrency(bidAmount * (1 + (auction.taxRate || 15) / 100)) }}</strong>
+                    </span>
+                    <span v-else>
+                      Total com IVA ({{ auction.taxRate || 15 }}%) incluído: <strong>{{ formatCurrency(bidAmount) }}</strong> (IVA: {{ formatCurrency(bidAmount - (bidAmount / (1 + (auction.taxRate || 15) / 100))) }})
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <!-- Participation Fee / Active Status Banner -->
@@ -296,10 +317,10 @@
                 </div>
               </div>
               <div v-else class="participation-banner fee-required animate-fade-in">
-                <span class="banner-icon">🎫</span>
+                <span class="banner-icon">🛡️</span>
                 <div class="banner-content">
-                  <span class="banner-title">Taxa de Participação: <strong>{{ formatCurrency(auction.participationFee || 1000) }}</strong></span>
-                  <span class="banner-desc">Pagamento único para validar a sua inscrição neste leilão.</span>
+                  <span class="banner-title">Garantia Reembolsável: <strong>{{ formatCurrency(auction.participationFee || 1000) }}</strong></span>
+                  <span class="banner-desc">Taxa de inscrição 100% devolvida à sua carteira digital após o encerramento do leilão.</span>
                 </div>
               </div>
 
@@ -347,7 +368,37 @@
             <div class="winner-info" v-if="auction.winner">
               <p class="winner-label">Arrematado por</p>
               <h4 class="winner-name">{{ auction.winner.name }}</h4>
-              <p class="winner-price">Valor Final: <span>{{ formatCurrency(auction.currentPrice) }}</span></p>
+              <p class="winner-price">Valor Final (Martelo): <span>{{ formatCurrency(auction.currentPrice) }}</span></p>
+              
+              <!-- Winner Tax Settlement Card -->
+              <div v-if="auction.applyTax !== false" class="winner-tax-settlement-card">
+                <div class="settle-title">📄 Resumo de Liquidação Final (com IVA)</div>
+                <div class="settle-row">
+                  <span>Valor do Martelo (Lance Vencedor):</span>
+                  <strong>{{ formatCurrency(auction.currentPrice) }}</strong>
+                </div>
+                <div class="settle-row" v-if="!auction.taxInclusive">
+                  <span>IVA ({{ auction.taxRate || 15 }}%):</span>
+                  <strong style="color: #0284c7;">+{{ formatCurrency(auction.currentPrice * ((auction.taxRate || 15) / 100)) }}</strong>
+                </div>
+                <div class="settle-row" v-else>
+                  <span>IVA ({{ auction.taxRate || 15 }}% incluído):</span>
+                  <strong style="color: #059669;">{{ formatCurrency(auction.currentPrice - (auction.currentPrice / (1 + (auction.taxRate || 15) / 100))) }}</strong>
+                </div>
+                <div class="settle-row">
+                  <span>Subtotal com Impostos:</span>
+                  <strong>{{ formatCurrency(auction.taxInclusive ? auction.currentPrice : (auction.currentPrice * (1 + (auction.taxRate || 15) / 100))) }}</strong>
+                </div>
+                <div class="settle-row settle-deduction">
+                  <span>Garantia de Participação Dedutível:</span>
+                  <strong style="color: #10b981;">-{{ formatCurrency(auction.participationFee || 1000) }}</strong>
+                </div>
+                <div class="settle-divider"></div>
+                <div class="settle-row settle-total">
+                  <span>Saldo Restante a Liquidar:</span>
+                  <strong class="settle-final-amount">{{ formatCurrency(Math.max(0, (auction.taxInclusive ? auction.currentPrice : (auction.currentPrice * (1 + (auction.taxRate || 15) / 100))) - (auction.participationFee || 1000))) }}</strong>
+                </div>
+              </div>
               
               <!-- Review Action Box -->
               <div v-if="canReview" class="review-action-box" style="margin-top: 1.25rem; padding: 1rem; background: rgba(234, 179, 8, 0.08); border: 1px dashed #eab308; border-radius: 12px; text-align: center;">
@@ -998,6 +1049,18 @@
             <div class="calc-row">
               <span class="calc-label">Próximo Lance Mínimo:</span>
               <span class="calc-value highlight">{{ formatCurrency(auction.currentPrice + (auction.bidIncrement || 1000)) }}</span>
+            </div>
+            <div v-if="auction.applyTax !== false && !auction.taxInclusive" class="calc-row">
+              <span class="calc-label">+ IVA ({{ auction.taxRate || 15 }}%):</span>
+              <span class="calc-value" style="color: #0284c7; font-weight: 600;">+{{ formatCurrency((auction.currentPrice + (auction.bidIncrement || 1000)) * ((auction.taxRate || 15) / 100)) }}</span>
+            </div>
+            <div v-if="auction.applyTax !== false && !auction.taxInclusive" class="calc-row">
+              <span class="calc-label">Total c/ IVA Estimado:</span>
+              <span class="calc-value highlight" style="color: #10b981; font-weight: 700;">{{ formatCurrency((auction.currentPrice + (auction.bidIncrement || 1000)) * (1 + (auction.taxRate || 15) / 100)) }}</span>
+            </div>
+            <div v-else-if="auction.applyTax !== false && auction.taxInclusive" class="calc-row">
+              <span class="calc-label">Regime de IVA:</span>
+              <span class="calc-value" style="color: #059669; font-size: 13px;">✓ IVA ({{ auction.taxRate || 15 }}%) incluído no lance</span>
             </div>
           </div>
           <button type="button" class="btn btn-primary btn-pill btn-sm" @click="showBidCalculator = false" style="width: 100%; margin-top: 1rem;">
@@ -2115,6 +2178,104 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* ─── IVA & Tax Transparency Styles ─── */
+.tax-transparency-badge {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tax-tag {
+  display: inline-block;
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.tax-total {
+  font-size: 12px;
+  color: #475569;
+}
+
+.tax-tag-inclusive {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.tax-subtext {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.bid-tax-note {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #1e3a8a;
+  background: rgba(59, 130, 246, 0.08);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.winner-tax-settlement-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.settle-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #475569;
+  padding: 3px 0;
+}
+
+.settle-deduction {
+  color: #059669;
+}
+
+.settle-divider {
+  height: 1px;
+  background: #cbd5e1;
+  margin: 8px 0;
+}
+
+.settle-total {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.settle-final-amount {
+  font-size: 16px;
+  color: #1e40af;
+}
+
 /* ─── Container ─── */
 .auction-detail-container {
   min-height: 100vh;

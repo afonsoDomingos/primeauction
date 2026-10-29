@@ -4,12 +4,21 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
 const socketIo = require('socket.io');
-const connectDB = require('./config/db');
+const dns = require('dns');
+
+// Fallback to reliable public DNS resolvers if local Windows resolver fails SRV lookups
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (dnsErr) {
+  console.warn('DNS server override warning:', dnsErr.message);
+}
 
 // Load env vars FIRST
 dotenv.config();
 
+const connectDB = require('./config/db');
 const passport = require('./config/passport');
 
 // Connect to database
@@ -30,6 +39,7 @@ const io = socketIo(server, {
 });
 
 // Middleware
+app.use(compression());
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
@@ -56,6 +66,7 @@ app.use('/api/proposals', require('./routes/proposals'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/reviews', require('./routes/reviews'));
